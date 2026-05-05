@@ -20,6 +20,7 @@ import { UrlParamsForm } from '../components/urlParamsForm';
 import TagEntitiesButton from '../components/TagEntitiesButton';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
+import BulkUploadPrimersButton from '../components/bulk_upload/BulkUploadPrimersButton';
 import PageContainer from '../components/PageContainer';
 import PrimersTable from '../components/PrimersTable';
 
@@ -116,6 +117,7 @@ function PrimersPage() {
         component={PrimerQueryFields}
       />
       <TopButtonSection>
+        <BulkUploadPrimersButton />
         <TagEntitiesButton
           selectedEntities={selectedPrimers}
           entityType="input_entities"

@@ -11,6 +11,8 @@ const endpoints = {
   sequenceSequencingFileDelete: (sequenceId, fileId) => `/sequence/${sequenceId}/sequencing_files/${fileId}`,
   postSequence: '/sequence',
   primers: '/primers',
+  primersValidateUpload: '/primers/validate-upload',
+  primersBulk: '/primers/bulk',
   primer: (id) => `/primer/${id}`,
   primerTemplateSequences: (id) => `/primer/${id}/sequences`,
   postPrimer: '/primer',
