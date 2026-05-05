@@ -12,7 +12,7 @@ function AppAlerts() {
       <Box id="opencloningdb-error-message-wrapper" sx={{ mt: 1, ml: 1}}>
         {alerts.map((alert, index) => (
           <Alert sx={{ mb: 1 }} key={index} severity={alert.severity} onClose={() => { removeAlert(alert.message); }}>
-            {alert.message}
+            {typeof alert.message === 'string' ? alert.message : JSON.stringify(alert.message)}
           </Alert>
         ))}
       </Box>

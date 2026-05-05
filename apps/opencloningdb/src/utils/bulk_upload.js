@@ -36,7 +36,7 @@ export function getPrimerRowsInfo(rows) {
   const warningRows = rows.filter((row) => primerRowStatus(row) === 'warning');
   const clearRows = rows.filter((row) => primerRowStatus(row) === 'clear');
   const orderedRows = [...errorRows, ...warningRows, ...clearRows];
-  const clearAndWarningRows = [...errorRows, ...warningRows];
+  const clearAndWarningRows = [...warningRows, ...clearRows];
   const clearRowsCount = clearRows.length;
   const warningRowsCount = warningRows.length;
   const errorRowsCount = errorRows.length;

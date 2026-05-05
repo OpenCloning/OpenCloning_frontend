@@ -33,15 +33,16 @@ export default function BulkUploadPrimersButton() {
     },
     onError: (error) => {
       addAlert({
-        message: error?.response?.data?.detail || error?.message || 'Failed to validate primers',
+        message: String(error?.response?.data?.detail) || String(error?.message) || 'Failed to validate primers',
         severity: 'error',
       });
     },
   });
 
   const submitMutation = useMutation({
-    mutationFn: async ({ primers }) => {
-      const { data } = await openCloningDBHttpClient.post(endpoints.primersBulk, primers);
+    mutationFn: async ({ primers, modeLabel }) => {
+      const strict = modeLabel === 'clear';
+      const { data } = await openCloningDBHttpClient.post(endpoints.primersBulk, primers, { params: { strict } });
       return data;
     },
     onSuccess: (createdPrimers, variables) => {
@@ -64,7 +65,7 @@ export default function BulkUploadPrimersButton() {
         return;
       }
       addAlert({
-        message: error?.response?.data?.detail || error?.message || 'Failed to import primers',
+        message: 'Server error while importing primers',
         severity: 'error',
       });
     },
@@ -108,7 +109,8 @@ export default function BulkUploadPrimersButton() {
     if (primers.length < 1) {
       return;
     }
-    submitMutation.mutate({ primers, modeLabel });
+    const primers2submit = primers.map(({name, sequence, uid}) => ({name, sequence, uid}));
+    submitMutation.mutate({ primers: primers2submit, modeLabel });
   };
 
   if (workspaceRole === 'viewer') {
@@ -146,10 +148,12 @@ export default function BulkUploadPrimersButton() {
             p: 3,
             width: 'min(1280px, 98vw)',
             maxHeight: '90vh',
-            overflow: 'auto',
+            overflow: 'hidden',
             mx: 'auto',
             my: '5vh',
             borderRadius: 1,
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <Typography variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
@@ -159,7 +163,11 @@ export default function BulkUploadPrimersButton() {
             Errors are shown first, then warnings, then clear rows.
           </Typography>
 
-          <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{ mb: 2, maxHeight: '55vh', overflowY: 'auto', flex: 1, minHeight: 0 }}
+          >
             <PrimerBulkUploadPreviewTable rows={orderedRows} />
           </TableContainer>
 

@@ -56,7 +56,7 @@ function PrimerBulkUploadPreviewTableRow({ row }) {
 
 export default function PrimerBulkUploadPreviewTable({ rows }) {
   return (
-    <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
+    <Table stickyHeader size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
       <colgroup>
         <col style={{ width: '48px' }} />
         <col style={{ width: '22%' }} />
