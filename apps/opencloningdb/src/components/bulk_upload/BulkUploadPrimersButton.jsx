@@ -4,10 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
-  CircularProgress,
   Modal,
-  TableContainer,
-  Paper,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -15,7 +12,7 @@ import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import useAppAlerts from '../../hooks/useAppAlerts';
 import PrimerBulkUploadPreviewTable from './PrimerBulkUploadPreviewTable';
-import { getPrimerRowsInfo, normalizePrimerSubmission } from '../../utils/bulk_upload';
+import { normalizePrimerSubmission } from '../../utils/bulk_upload';
 
 
 export default function BulkUploadPrimersButton() {
@@ -70,10 +67,6 @@ export default function BulkUploadPrimersButton() {
       });
     },
   });
-
-  const { orderedRows, clearRows, clearAndWarningRows, warningRowsCount, errorRowsCount } = React.useMemo(
-    () => getPrimerRowsInfo(validationRows),
-    [validationRows]);
 
 
   const handleUploadClick = () => {
@@ -159,47 +152,13 @@ export default function BulkUploadPrimersButton() {
           <Typography variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
             Bulk Upload Primers Preview
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Errors are shown first, then warnings, then clear rows.
-          </Typography>
-
-          <TableContainer
-            component={Paper}
-            variant="outlined"
-            sx={{ mb: 2, maxHeight: '55vh', overflowY: 'auto', flex: 1, minHeight: 0 }}
-          >
-            <PrimerBulkUploadPreviewTable rows={orderedRows} />
-          </TableContainer>
-
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            {clearRows.length} clear, {warningRowsCount} warning, {errorRowsCount} error out of {orderedRows.length} uploaded primer{orderedRows.length === 1 ? '' : 's'}.
-          </Typography>
-
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => setOpenModal(false)}
-              disabled={submitMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => handleSubmit(clearRows, 'clear')}
-              disabled={clearRows.length < 1 || submitMutation.isPending || validateMutation.isPending}
-            >
-              {submitMutation.isPending ? <CircularProgress size={24} /> : 'Import Clear Primers'}
-            </Button>
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={() => handleSubmit(clearAndWarningRows, 'clear and warning')}
-              disabled={clearAndWarningRows.length < 1 || submitMutation.isPending || validateMutation.isPending}
-            >
-              {submitMutation.isPending ? <CircularProgress size={24} /> : 'Import Clear + Warnings'}
-            </Button>
-          </Box>
+          <PrimerBulkUploadPreviewTable
+            rows={validationRows}
+            handleSubmit={handleSubmit}
+            handleCancel={() => setOpenModal(false)}
+            submitMutation={submitMutation}
+            validateMutation={validateMutation}
+          />
         </Box>
       </Modal>
     </>
