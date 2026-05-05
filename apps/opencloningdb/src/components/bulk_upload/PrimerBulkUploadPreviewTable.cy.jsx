@@ -53,7 +53,13 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       },
     ];
 
-    cy.mount(<PrimerBulkUploadPreviewTable rows={rows} />);
+    cy.mount(<PrimerBulkUploadPreviewTable
+      rows={rows}
+      handleSubmit={() => {}}
+      handleCancel={() => {}}
+      submitMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
+      validateMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
+    />);
 
 
     cy.contains('td', 'clear-primer').parent().within(() => {
@@ -108,7 +114,13 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       },
     ];
 
-    cy.mount(<PrimerBulkUploadPreviewTable rows={rows} />);
+    cy.mount(<PrimerBulkUploadPreviewTable
+      rows={rows}
+      handleSubmit={() => {}}
+      handleCancel={() => {}}
+      submitMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
+      validateMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
+    />);
 
     cy.contains('td', 'warning-and-error').parent().within(() => {
       cy.get('[data-testid="CancelIcon"]').should('exist');
