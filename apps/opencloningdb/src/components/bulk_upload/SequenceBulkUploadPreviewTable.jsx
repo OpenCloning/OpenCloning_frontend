@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Box,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -57,7 +59,15 @@ export default function SequenceBulkUploadPreviewTable({
   handleSubmit,
   handleCancel,
   isSubmitting,
+  isValidating
 }) {
+  if (isValidating) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
   const rowsInfo = getSequenceRowsInfo(rows);
   return (
     <BulkUploadPreviewTableWrapper rowsInfo={rowsInfo} handleSubmit={handleSubmit} handleCancel={handleCancel} isSubmitting={isSubmitting}>

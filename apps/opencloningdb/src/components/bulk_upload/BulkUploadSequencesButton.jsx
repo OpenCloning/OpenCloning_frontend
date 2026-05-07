@@ -82,6 +82,7 @@ export default function BulkUploadSequencesButton() {
     }
 
     try {
+      setOpenModal(true);
       const rows = await validateMutation.mutateAsync(uploadedFiles);
       if (!Array.isArray(rows) || rows.length < 1) {
         throw new Error('No validation rows returned');
@@ -91,8 +92,9 @@ export default function BulkUploadSequencesButton() {
         row.file = uploadedFiles[index];
       });
       setValidationRows(rows);
-      setOpenModal(true);
+
     } catch (error) {
+      setOpenModal(false);
       addAlert({
         message: error?.response?.data?.detail || error?.message || 'Failed to validate sequence files',
         severity: 'error',
@@ -149,6 +151,7 @@ export default function BulkUploadSequencesButton() {
             handleSubmit={(submittedRows, mode) => submitMutation.mutate({ submittedRows, mode })}
             handleCancel={() => setOpenModal(false)}
             isSubmitting={submitMutation.isPending}
+            isValidating={validateMutation.isPending}
           />
         </Box>
       </Modal>

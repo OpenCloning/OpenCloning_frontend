@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Box, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { getPrimerRowsInfo, primerRowStatus, rowIssues } from '../../utils/bulk_upload';
 import { BulkUploadPreviewTableWrapper, CommonTableRow } from './common';
 
@@ -58,7 +58,14 @@ function TableComponent({ rows }) {
   );
 }
 
-export default function PrimerBulkUploadPreviewTable({ rows, handleSubmit, handleCancel, isSubmitting }) {
+export default function PrimerBulkUploadPreviewTable({ rows, handleSubmit, handleCancel, isSubmitting, isValidating }) {
+  if (isValidating) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
   const rowsInfo = getPrimerRowsInfo(rows);
   return (
     <BulkUploadPreviewTableWrapper rowsInfo={rowsInfo} handleSubmit={handleSubmit} handleCancel={handleCancel} isSubmitting={isSubmitting}>

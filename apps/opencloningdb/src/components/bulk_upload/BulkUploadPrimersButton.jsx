@@ -85,9 +85,9 @@ export default function BulkUploadPrimersButton() {
       if (normalizedRows.length < 1) {
         throw new Error('File does not contain primer rows');
       }
+      setOpenModal(true);
       const rows = await validateMutation.mutateAsync(normalizedRows);
       setValidationRows(rows);
-      setOpenModal(true);
     } catch (error) {
       addAlert({
         message: error?.response?.data?.detail || error?.message || 'Failed to parse or validate primers file',
@@ -157,6 +157,7 @@ export default function BulkUploadPrimersButton() {
             handleSubmit={handleSubmit}
             handleCancel={() => setOpenModal(false)}
             isSubmitting={submitMutation.isPending}
+            isValidating={validateMutation.isPending}
           />
         </Box>
       </Modal>

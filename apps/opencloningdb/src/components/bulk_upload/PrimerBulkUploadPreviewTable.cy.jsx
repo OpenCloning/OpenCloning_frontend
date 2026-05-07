@@ -162,4 +162,25 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       cy.get('[data-testid="WarningIcon"]').should('not.exist');
     });
   });
+
+  it('shows a loading spinner when validating', () => {
+    const rows = [
+      {
+        name: 'warning-and-error',
+        uid: 'E4',
+        sequence: 'TTAA',
+        'sequence_invalid': true,
+        'name_exists': true,
+      },
+    ];
+    cy.mount(<PrimerBulkUploadPreviewTable
+      rows={rows}
+      handleSubmit={() => {}}
+      handleCancel={() => {}}
+      isSubmitting={false}
+      isValidating={true}
+    />);
+    cy.get('[role="progressbar"]').should('exist');
+    cy.contains('warning-and-error').should('not.exist');
+  });
 });
