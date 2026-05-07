@@ -53,10 +53,13 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       },
     ];
 
+    const handleSubmitSpy = cy.spy().as('handleSubmitSpy');
+    const handleCancelSpy = cy.spy().as('handleCancelSpy');
+
     cy.mount(<PrimerBulkUploadPreviewTable
       rows={rows}
-      handleSubmit={() => {}}
-      handleCancel={() => {}}
+      handleSubmit={handleSubmitSpy}
+      handleCancel={handleCancelSpy}
       submitMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
       validateMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
     />);
@@ -101,6 +104,38 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       cy.get('[data-testid="CancelIcon"]').should('exist');
       cy.contains('UID duplicated in uploaded file').should('exist');
     });
+
+    cy.contains('button', 'Import Clear Primers').click();
+    cy.get('@handleSubmitSpy').should('have.been.calledOnce');
+    cy.get('@handleSubmitSpy').then((spy) => {
+      const [submittedRows, mode] = spy.getCall(0).args;
+      cy.wrap(mode).should('equal', 'clear');
+      cy.wrap(submittedRows).should('have.length', 1);
+      cy.wrap(submittedRows.map((r) => r.name)).should('deep.equal', ['clear-primer']);
+    });
+
+    cy.contains('button', 'Import Clear + Warnings').click();
+    cy.get('@handleSubmitSpy').should('have.been.calledTwice');
+    cy.get('@handleSubmitSpy').then((spy) => {
+      const [submittedRows, mode] = spy.getCall(1).args;
+      cy.wrap(mode).should('equal', 'clear and warning');
+      cy.wrap(submittedRows).should('have.length', 5);
+      const submittedNames = submittedRows.map((r) => r.name);
+      cy.wrap(submittedNames).should('have.members', [
+        'name-exists',
+        'sequence-exists',
+        'name-duplicated',
+        'sequence-duplicated',
+        'clear-primer',
+      ]);
+      cy.wrap(submittedNames).should('not.include', 'sequence-invalid');
+      cy.wrap(submittedNames).should('not.include', 'uid-exists');
+      cy.wrap(submittedNames).should('not.include', 'uid-duplicated');
+    });
+
+    cy.get('@handleCancelSpy').should('not.have.been.called');
+    cy.contains('button', 'Cancel').click();
+    cy.get('@handleCancelSpy').should('have.been.calledOnce');
   });
 
   it('prioritizes error icon when row has warning and error, while showing both issues', () => {

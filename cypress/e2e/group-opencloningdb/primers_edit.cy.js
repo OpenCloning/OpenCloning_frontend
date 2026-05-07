@@ -50,8 +50,46 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
         cy.get('td').contains('test_primer').should('exist');
         cy.get('td').contains('AACCCCTTTGGG').should('exist');
       });
-      
-
     });
   });
+  it('can bulk upload primers', () => {
+    cy.e2eLogin('/primers', 'bootstrap@example.com', 'password');
+    cy.get('button').contains('Bulk Upload').click();
+    cy.get('input[type="file"]').selectFile('cypress/test_files/import_oligos/database_import.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-primers-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('repeated-uid').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(2).within(() => {
+        cy.contains('fwd_restriction_then_ligation').should('exist');
+        cy.get('[data-testid="WarningIcon"]').should('exist');
+      });
+      cy.get('tr').eq(3).within(() => {
+        cy.contains('all-fine').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+      });
+    });
+    cy.intercept('POST', 'http://localhost:8001/primers/bulk*').as('bulkUploadPrimers');
+    cy.get('button').contains('Import Clear Primers').click();
+    cy.wait('@bulkUploadPrimers').then(({ response, request }) => {
+      cy.wrap(response.body).should('have.length', 1);
+      cy.wrap(response.body[0].name).should('equal', 'all-fine');
+      cy.wrap(request.query).should('have.property', 'strict', 'true');
+    });
+    cy.dbAlertExists('Imported 1 clear primer successfully');
+    cy.closeDbAlerts();
+    cy.get('input[type="file"]').selectFile('cypress/test_files/import_oligos/database_import.tsv', { force: true });
+    cy.get('tr [data-testid="CheckCircleIcon"]').should('not.exist');
+    cy.intercept('POST', 'http://localhost:8001/primers/bulk*').as('bulkUploadPrimers2');
+    cy.get('button').contains('Import Clear + Warnings').click();
+    cy.wait('@bulkUploadPrimers2').then(({ response, request }) => {
+      cy.wrap(response.body).should('have.length', 1);
+      cy.wrap(response.body[0].name).should('equal', 'fwd_restriction_then_ligation');
+      cy.wrap(request.query).should('have.property', 'strict', 'false');
+    });
+    cy.dbAlertExists('Imported 1 clear and warning primer successfully');
+    cy.closeDbAlerts();
+  });
 });
+
