@@ -1,7 +1,5 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
-const DB_URL = 'http://localhost:8001';
-const dbUrl = (path) => `${DB_URL}${path}`;
 
 describe('opencloningdb login', () => {
   beforeEach(() => {
@@ -19,8 +17,8 @@ describe('opencloningdb login', () => {
   it('logs in the bootstrap, sets the workspace and token, and lands on /sequences', () => {
     cy.setInputValue('Email', 'bootstrap@example.com');
     cy.setInputValue('Password', 'password');
-    cy.intercept('POST', dbUrl(endpoints.authToken)).as('getToken');
-    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
+    cy.intercept('POST', Cypress.getDbURL(endpoints.authToken)).as('getToken');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.get('button[type="submit"]').click();
     cy.wait('@getToken').then(({ response: { body: { access_token } } }) => {
       cy.window().its('localStorage').invoke('getItem', 'token').should('equal', access_token);

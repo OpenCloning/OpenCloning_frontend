@@ -1,7 +1,5 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
-const DB_URL = 'http://localhost:8001';
-const dbUrl = (path) => `${DB_URL}${path}`;
 
 describe('Actions that can be perfomed by an edit user on the Lines page', () => {
   afterEach(() => {
@@ -95,7 +93,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
 
       // Add an extra allele, can submit
       cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div');
-      cy.intercept('POST', dbUrl(endpoints.postLine)).as('postLine');
+      cy.intercept('POST', Cypress.getDbURL(endpoints.postLine)).as('postLine');
       cy.get('button').contains('Submit').click();
       cy.wait('@postLine').then(({ response }) => {
         cy.url().should('match', new RegExp(`/lines/${response.body.id}$`));  

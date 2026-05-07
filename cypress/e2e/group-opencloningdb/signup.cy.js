@@ -1,7 +1,5 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
-const DB_URL = 'http://localhost:8001';
-const dbUrl = (path) => `${DB_URL}${path}`;
 
 describe('opencloningdb sign up', () => {
   afterEach(() => {
@@ -33,8 +31,8 @@ describe('opencloningdb sign up', () => {
     cy.setInputValue('Email', `e2e-signup@example.com`);
     cy.setInputValue('Password', 'password');
     cy.setInputValue('Confirm password', 'password');
-    cy.intercept('POST', dbUrl(endpoints.authRegister)).as('register');
-    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
+    cy.intercept('POST', Cypress.getDbURL(endpoints.authRegister)).as('register');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.get('button[type="submit"]').click();
     cy.wait('@register').then(({ request }) => {
       expect(request.body).to.include({ email: `e2e-signup@example.com`, display_name: `E2E Signup` });

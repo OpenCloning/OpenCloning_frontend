@@ -1,7 +1,5 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
-const DB_URL = 'http://localhost:8001';
-const dbUrl = (path) => `${DB_URL}${path}`;
 
 describe('Locate sequence in database', () => {
   beforeEach(() => {
@@ -12,7 +10,7 @@ describe('Locate sequence in database', () => {
     cy.get('li').contains('connected_gibson.dna', { timeout: 20000 }).should('exist');
     cy.checkSequenceNotInDatabase('1');
     cy.checkSequenceNotInDatabase('2');
-    cy.intercept('POST', `${dbUrl(endpoints.sequenceSearch)}*`).as('locateSequenceInDatabase');
+    cy.intercept('POST', Cypress.getDbURL(endpoints.sequenceSearch, '*')).as('locateSequenceInDatabase');
     cy.get('[aria-label="Synchronize sequences with database"]').click({ force: true });
     cy.wait('@locateSequenceInDatabase', { timeout: 20000 })
     cy.checkSequenceInDatabase('1');
@@ -34,7 +32,7 @@ describe('Locate sequence in database', () => {
     cy.deleteSourceByContent('Restriction with');
 
     // Clicking again should not make a request
-    cy.intercept('POST', `${dbUrl(endpoints.sequenceSearch)}*`).as('locateSequenceInDatabase2');
+    cy.intercept('POST', Cypress.getDbURL(endpoints.sequenceSearch, '*')).as('locateSequenceInDatabase2');
     cy.get('[aria-label="Synchronize sequences with database"]').click({ force: true });
     cy.openCloningAlertExists('All sequences are already in the database');
     cy.closeAlerts();

@@ -1,8 +1,5 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
-const DB_URL = 'http://localhost:8001';
-const dbUrl = (path) => `${DB_URL}${path}`;
-
 describe('Actions that can be perfomed by an edit user on the Sequences page', () => {
   afterEach(() => {
     cy.resetDB();
@@ -15,16 +12,16 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   });
   it('can add and remove sequencing files from the detail page', () => {
     const sequenceName = 'pREX0008';
-    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === sequenceName);
-      cy.intercept('GET', dbUrl(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');
+      cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');
       cy.get('tbody tr button').contains(sequenceName).click();
       cy.wait('@getSequenceSequencingFiles').then(({ response }) => {
         const sequencingFiles = response.body;
         const sequencingFile = sequencingFiles[0];
-        cy.intercept('DELETE', dbUrl(endpoints.sequenceSequencingFileDelete(sequence.id, sequencingFile.id))).as('deleteSequencingFile');
+        cy.intercept('DELETE', Cypress.getDbURL(endpoints.sequenceSequencingFileDelete(sequence.id, sequencingFile.id))).as('deleteSequencingFile');
         cy.get('[data-testid="sequencing-file-row"]').filter(`:contains(${sequencingFile.original_name})`).within(() => {
           cy.get('[aria-label="Delete"]').click();
         });
@@ -32,7 +29,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.get('[data-testid="sequencing-file-row"]').contains(sequencingFile.original_name).should('not.exist');
         cy.dbAlertExists('Sequencing file deleted successfully');
         cy.closeDbAlerts();
-        cy.intercept('POST', dbUrl(endpoints.sequenceSequencingFiles(sequence.id))).as('addSequencingFile');
+        cy.intercept('POST', Cypress.getDbURL(endpoints.sequenceSequencingFiles(sequence.id))).as('addSequencingFile');
         cy.get('[aria-label="Add sequencing files"]').siblings('input').selectFile('cypress/test_files/dummy_sequencing.fasta', { force: true });
         cy.wait('@addSequencingFile');
         cy.dbAlertExists('Sequencing files submitted successfully');
@@ -43,14 +40,14 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   });
   it('can add and remove sample UIDs from the detail page', () => {
     const sequenceName = 'pREX0008';
-    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === sequenceName);
       cy.get('tbody tr button').contains(sequenceName).click();
       cy.get('[data-testid="sequence-samples-section"]').contains('cre_lox_recombination-sample').should('not.exist');
       cy.get('[data-testid="sequence-samples-section"]').contains('example_sequencing-sample').should('exist');
-      cy.intercept('PATCH', dbUrl(endpoints.sequenceSample('cre_lox_recombination-sample'))).as('transferSample');
+      cy.intercept('PATCH', Cypress.getDbURL(endpoints.sequenceSample('cre_lox_recombination-sample'))).as('transferSample');
       cy.get('[aria-label="Transfer UID from another sequence"]').click();
       cy.setAutocompleteValue('Search UIDs', 'cre_lox_recombination-sample', 'body', false);
       cy.contains('Are you sure you want to transfer UID cre_lox_recombination-sample from sequence reconstituted_locus to this one').should('exist');

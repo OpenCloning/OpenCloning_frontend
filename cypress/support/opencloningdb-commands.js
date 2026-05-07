@@ -2,8 +2,8 @@ import { setWorkspaceHeader } from '../../packages/opencloningdb/src/common.js';
 import endpoints from '../../packages/opencloningdb/src/endpoints';
 
 const DB_URL = 'http://localhost:8001';
-const dbUrl = (path) => `${DB_URL}${path}`;
 const STUB_FOLDER = 'OpenCloning_backend/stubs/db';
+Cypress.getDbURL = (path = '', subpath = '') => `${DB_URL}${path}${subpath}`;
 
 function normalizeHeaders(headers = {}) {
   return Object.fromEntries(
@@ -38,7 +38,7 @@ function ensureHeadersMatch(actualHeaders, expectedHeaders) {
 Cypress.Commands.add('loginToOpenCloningDB', (email, password, workspaceId) => {
   cy.request({
     method: 'POST',
-    url: dbUrl(endpoints.authToken),
+    url: Cypress.getDbURL(endpoints.authToken),
     form: true,
     body: { username: email, password },
   }).then(({ body }) => {
@@ -48,9 +48,9 @@ Cypress.Commands.add('loginToOpenCloningDB', (email, password, workspaceId) => {
 });
 
 Cypress.Commands.add('mockLogin', () => {
-  cy.intercept('POST', dbUrl(endpoints.authToken), { statusCode: 200, body: { access_token: 'test_token' } }).as('login');
-  cy.intercept('GET', dbUrl(endpoints.authMe), { statusCode: 200, body: {} }).as('authMe');
-  cy.intercept('GET', dbUrl(endpoints.workspaces), { statusCode: 200, body: [{ id: 1 }] }).as('workspaces');
+  cy.intercept('POST', Cypress.getDbURL(endpoints.authToken), { statusCode: 200, body: { access_token: 'test_token' } }).as('login');
+  cy.intercept('GET', Cypress.getDbURL(endpoints.authMe), { statusCode: 200, body: {} }).as('authMe');
+  cy.intercept('GET', Cypress.getDbURL(endpoints.workspaces), { statusCode: 200, body: [{ id: 1 }] }).as('workspaces');
 
 });
 
