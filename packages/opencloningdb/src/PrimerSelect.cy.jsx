@@ -3,6 +3,7 @@ import PrimerSelect from './PrimerSelect';
 import { DatabaseProvider } from '@opencloning/ui/providers/DatabaseContext';
 import OpenCloningDBInterface from './OpenCloningDBInterface';
 import { clickMultiSelectOption } from '../../../cypress/e2e/common_functions';
+import endpoints from './endpoints';
 
 const PRIMER_NAME = 'lacZ_attB1_fwd';
 
@@ -36,7 +37,7 @@ describe('<PrimerSelect />', () => {
   });
 
   it('shows an error message when the request fails', () => {
-    cy.intercept('GET', 'http://localhost:8001/primers*', { statusCode: 500 }).as('getPrimers');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.primers, '*'), { statusCode: 500 }).as('getPrimers');
     cy.mount(
       <DatabaseProvider value={OpenCloningDBInterface}>
         <PrimerSelect setPrimer={cy.stub()} />

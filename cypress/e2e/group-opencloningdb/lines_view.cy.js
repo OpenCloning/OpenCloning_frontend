@@ -57,7 +57,7 @@ describe('LinesPage', () => {
   it('should set query params from the URL', () => {
     cy.e2eLogin('/lines', 'view-only-user@example.com', 'password');
     cy.intercept('GET', Cypress.getDbURL(endpoints.lines, '*'), { statusCode: 200, body: { items: [] } }).as('getLines');
-    cy.intercept('GET', 'http://localhost:8001/tags*', { statusCode: 200, body: [{ id: 4, name: 'crispr_hdr' }] }).as('getTags');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.tags, '*'), { statusCode: 200, body: [{ id: 4, name: 'crispr_hdr' }] }).as('getTags');
     cy.visit('/lines?uid=crispr_hdr-line&genotype=3xHA-ase1&plasmid=pFA6a-3HA-kanMX6&tags=4');
     cy.wait('@getLines').then(({ request }) => {
       cy.wrap(request.query).should('have.property', 'uid', 'crispr_hdr-line');

@@ -73,7 +73,7 @@ describe('SequencesPage', () => {
   it('should set query params from the URL', () => {
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.intercept('GET', 'http://localhost:8001/tags*', { statusCode: 200, body: [{ id: 1, name: 'example_sequencing' }] }).as('getTags');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.tags, '*'), { statusCode: 200, body: [{ id: 1, name: 'example_sequencing' }] }).as('getTags');
     cy.visit('/sequences?uid=example_sequencing-sample&name=pREX0008&sequence_types=plasmid&tags=1&has_uid=true');
     cy.wait('@getSequences').then(({ request }) => {
       cy.wrap(request.query).should('have.property', 'uid', 'example_sequencing-sample');
