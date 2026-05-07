@@ -74,7 +74,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
       });
     });
     cy.intercept('POST', Cypress.getDbURL(endpoints.primersBulk, '*')).as('bulkUploadPrimers');
-    cy.get('button').contains('Import Clear Primers').click();
+    cy.get('button').contains('Import Clear').click();
     cy.wait('@bulkUploadPrimers').then(({ response, request }) => {
       cy.wrap(response.body).should('have.length', 1);
       cy.wrap(response.body[0].name).should('equal', 'all-fine');

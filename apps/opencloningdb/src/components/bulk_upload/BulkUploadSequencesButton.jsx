@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -14,6 +14,7 @@ import SequenceBulkUploadPreviewTable from './SequenceBulkUploadPreviewTable';
 export default function BulkUploadSequencesButton() {
   const hiddenFileInput = React.useRef(null);
   const { addAlert } = useAppAlerts();
+  const queryClient = useQueryClient();
   const [openModal, setOpenModal] = React.useState(false);
   const [validationRows, setValidationRows] = React.useState([]);
 
@@ -39,24 +40,32 @@ export default function BulkUploadSequencesButton() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: async ({ rows }) => {
-      // Temporary mock endpoint behavior until backend submission endpoint is available.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 300);
+    mutationFn: async ({ submittedRows, mode }) => {
+      const strict = mode === 'clear';
+      const formData = new FormData();
+      submittedRows.forEach((row) => {
+        formData.append('files', row.file);
       });
-      return rows;
+      const { data } = await openCloningDBHttpClient.post(endpoints.sequencesBulk, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        params: { strict },
+      });
+      return data;
     },
-    onSuccess: (importedRows, variables) => {
+    onSuccess: (createdSequences) => {
       addAlert({
-        message: `Imported ${importedRows.length} ${variables.modeLabel} sequence${importedRows.length === 1 ? '' : 's'} successfully (mock)`,
+        message: `Imported ${createdSequences.length} sequence${createdSequences.length === 1 ? '' : 's'} successfully`,
         severity: 'success',
       });
       setOpenModal(false);
       setValidationRows([]);
+      queryClient.invalidateQueries({ queryKey: ['sequences'] });
     },
     onError: () => {
       addAlert({
-        message: 'Mock submission failed',
+        message: 'Submission failed',
         severity: 'error',
       });
     },
@@ -77,6 +86,10 @@ export default function BulkUploadSequencesButton() {
       if (!Array.isArray(rows) || rows.length < 1) {
         throw new Error('No validation rows returned');
       }
+      // Add file as a field
+      rows.forEach((row, index) => {
+        row.file = uploadedFiles[index];
+      });
       setValidationRows(rows);
       setOpenModal(true);
     } catch (error) {
@@ -87,13 +100,6 @@ export default function BulkUploadSequencesButton() {
     } finally {
       event.target.value = null;
     }
-  };
-
-  const handleSubmit = (rows, modeLabel) => {
-    if (rows.length < 1) {
-      return;
-    }
-    submitMutation.mutate({ rows, modeLabel });
   };
 
   return (
@@ -140,10 +146,9 @@ export default function BulkUploadSequencesButton() {
           </Typography>
           <SequenceBulkUploadPreviewTable
             rows={validationRows}
-            handleSubmit={handleSubmit}
+            handleSubmit={(submittedRows, mode) => submitMutation.mutate({ submittedRows, mode })}
             handleCancel={() => setOpenModal(false)}
-            submitMutation={submitMutation}
-            validateMutation={validateMutation}
+            isSubmitting={submitMutation.isPending}
           />
         </Box>
       </Modal>

@@ -1,5 +1,14 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
+const bulkSequenceFiles = [
+  '68164.gb',
+  '68165.gb',
+  'hello.fasta',
+  'pFA6a-3HA-kanMX6.fasta',
+  'repeated_1.gb',
+  'repeated_2.gb',
+].map((file) => `cypress/test_files/bulk_sequence_submit/${file}`);
+
 describe('Actions that can be perfomed by an edit user on the Sequences page', () => {
   afterEach(() => {
     cy.resetDB();
@@ -121,5 +130,73 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     });
     cy.dbAlertExists('Sequence updated successfully');
     cy.closeDbAlerts();
+  });
+  it('can bulk upload sequences', () => {
+    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.get('button').contains('Bulk Upload').click();
+    cy.get('input[type="file"]').selectFile(bulkSequenceFiles, { force: true });
+    cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('hello.fasta').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(2).within(() => {
+        cy.contains('pFA6a-3HA-kanMX6.fasta').should('exist');
+        cy.get('[data-testid="WarningIcon"]').should('exist');
+        cy.contains('Circularized sequence already exists in workspace').should('exist');
+        cy.contains('Name already exists in workspace').should('exist');
+      });
+      cy.get('tr').eq(3).within(() => {
+        cy.contains('repeated_1.gb').should('exist');
+        cy.get('[data-testid="WarningIcon"]').should('exist');
+        cy.contains('Name duplicated in uploaded files').should('exist');
+        cy.contains('Sequence duplicated in uploaded files').should('exist');
+      });
+      cy.get('tr').eq(4).within(() => {
+        cy.contains('repeated_2.gb').should('exist');
+        cy.get('[data-testid="WarningIcon"]').should('exist');
+        cy.contains('Name duplicated in uploaded files').should('exist');
+        cy.contains('Sequence duplicated in uploaded files').should('exist');
+      });
+      cy.get('tr').eq(5).within(() => {
+        cy.contains('68164.gb').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+        cy.get('td').eq(5).should('be.empty');
+      });
+      cy.get('tr').eq(6).within(() => {
+        cy.contains('68165.gb').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+        cy.get('td').eq(5).should('be.empty');
+      });
+      cy.intercept('POST', Cypress.getDbURL(endpoints.sequencesBulk, '*')).as('bulkUploadSequences');
+      cy.get('button').contains('Import Clear').click();
+      cy.wait('@bulkUploadSequences').then(({ response, request }) => {
+        cy.wrap(response.body).should('have.length', 2);
+        cy.wrap(response.body[0].name).should('equal', 'pPML1_(GB0045)');
+        cy.wrap(response.body[1].name).should('equal', 'pNH__(GB0064)');
+        cy.wrap(request.query).should('have.property', 'strict', 'true');
+      });
+      cy.dbAlertExists('Imported 2 sequences successfully');
+      cy.closeDbAlerts();
+    });
+    cy.get('button').contains('Bulk Upload').click();
+    cy.get('input[type="file"]').selectFile(bulkSequenceFiles.slice(2), { force: true });
+    cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
+      cy.get('tr [data-testid="CheckCircleIcon"]').should('not.exist');
+      cy.get('tr [data-testid="WarningIcon"]').should('exist');
+      cy.get('tr [data-testid="CancelIcon"]').should('exist');
+      cy.get('button').contains(/^Import Clear$/).should('be.disabled');
+      cy.intercept('POST', Cypress.getDbURL(endpoints.sequencesBulk, '*')).as('bulkUploadSequences2');
+      cy.get('button').contains('Import Clear + Warnings').click();
+      cy.wait('@bulkUploadSequences2').then(({ response, request }) => {
+        cy.wrap(response.body).should('have.length', 3);
+        cy.wrap(response.body[0].name).should('equal', 'pFA6a-3HA-kanMX6');
+        cy.wrap(response.body[1].name).should('equal', 'pj5_00001');
+        cy.wrap(response.body[2].name).should('equal', 'pj5_00001');
+        cy.wrap(request.query).should('have.property', 'strict', 'false');
+      });
+      cy.dbAlertExists('Imported 3 sequences successfully');
+      cy.closeDbAlerts();
+    });
   });
 });

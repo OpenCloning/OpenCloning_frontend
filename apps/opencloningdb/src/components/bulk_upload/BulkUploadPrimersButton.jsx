@@ -156,8 +156,7 @@ export default function BulkUploadPrimersButton() {
             rows={validationRows}
             handleSubmit={handleSubmit}
             handleCancel={() => setOpenModal(false)}
-            submitMutation={submitMutation}
-            validateMutation={validateMutation}
+            isSubmitting={submitMutation.isPending}
           />
         </Box>
       </Modal>

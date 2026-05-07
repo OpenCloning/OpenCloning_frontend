@@ -60,8 +60,7 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       rows={rows}
       handleSubmit={handleSubmitSpy}
       handleCancel={handleCancelSpy}
-      submitMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
-      validateMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
+      isSubmitting={false}
     />);
 
 
@@ -105,7 +104,7 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       cy.contains('UID duplicated in uploaded file').should('exist');
     });
 
-    cy.contains('button', 'Import Clear Primers').click();
+    cy.contains('button', 'Import Clear').click();
     cy.get('@handleSubmitSpy').should('have.been.calledOnce');
     cy.get('@handleSubmitSpy').then((spy) => {
       const [submittedRows, mode] = spy.getCall(0).args;
@@ -153,8 +152,7 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       rows={rows}
       handleSubmit={() => {}}
       handleCancel={() => {}}
-      submitMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
-      validateMutation={{mutateAsync: () => Promise.resolve([]), isPending: false}}
+      isSubmitting={false}
     />);
 
     cy.contains('td', 'warning-and-error').parent().within(() => {
