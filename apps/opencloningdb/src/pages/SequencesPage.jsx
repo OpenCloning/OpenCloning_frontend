@@ -21,6 +21,7 @@ import { UrlParamsForm } from '../components/urlParamsForm';
 import TagEntitiesButton from '../components/TagEntitiesButton';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
+import BulkUploadSequencesButton from '../components/bulk_upload/BulkUploadSequencesButton';
 import PageContainer from '../components/PageContainer';
 import SequenceTable from '../components/SequenceTable';
 
@@ -126,6 +127,7 @@ function SequencesPage() {
         component={SequenceQueryFields}
       />
       <TopButtonSection>
+        <BulkUploadSequencesButton />
         <TagEntitiesButton
           selectedEntities={selectedSequences}
           entityType="input_entities"

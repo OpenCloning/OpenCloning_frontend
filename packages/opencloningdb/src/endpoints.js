@@ -7,6 +7,7 @@ const endpoints = {
   sequencePrimers: (id) => `/sequences/${id}/primers`,
   sequenceSequencingFiles: (id) => `/sequences/${id}/sequencing_files`,
   sequenceSearch: '/sequences/search',
+  sequencesValidateUpload: '/sequences/validate-upload',
   sequencingFileDownload: (id) => `/sequencing_files/${id}/download`,
   sequenceSequencingFileDelete: (sequenceId, fileId) => `/sequences/${sequenceId}/sequencing_files/${fileId}`,
   postSequence: '/sequences',
