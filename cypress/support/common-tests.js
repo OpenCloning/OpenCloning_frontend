@@ -1,5 +1,22 @@
+import endpoints from '../../packages/opencloningdb/src/endpoints';
+
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+
+const listEndpoints = {
+  sequences: endpoints.sequences,
+  lines: endpoints.lines,
+  primers: endpoints.primers,
+};
+
+const tagEndpoints = {
+  lines: endpoints.lineTags,
+  input_entities: endpoints.inputEntityTags,
+};
+
 Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
-  cy.intercept('GET', `http://localhost:8001/${resourcePlural}*`).as('getRequest');
+  cy.intercept('GET', `${dbUrl(listEndpoints[resourcePlural])}*`).as('getRequest');
+  console.log(`${dbUrl(listEndpoints[resourcePlural])}*`)
   cy.e2eLogin(`/${resourcePlural}`, 'bootstrap@example.com', 'password');
   cy.wait('@getRequest')
   cy.get('tbody tr').contains('test-tag').should('not.exist')
@@ -9,7 +26,7 @@ Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
   cy.setInputValue('Tags', 'test-tag', '[data-testid="tag-entities-dialog"]');
   cy.get('div[role="presentation"]').contains('Create tag').click();
   cy.clickMultiSelectOption('Tags', 'test-tag', '[data-testid="tag-entities-dialog"]');
-  cy.intercept('POST', `http://localhost:8001/${tagEndpointName}/*/tags`).as('addTag');
+  cy.intercept('POST', dbUrl(tagEndpoints[tagEndpointName]('*'))).as('addTag');
   cy.get('[data-testid="tag-entities-dialog"] button').contains('Tag').click();
   cy.wait('@addTag');
   cy.get('tbody tr').eq(0).contains('test-tag').should('exist');
@@ -40,14 +57,14 @@ Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
 });
 
 Cypress.Commands.add('addTagInDetailPageTest', (resourcePlural, resourceName, expectedTagName) => {
-  cy.intercept('GET', `http://localhost:8001/${resourcePlural}*`).as('getRequest');
+  cy.intercept('GET', `${dbUrl(listEndpoints[resourcePlural])}*`).as('getRequest');
   cy.e2eLogin(`/${resourcePlural}`, 'bootstrap@example.com', 'password');
   cy.wait('@getRequest').then(({ response }) => {
     const resource = response.body.items.find((resource) => resource.name === resourceName || resource.uid === resourceName);
     const tagId = resource.tags[0].id;
     cy.get('tbody tr button').contains(resourceName).click();
     cy.get('[data-testid="resource-detail-header-title"]').contains(resourceName).should('exist');
-    cy.intercept('DELETE', `http://localhost:8001/*/${resource.id}/tags/${tagId}`).as('deleteTag');
+    cy.intercept('DELETE', `${dbUrl('')}/**/${resource.id}/tags/${tagId}`).as('deleteTag');
     cy.get('[data-testid="tag-chip-with-delete"]').filter(`:contains(${expectedTagName})`).within(
       () => {
         cy.get('svg[data-testid="ClearIcon"]').click();
@@ -66,7 +83,7 @@ Cypress.Commands.add('addTagInDetailPageTest', (resourcePlural, resourceName, ex
 
 /** Requires seeded list total > 10 so page 2 exists when size is 10. */
 Cypress.Commands.add('openCloningDbTablePaginationTest', (resourcePlural, pageTestId) => {
-  cy.intercept('GET', `http://localhost:8001/${resourcePlural}*`).as('list');
+  cy.intercept('GET', `${dbUrl(listEndpoints[resourcePlural])}*`).as('list');
   cy.e2eLogin(`/${resourcePlural}`, 'view-only-user@example.com', 'password');
   cy.wait('@list').then(({ response }) => {
     expect(response.body.total).to.be.greaterThan(10);
@@ -86,7 +103,7 @@ Cypress.Commands.add('openCloningDbTablePaginationTest', (resourcePlural, pageTe
 });
 
 Cypress.Commands.add('openCloningDbTableSelectAllTest', (resourcePlural, pageTestId, selectAllAriaLabel, bulkButtonLabel) => {
-  cy.intercept('GET', `http://localhost:8001/${resourcePlural}*`).as('list');
+  cy.intercept('GET', `${dbUrl(listEndpoints[resourcePlural])}*`).as('list');
   cy.e2eLogin(`/${resourcePlural}`, 'view-only-user@example.com', 'password');
   cy.wait('@list');
   cy.get(`${pageTestId} [aria-label="${selectAllAriaLabel}"]`).click();
@@ -97,7 +114,7 @@ Cypress.Commands.add('openCloningDbTableSelectAllTest', (resourcePlural, pageTes
 });
 
 Cypress.Commands.add('goBackToMainPageFromDetailPage', (resourcePlural, resourceName) => {
-  cy.intercept('GET', `http://localhost:8001/${resourcePlural}*`).as('list');
+  cy.intercept('GET', `${dbUrl(listEndpoints[resourcePlural])}*`).as('list');
   cy.e2eLogin(`/${resourcePlural}?name=${resourceName}`, 'view-only-user@example.com', 'password');
   cy.wait('@list');
   cy.get('tbody button').contains(resourceName).click();

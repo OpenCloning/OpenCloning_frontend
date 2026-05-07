@@ -1,6 +1,9 @@
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+import endpoints from '../../../packages/opencloningdb/src/endpoints';
 describe('Actions that can be perfomed by a view-only user on the Primers page', () => {
   it('should render and make the right search request', () => {
-    cy.intercept('GET', 'http://localhost:8001/primers*').as('getPrimers');
+    cy.intercept('GET', dbUrl(endpoints.primers)).as('getPrimers');
     cy.e2eLogin('/primers', 'view-only-user@example.com', 'password');
     cy.wait('@getPrimers').then(({ response, request }) => {
       expect(request.query).to.deep.equal({page: "1", size: "25"});
@@ -29,7 +32,7 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
           cy.get('td').eq(4).should('have.text', primerWithTagsAndUID.sequence);
         });
     });
-    cy.intercept('GET', 'http://localhost:8001/primers*').as('getPrimers2');
+    cy.intercept('GET', dbUrl(endpoints.primers)).as('getPrimers2');
     cy.setInputValue('UID', 'ML7', '[data-testid="primers-page"]');
     cy.setInputValue('Name', 'fwd_restriction_then_ligation', '[data-testid="primers-page"]');
     cy.clickMultiSelectOption('Tags', 'templateless_PCR', '[data-testid="primers-page"]');
@@ -44,7 +47,7 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
       cy.wrap(request.query).should('have.property', 'has_uid', 'true');
     });
     // Finally a query to verify that multiple tags are working, mock since no need
-    cy.intercept('GET', 'http://localhost:8001/primers*', { statusCode: 200, body: { items: [] } }).as('getPrimers3');
+    cy.intercept('GET', dbUrl(endpoints.primers), { statusCode: 200, body: { items: [] } }).as('getPrimers3');
     cy.setAutocompleteValue('Tags', 'crispr_hdr', '[data-testid="primers-page"]');
     cy.get('button').contains('Search').click();
     cy.wait('@getPrimers3').then(({ response, request }) => {
@@ -56,8 +59,8 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
   });
   it('should set query params from the URL', () => {
     cy.e2eLogin('/primers', 'view-only-user@example.com', 'password');
-    cy.intercept('GET', 'http://localhost:8001/primers*', { statusCode: 200, body: { items: [] } }).as('getPrimers2');
-    cy.intercept('GET', 'http://localhost:8001/tags*', { statusCode: 200, body:[{ id: 1, name: 'crispr_hdr' }, { id: 2, name: 'templateless_PCR' }] }).as('getTags');
+    cy.intercept('GET', dbUrl(endpoints.primers), { statusCode: 200, body: { items: [] } }).as('getPrimers2');
+    cy.intercept('GET', dbUrl(endpoints.tags), { statusCode: 200, body:[{ id: 1, name: 'crispr_hdr' }, { id: 2, name: 'templateless_PCR' }] }).as('getTags');
     cy.visit('/primers?uid=ML7&name=fwd_restriction_then_ligation&tags=1&tags=2&has_uid=true');
 
     cy.wait('@getPrimers2').then(({ response, request }) => {
@@ -75,11 +78,11 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
 
   });
   it('clicking on entry shows the detail page and allows to add to design tab', () => {
-    cy.intercept('GET', 'http://localhost:8001/primers*').as('getPrimers');
+    cy.intercept('GET', dbUrl(endpoints.primers)).as('getPrimers');
     cy.e2eLogin('/primers', 'view-only-user@example.com', 'password');
     cy.wait('@getPrimers').then(({ response }) => {
       const primer = response.body.items.find((primer) => primer.name === 'fwd_restriction_then_ligation');
-      cy.intercept('GET', `http://localhost:8001/primer/${primer.id}*`).as('getPrimer');
+      cy.intercept('GET', dbUrl(endpoints.primer(primer.id))).as('getPrimer');
       cy.get('tbody button').contains(primer.name).click();
       cy.wait('@getPrimer')
       cy.get('[data-testid="resource-detail-header-title"] h5').contains(primer.name).should('exist');
@@ -108,7 +111,7 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
     cy.get('[data-testid="resource-detail-header-title"] span').contains('No UID').should('exist');
   });
   it('clicking on add to design tab button adds primers to the design tab', () => {
-    cy.intercept('GET', 'http://localhost:8001/primers*').as('getPrimers');
+    cy.intercept('GET', dbUrl(endpoints.primers)).as('getPrimers');
     cy.e2eLogin('/primers', 'view-only-user@example.com', 'password');
     cy.wait('@getPrimers').then(({ response }) => {
       cy.get('button').contains('Add to Design Tab').should('not.exist');

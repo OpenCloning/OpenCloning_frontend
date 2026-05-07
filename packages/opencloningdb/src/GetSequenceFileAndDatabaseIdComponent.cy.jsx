@@ -1,8 +1,10 @@
 import React from 'react';
 import GetSequenceFileAndDatabaseIdComponent from './GetSequenceFileAndDatabaseIdComponent';
 import { clickMultiSelectOption } from '../../../cypress/e2e/common_functions';
+import endpoints from './endpoints';
 
 const SEQUENCE_NAME = 'ase1_CDS_PCR';
+const textFilePattern = `**${endpoints.sequenceTextFile('*')}`;
 
 function expectCloningStrategyFile(file, sequenceId, expectedSequenceFile) {
   expect(file.name).to.equal('cloning_strategy.json');
@@ -58,7 +60,7 @@ describe('<GetSequenceFileAndDatabaseIdComponent />', () => {
 
     cy.getStub('get_text_file_sequence').then((textFileSequenceStub) => {
       let callCount = 0;
-      cy.intercept('GET', '**/sequence/*/text_file_sequence', (req) => {
+      cy.intercept('GET', textFilePattern, (req) => {
         callCount += 1;
         if (callCount === 1) {
           req.reply({ statusCode: 500 });

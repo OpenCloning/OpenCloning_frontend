@@ -1,6 +1,11 @@
+import endpoints from '../../../packages/opencloningdb/src/endpoints';
+
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+
 describe('SequencesPage', () => {
   it('should render and make the right search request', () => {
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences').then(({ response, request }) => {
       expect(request.query).to.deep.equal({ page: '1', size: '25' });
@@ -26,7 +31,7 @@ describe('SequencesPage', () => {
         });
     });
 
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences2');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences2');
     cy.setInputValue('UID', 'example_sequencing-sample', '[data-testid="sequences-page"]');
     cy.setInputValue('Name', 'pREX0008', '[data-testid="sequences-page"]');
     cy.clickMultiSelectOption('Type', 'Plasmid', '[data-testid="sequences-page"]');
@@ -55,7 +60,7 @@ describe('SequencesPage', () => {
         });
     });
 
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences3');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences3');
     cy.get('[data-testid="sequences-page"] label').contains('With UID').parent().find('input').click({ force: true });
     cy.get('[data-testid="sequences-page"] button').contains('Search').click();
     cy.wait('@getSequences3').then(({ request }) => {
@@ -69,7 +74,7 @@ describe('SequencesPage', () => {
 
   it('should set query params from the URL', () => {
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
     cy.intercept('GET', 'http://localhost:8001/tags*', { statusCode: 200, body: [{ id: 1, name: 'example_sequencing' }] }).as('getTags');
     cy.visit('/sequences?uid=example_sequencing-sample&name=pREX0008&sequence_types=plasmid&tags=1&has_uid=true');
     cy.wait('@getSequences').then(({ request }) => {
@@ -93,24 +98,24 @@ describe('SequencesPage', () => {
   });
 
   it('clicking on entry shows the detail page', () => {
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
     // entry clone has parent and children, no sequencing data.
     // pREX0008 has sequencing data, no parent or children.
     // lacZ_PCR_product has linked primers
     cy.wait('@getSequences');
     for (const name of ['entry_clone_lacZ', 'pREX0008', 'lacZ_PCR_product']) {
-      cy.intercept('GET', 'http://localhost:8001/sequences*').as(`getSequences-${name}`);
+      cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as(`getSequences-${name}`);
       cy.setInputValue('Name', name, '[data-testid="sequences-page"]');
       cy.get('[data-testid="sequences-page"] button').contains('Search').click();
       cy.wait(`@getSequences-${name}`).then(({ response }) => {
         const sequence = response.body.items.find((item) => item.name === name);
 
-        cy.intercept('GET', `http://localhost:8001/sequence/${sequence.id}`).as('getSequenceDetail');
-        cy.intercept('GET', `http://localhost:8001/sequence/${sequence.id}/cloning_strategy`).as('getSequenceCloningStrategy');
-        cy.intercept('GET', `http://localhost:8001/sequence/${sequence.id}/children`).as('getSequenceChildren');
-        cy.intercept('GET', `http://localhost:8001/sequence/${sequence.id}/primers`).as('getSequencePrimers');
-        cy.intercept('GET', `http://localhost:8001/sequence/${sequence.id}/sequencing_files`).as('getSequenceSequencingFiles');
+        cy.intercept('GET', dbUrl(endpoints.sequence(sequence.id))).as('getSequenceDetail');
+        cy.intercept('GET', dbUrl(endpoints.sequenceCloningStrategy(sequence.id))).as('getSequenceCloningStrategy');
+        cy.intercept('GET', dbUrl(endpoints.sequenceChildren(sequence.id))).as('getSequenceChildren');
+        cy.intercept('GET', dbUrl(endpoints.sequencePrimers(sequence.id))).as('getSequencePrimers');
+        cy.intercept('GET', dbUrl(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');
 
         cy.get('tbody button').contains(sequence.name).click();
         cy.wait('@getSequenceDetail').then(({ response: sequenceDetailResponse }) => {
@@ -137,7 +142,7 @@ describe('SequencesPage', () => {
           const linkedPrimers = [...sequencePrimersResponse.body.templates, ...sequencePrimersResponse.body.products];
 
           if (name === 'lacZ_PCR_product') {
-            expect(linkedPrimers).to.have.length(2);
+            cy.wrap(linkedPrimers).should('have.length', 2);
             linkedPrimers.forEach((primer) => {
               cy.contains('h6', 'Linked primers').parent().parent().contains(primer.name).should('exist');
             });
@@ -185,7 +190,7 @@ describe('SequencesPage', () => {
   });
 
   it('can add to tab from the detail page', () => {
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences')
     cy.get('tbody button').contains('pREX0008').click();
@@ -197,16 +202,16 @@ describe('SequencesPage', () => {
   it('can download and align sequencing files', () => {
     cy.disableCache();
     // If downloaded file exists, delete it
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === 'pREX0008');
-      cy.intercept('GET', `http://localhost:8001/sequence/${sequence.id}/sequencing_files`).as('getSequenceSequencingFiles');
+      cy.intercept('GET', dbUrl(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');
       cy.get('tbody button').contains(sequence.name).click();
       cy.wait('@getSequenceSequencingFiles').then(({ response: sequencingFilesResponse }) => {
         const sequencingFiles = sequencingFilesResponse.body;
         const firstFile = sequencingFiles[0];
-        cy.intercept('GET', `http://localhost:8001/sequencing_files/${firstFile.id}/download`).as('downloadSequencingFile');
+        cy.intercept('GET', dbUrl(endpoints.sequencingFileDownload(firstFile.id))).as('downloadSequencingFile');
         // Wait until name displayed on sequence editor
         cy.get('.veEditor').contains('pREX0008', { timeout: 20000 }).should('exist').then(() => {
           cy.get('h5').contains('pREX0008').scrollIntoView()
@@ -224,8 +229,8 @@ describe('SequencesPage', () => {
   });
 
   it('clicking on add to design tab button adds sequences to the design tab', () => {
-    cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
-    cy.intercept('GET', 'http://localhost:8001/sequence/*/text_file_sequence').as('getSequenceTextFile');
+    cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
+    cy.intercept('GET', dbUrl(endpoints.sequenceTextFile('*'))).as('getSequenceTextFile');
     cy.e2eLogin('/sequences?name=lacz', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences')
     cy.get('button').contains('Add to Design Tab').should('not.exist');

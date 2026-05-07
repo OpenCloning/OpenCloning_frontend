@@ -1,9 +1,14 @@
+import endpoints from '../../../packages/opencloningdb/src/endpoints';
+
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+
 describe('Actions that can be perfomed by an edit user on the Primers page', () => {
   afterEach(() => {
     cy.resetDB();
   })
   it('can tag primers from the table', () => {
-    cy.addTagInTableTest('primers', 'input_entity');
+    cy.addTagInTableTest('primers', 'input_entities');
   });
   it('can remove and add tags from the detail page', () => {
     cy.addTagInDetailPageTest('primers', 'fwd_restriction_then_ligation', 'restriction_then_ligation');
@@ -35,7 +40,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
     cy.e2eLogin('/design', 'bootstrap@example.com', 'password');
     cy.addPrimer('test_primer', 'AACCCCTTTGGG').then(() => {
       cy.get('.primer-table-container').contains('test_primer').should('exist');
-      cy.intercept('POST', 'http://localhost:8001/primer').as('addPrimer');
+      cy.intercept('POST', dbUrl(endpoints.postPrimer)).as('addPrimer');
       cy.changeTab('Primers', '#opencloning-app-tabs');
       cy.get('.primer-table-container [data-testid="SaveIcon"]').click();
       cy.get('[data-testid="submit-to-database-component"]').within(() => {
@@ -70,7 +75,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
         cy.get('[data-testid="CheckCircleIcon"]').should('exist');
       });
     });
-    cy.intercept('POST', 'http://localhost:8001/primers/bulk*').as('bulkUploadPrimers');
+    cy.intercept('POST', dbUrl(endpoints.primersBulk + '*')).as('bulkUploadPrimers');
     cy.get('button').contains('Import Clear Primers').click();
     cy.wait('@bulkUploadPrimers').then(({ response, request }) => {
       cy.wrap(response.body).should('have.length', 1);
@@ -81,7 +86,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
     cy.closeDbAlerts();
     cy.get('input[type="file"]').selectFile('cypress/test_files/import_oligos/database_import.tsv', { force: true });
     cy.get('tr [data-testid="CheckCircleIcon"]').should('not.exist');
-    cy.intercept('POST', 'http://localhost:8001/primers/bulk*').as('bulkUploadPrimers2');
+    cy.intercept('POST', dbUrl(endpoints.primersBulk + '*')).as('bulkUploadPrimers2');
     cy.get('button').contains('Import Clear + Warnings').click();
     cy.wait('@bulkUploadPrimers2').then(({ response, request }) => {
       cy.wrap(response.body).should('have.length', 1);

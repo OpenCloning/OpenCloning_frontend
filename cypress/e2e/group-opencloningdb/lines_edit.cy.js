@@ -1,9 +1,14 @@
+import endpoints from '../../../packages/opencloningdb/src/endpoints';
+
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+
 describe('Actions that can be perfomed by an edit user on the Lines page', () => {
   afterEach(() => {
     cy.resetDB();
   })
   it('can tag lines from the table', () => {
-    cy.addTagInTableTest('lines', 'line');
+    cy.addTagInTableTest('lines', 'lines');
   });
   it('can remove and add tags from the detail page', () => {
     cy.addTagInDetailPageTest('lines', 'crispr_hdr-line', 'crispr_hdr');
@@ -90,7 +95,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
 
       // Add an extra allele, can submit
       cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div');
-      cy.intercept('POST', 'http://localhost:8001/line').as('postLine');
+      cy.intercept('POST', dbUrl(endpoints.postLine)).as('postLine');
       cy.get('button').contains('Submit').click();
       cy.wait('@postLine').then(({ response }) => {
         cy.url().should('match', new RegExp(`/lines/${response.body.id}$`));  

@@ -1,6 +1,11 @@
+import endpoints from '../../../packages/opencloningdb/src/endpoints';
+
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+
 describe('LinesPage', () => {
   it('should render and make the right search request', () => {
-    cy.intercept('GET', 'http://localhost:8001/lines*').as('getLines');
+    cy.intercept('GET', `${dbUrl(endpoints.lines)}*`).as('getLines');
     cy.e2eLogin('/lines', 'view-only-user@example.com', 'password');
     cy.wait('@getLines').then(({ request }) => {
       expect(request.query).to.deep.equal({ page: '1', size: '25' });
@@ -18,7 +23,7 @@ describe('LinesPage', () => {
         });
     });
 
-    cy.intercept('GET', 'http://localhost:8001/lines*').as('getLines2');
+    cy.intercept('GET', `${dbUrl(endpoints.lines)}*`).as('getLines2');
     cy.setInputValue('UID', 'crispr_hdr-line', '[data-testid="lines-page"]');
     cy.setInputValue('Genotype', '3xHA-ase1', '[data-testid="lines-page"]');
     cy.setInputValue('Plasmid', 'pFA6a-3HA-kanMX6', '[data-testid="lines-page"]');
@@ -53,7 +58,7 @@ describe('LinesPage', () => {
 
   it('should set query params from the URL', () => {
     cy.e2eLogin('/lines', 'view-only-user@example.com', 'password');
-    cy.intercept('GET', 'http://localhost:8001/lines*', { statusCode: 200, body: { items: [] } }).as('getLines');
+    cy.intercept('GET', `${dbUrl(endpoints.lines)}*`, { statusCode: 200, body: { items: [] } }).as('getLines');
     cy.intercept('GET', 'http://localhost:8001/tags*', { statusCode: 200, body: [{ id: 4, name: 'crispr_hdr' }] }).as('getTags');
     cy.visit('/lines?uid=crispr_hdr-line&genotype=3xHA-ase1&plasmid=pFA6a-3HA-kanMX6&tags=4');
     cy.wait('@getLines').then(({ request }) => {
@@ -71,12 +76,12 @@ describe('LinesPage', () => {
   });
 
   it('clicking on entry shows the detail page', () => {
-    cy.intercept('GET', 'http://localhost:8001/lines*').as('getLines');
+    cy.intercept('GET', `${dbUrl(endpoints.lines)}*`).as('getLines');
     cy.e2eLogin('/lines', 'view-only-user@example.com', 'password');
     cy.wait('@getLines').then(({ response }) => {
       const line = response.body.items.find((item) => item.uid === 'crispr_hdr-line');
-      cy.intercept('GET', `http://localhost:8001/line/${line.id}`).as('getLineDetail');
-      cy.intercept('GET', `http://localhost:8001/line/${line.parent_ids[0]}`).as('getParentLine');
+      cy.intercept('GET', dbUrl(endpoints.line(line.id))).as('getLineDetail');
+      cy.intercept('GET', dbUrl(endpoints.line(line.parent_ids[0]))).as('getParentLine');
 
       cy.get('tbody button').contains(line.uid).click();
       cy.wait('@getLineDetail');

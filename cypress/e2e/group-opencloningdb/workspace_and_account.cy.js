@@ -1,3 +1,8 @@
+import endpoints from '../../../packages/opencloningdb/src/endpoints';
+
+const DB_URL = 'http://localhost:8001';
+const dbUrl = (path) => `${DB_URL}${path}`;
+
 describe('workspace and account', () => {
   afterEach(() => {
     cy.resetDB();
@@ -41,7 +46,7 @@ describe('workspace and account', () => {
   });
 
   it('switches workspace and sends x-workspace-id on the next list request', () => {
-    cy.intercept('GET', 'http://localhost:8001/workspaces*').as('getWorkspaces');
+    cy.intercept('GET', `${dbUrl(endpoints.workspaces)}*`).as('getWorkspaces');
     cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
     cy.wait('@getWorkspaces').then(({ response: { body } }) => {
       cy.contains('h5', 'Manage workspaces').should('be.visible');
@@ -49,7 +54,7 @@ describe('workspace and account', () => {
       const originalWorkspaceId = body[0].id;
       const originalName = body[0].name;
 
-      cy.intercept('POST', 'http://localhost:8001/workspaces').as('createWorkspace');
+      cy.intercept('POST', dbUrl(endpoints.postWorkspace)).as('createWorkspace');
       cy.contains('h6', 'Create workspace').closest('.MuiPaper-root').within(() => {
         cy.setInputValue('Workspace name', 'e2e-second-workspace', 'div');
         cy.get('button').contains('Create').click();
@@ -60,7 +65,7 @@ describe('workspace and account', () => {
         cy.dbAlertExists('Workspace "e2e-second-workspace" created and activated');
         cy.closeDbAlerts();
         cy.get('.MuiToolbar-root .MuiTypography-caption').contains('e2e-second-workspace').should('exist');
-        cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequences');
+        cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequences');
         cy.changeTab('Sequences');
         cy.wait('@getSequences').then(({ request }) => {
           expect(request.headers).to.have.property('x-workspace-id', String(newWorkspaceId));
@@ -75,7 +80,7 @@ describe('workspace and account', () => {
       cy.get('ul[role="listbox"] li').contains(originalName).click();
       cy.contains('.MuiDialog-root', 'Switch workspace').contains('button', 'Switch').click();
 
-      cy.intercept('GET', 'http://localhost:8001/sequences*').as('getSequencesAfterSwitch');
+      cy.intercept('GET', `${dbUrl(endpoints.sequences)}*`).as('getSequencesAfterSwitch');
       // We use visit to trigger new request, otherwise the query cache is used and no request is sent.
       cy.visit('/sequences');
       cy.wait('@getSequencesAfterSwitch').then(({ request }) => {
@@ -85,7 +90,7 @@ describe('workspace and account', () => {
   });
 
   it('signs out and clears the token', () => {
-    cy.intercept('POST', 'http://localhost:8001/auth/token').as('getToken');
+    cy.intercept('POST', dbUrl(endpoints.authToken)).as('getToken');
     cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
     cy.wait('@getToken').then(({ response: { body: { access_token: accessToken } } }) => {
       cy.window().its('localStorage').invoke('getItem', 'token').should('equal', accessToken);
