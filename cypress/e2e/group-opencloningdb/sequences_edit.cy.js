@@ -13,6 +13,26 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   afterEach(() => {
     cy.resetDB();
   })
+  it('can toggle sequence circularity from the detail page', () => {
+    const sequenceName = 'pREX0008';
+    cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
+    cy.e2eLogin(`/sequences?name=${sequenceName}`, 'bootstrap@example.com', 'password');
+    cy.wait('@getSequences').then(({ response }) => {
+      const sequence = response.body.items.find((item) => item.name === sequenceName);
+      cy.intercept('POST', Cypress.getDbURL(endpoints.sequenceChangeCircularity(sequence.id))).as('changeCircularity');
+      cy.get('tbody tr button').contains(sequenceName).click();
+      cy.get('[data-testid="change-sequence-circularity-button"]').click();
+      cy.wait('@changeCircularity');
+      cy.dbAlertExists('Sequence circularity updated');
+      cy.closeDbAlerts();
+      cy.get('[data-testid="sequence-header"]').contains('Linear DNA').should('exist');
+      cy.get('[data-testid="change-sequence-circularity-button"]').click();
+      cy.wait('@changeCircularity');
+      cy.dbAlertExists('Sequence circularity updated');
+      cy.closeDbAlerts();
+      cy.get('[data-testid="sequence-header"]').contains('Plasmid').should('exist');
+    });
+  });
   it('can tag sequences from the table', () => {
     cy.addTagInTableTest('sequences', 'input_entities');
   });

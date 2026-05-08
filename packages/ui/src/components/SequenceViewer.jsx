@@ -11,6 +11,7 @@ const EDITOR_NAME = 'sequenceViewer';
 
 const baseViewerProps = {
   ...defaultMainEditorProps,
+  annotationVisibility: {featureTypesToHyde: {source: true}},
   readOnly: true,
   selectionLayer: {},
   sequenceData: {},
@@ -56,6 +57,9 @@ function SequenceViewer({ sequenceData, alignmentData }) {
           editorUpdate.panelsShown = removePanelFromShown(editorState.panelsShown, 'simpleAlignment');
         }
       }
+
+      editorUpdate.panelsShown[0].find((panel) => panel.id === 'rail').active = !sequenceData.circular;
+      editorUpdate.panelsShown[0].find((panel) => panel.id === 'circular').active = sequenceData.circular;
 
       updateEditor(store, EDITOR_NAME, editorUpdate);
     }

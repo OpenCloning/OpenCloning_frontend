@@ -14,6 +14,7 @@ import PrimersTable from '../components/PrimersTable';
 import PageContainer from '../components/PageContainer';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
+import ChangeSequenceCircularityButton from '../components/ChangeSequenceCircularityButton';
 import { List, ListItem, ListItemIcon } from '@mui/material';
 import { OpenCloningDBInterface } from '@opencloning/opencloningdb';
 import { Download as DownloadIcon, Visibility as VisibilityIcon, AddCircle as AddCircleIcon, Delete as DeleteIcon, InsertDriveFile as InsertDriveFileIcon } from '@mui/icons-material';
@@ -221,6 +222,16 @@ function SequenceDetailPage() {
         <AddToCloningButton selectedEntities={[sequenceModel]} entityType="sequence" size="small">
           Add to Design Tab
         </AddToCloningButton>
+        <ChangeSequenceCircularityButton
+          sequenceId={id}
+          hasParents={(parentSequences?.length ?? 0) > 0}
+          hasChildren={(children?.length ?? 0) > 0}
+          hasOverhangs={
+            (sequenceInDb?.overhang_crick_3prime ?? 0) !== 0
+            || (sequenceInDb?.overhang_watson_3prime ?? 0) !== 0
+          }
+          isCircular={sequenceData?.circular}
+        />
       </TopButtonSection>
       <SequenceSamplesSection sequenceId={id} sampleUids={sequenceInDb?.sample_uids ?? []} />
       <DetailPageSection title="Provenance" data-testid="sequence-provenance">

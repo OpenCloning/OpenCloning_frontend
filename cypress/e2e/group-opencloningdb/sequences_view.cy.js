@@ -165,7 +165,8 @@ describe('SequencesPage', () => {
             // Parents
             cy.get('[data-testid="sequence-provenance"]').contains('UploadedFileSource').should('exist');
             // Children
-            cy.get('[data-testid="sequence-children"]').should('not.exist')
+            cy.get('[data-testid="sequence-children"]').should('not.exist');
+            cy.get('[data-testid="change-sequence-circularity-button"]').should('exist');
           } else if (name === 'entry_clone_lacZ') {
             // Parents
             cy.get('[data-testid="sequence-provenance"]').contains('GatewaySource').should('exist');
@@ -179,6 +180,7 @@ describe('SequencesPage', () => {
               cy.get('tr').should('have.length', 2);
               cy.get('tr').eq(1).contains('expression_clone_lacZ').should('exist');
             });
+            cy.get('[data-testid="change-sequence-circularity-button"]').should('not.exist');
           }
         });
         cy.get('.veEditor').contains(name).should('exist');
