@@ -12,11 +12,9 @@ import {
   FormControl,
   TableContainer,
   Paper,
-  Tooltip,
 } from '@mui/material';
 import { openCloningDBHttpClient, endpoints, SequenceSelect } from '@opencloning/opencloningdb';
 import { Dialog, DialogTitle } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
 import NewLineUID from '../components/NewLineUID';
 import ResourceDetailHeader from '../components/ResourceDetailHeader';
 import SequenceTable from '../components/SequenceTable';
@@ -25,7 +23,7 @@ import DetailPageSection from '../components/DetailPageSection';
 import PageContainer from '../components/PageContainer';
 import TopButtonSection from '../components/TopButtonSection';
 import useAppAlerts from '../hooks/useAppAlerts';
-import ConfirmMutationDialog from '../components/ConfirmMutationDialog';
+import DeleteResourceButton from '../components/DeleteResourceButton';
 import { getPlasmidSequencesInLine, getAlleleSequencesInLine } from '../utils/models_utils';
 import useCreateLineMutation from '../hooks/useCreateLineMutation';
 
@@ -180,7 +178,6 @@ function LineDetailPage() {
   const navigate = useNavigate();
   const { addAlert } = useAppAlerts();
   const queryClient = useQueryClient();
-  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
 
   const { data: line, isLoading, error } = useQuery({
     queryKey: ['line', id],
@@ -212,7 +209,6 @@ function LineDetailPage() {
         message: mutationError?.response?.data?.detail || mutationError?.message || 'Error deleting line',
         severity: 'error',
       });
-      setIsDeleteOpen(false);
     },
   });
 
@@ -241,19 +237,15 @@ function LineDetailPage() {
 
       <TopButtonSection>
         <TransformButton line={line} />
-        <Tooltip title={deleteTooltip} arrow placement="right">
-          <span>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={() => setIsDeleteOpen(true)}
-              disabled={hasChildren}
-            >
-              Delete line
-            </Button>
-          </span>
-        </Tooltip>
+        <DeleteResourceButton
+          mutation={deleteLineMutation}
+          disabledReason={deleteTooltip}
+          buttonLabel="Delete line"
+          confirmTitle="Delete line"
+          confirmContent={<Typography>Are you sure you want to delete line <strong>{line.uid}</strong>?</Typography>}
+          confirmButtonText="Confirm delete"
+          dataTestId="delete-line-button"
+        />
       </TopButtonSection>
 
       {alleles.length > 0 && (
@@ -284,14 +276,6 @@ function LineDetailPage() {
         <Typography color="text.secondary">No genotype, plasmids, or parents for this line.</Typography>
       )}
 
-      <ConfirmMutationDialog
-        open={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        mutation={deleteLineMutation}
-        title="Delete line"
-        content={<Typography>Are you sure you want to delete line <strong>{line.uid}</strong>?</Typography>}
-        confirmButtonText="Confirm delete"
-      />
     </PageContainer>
   );
 }

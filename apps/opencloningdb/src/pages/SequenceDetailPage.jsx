@@ -15,6 +15,7 @@ import PageContainer from '../components/PageContainer';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
 import ChangeSequenceCircularityButton from '../components/ChangeSequenceCircularityButton';
+import DeleteResourceButton from '../components/DeleteResourceButton';
 import { List, ListItem, ListItemIcon } from '@mui/material';
 import { OpenCloningDBInterface } from '@opencloning/opencloningdb';
 import { Download as DownloadIcon, Visibility as VisibilityIcon, AddCircle as AddCircleIcon, Delete as DeleteIcon, InsertDriveFile as InsertDriveFileIcon } from '@mui/icons-material';
@@ -37,7 +38,7 @@ function SequencingFileRow({ file, sequenceId, onGetFile }) {
       <Box component="span" sx={{ fontFamily: 'monospace', fontSize: '0.875rem', flexShrink: 0 }}>{file.name}</Box>
       <Box className="file-actions" sx={{ display: 'flex', alignItems: 'center', ml: 0.5 }}>
         <Tooltip title="Download" placement="top" arrow>
-          <IconButton size="small" onClick={() => {onGetFile(file.getFile); console.log('clicked')}}>
+          <IconButton size="small" onClick={() => onGetFile(file.getFile)}>
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -195,6 +196,32 @@ function SequenceDetailPage() {
     },
   });
 
+  const queryClient = useQueryClient();
+  const hasParents = (parentSequences?.length ?? 0) > 0;
+  const hasChildren = (children?.length ?? 0) > 0;
+  // Placeholder: this will use a dedicated query once the backend endpoint is available.
+  const presentInStrain = false;
+  const deleteDisabledReason = hasChildren
+    ? 'Cannot delete: sequence has children'
+    : presentInStrain
+      ? 'Cannot delete: sequence is present in a strain'
+      : null;
+
+  const deleteSequenceMutation = useMutation({
+    mutationFn: () => openCloningDBHttpClient.delete(endpoints.sequence(id)),
+    onSuccess: () => {
+      addAlert({ message: 'Sequence deleted successfully', severity: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['sequences'] });
+      navigate('/sequences');
+    },
+    onError: (mutationError) => {
+      addAlert({
+        message: mutationError?.response?.data?.detail || mutationError?.message || 'Error deleting sequence',
+        severity: 'error',
+      });
+    },
+  });
+
   const updateAnnotationMutation = useUpdateAnnotationMutation(id, sequenceModel);
 
   if (isLoading) return <CircularProgress />;
@@ -227,13 +254,22 @@ function SequenceDetailPage() {
         </AddToCloningButton>
         <ChangeSequenceCircularityButton
           sequenceId={id}
-          hasParents={(parentSequences?.length ?? 0) > 0}
-          hasChildren={(children?.length ?? 0) > 0}
+          hasParents={hasParents}
+          hasChildren={hasChildren}
           hasOverhangs={
             (sequenceInDb?.overhang_crick_3prime ?? 0) !== 0
             || (sequenceInDb?.overhang_watson_3prime ?? 0) !== 0
           }
           isCircular={sequenceData?.circular}
+        />
+        <DeleteResourceButton
+          mutation={deleteSequenceMutation}
+          disabledReason={deleteDisabledReason}
+          buttonLabel="Delete sequence"
+          confirmTitle="Delete sequence"
+          confirmContent={<Typography>Are you sure you want to delete sequence <strong>{sequenceInDb?.name}</strong>?</Typography>}
+          confirmButtonText="Confirm delete"
+          dataTestId="delete-sequence-button"
         />
       </TopButtonSection>
       <SequenceSamplesSection sequenceId={id} sampleUids={sequenceInDb?.sample_uids ?? []} />
