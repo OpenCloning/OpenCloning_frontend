@@ -54,7 +54,7 @@ function MainSequenceEditor() {
       if (!history) return false;
       const sequenceId = state.VectorEditor.mainEditor?.sequenceData?.id;
       if (sequenceId === 'opencloning_primer_design_product') return false;
-      return state.cloning.mainSequenceId && Object.keys(history).length > 0 && history.future.length === 0;
+      return state.cloning.mainSequenceId && Object.keys(history).length > 0 && history.past.length !== 0;
     }
   );
 

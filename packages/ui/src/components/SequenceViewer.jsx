@@ -1,28 +1,112 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 import { Editor, updateEditor, addAlignment } from '@teselagen/ove';
-import { Paper, IconButton } from '@mui/material';
+import { Paper, IconButton, Alert, Button } from '@mui/material';
 import {Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon} from '@mui/icons-material';
 import defaultMainEditorProps from '../config/defaultMainEditorProps';
 import { updatePanelsShownWithAlignment, removePanelFromShown } from '@opencloning/utils/alignmentUtils';
 
 const EDITOR_NAME = 'sequenceViewer';
 
+
+function regionRightClickedOverride(items, { annotation }, props) {
+  const items2keep = items.filter((i) => i.text === 'Copy');
+  return [
+    ...items2keep,
+    {
+      text: 'Create',
+      submenu: [
+        "newFeature",
+      ],
+    },
+    ...(props.sequenceData.circular === true ? [
+      "--",
+      "selectInverse",
+      "--",
+    ] : []),
+  ];
+}
+
+function primerRightClickedOverride(items, { annotation }, props) {
+  return [
+    ...regionRightClickedOverride(items, { annotation }, props),
+    "--",
+    {
+      text: 'Delete Primer annotation',
+      cmd: 'deletePrimer',
+    }
+  ];
+}
+
+function featureRightClickedOverride(items, { annotation }, props) {
+  return [
+    ...regionRightClickedOverride(items, { annotation }, props),
+    "--",
+    "editFeature",
+    "deleteFeature",
+    "showRemoveDuplicatesDialogFeatures",
+    "--",
+    "toggleCdsFeatureTranslations",
+    "viewFeatureProperties",
+    "--",
+  ];
+}
+const rightClickOverrides = {
+  selectionLayerRightClicked: regionRightClickedOverride,
+  primerRightClicked: primerRightClickedOverride,
+  translationRightClicked: regionRightClickedOverride,
+  searchLayerRightClicked: regionRightClickedOverride,
+  featureRightClicked: featureRightClickedOverride,
+  partRightClicked: {},
+  orfRightClicked: {},
+  backgroundRightClicked: {},
+};
+
 const baseViewerProps = {
   ...defaultMainEditorProps,
   annotationVisibility: {featureTypesToHyde: {source: true}},
-  readOnly: true,
+  readOnly: false,
+  disableBpEditing: true,
   selectionLayer: {},
   sequenceData: {},
   ToolBarProps: {
-    toolList: ['downloadTool', 'findTool', 'visibilityTool'],
+    toolList: ['downloadTool', 'findTool', 'visibilityTool', 'undoTool', 'redoTool'],
   },
+  rightClickOverrides,
 };
 
 function SequenceViewer({ sequenceData, alignmentData }) {
   const store = useStore();
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const annotationChanged = useSelector(
+    (state) => {
+      const history = state.VectorEditor.sequenceViewer?.sequenceDataHistory;
+      if (!history) return false;
+      return Object.keys(history).length > 0 && history.past.length !== 0;
+    }
+  );
+
+  const annotationChangedAlert = annotationChanged && (
+    <Alert
+      style={{maxWidth: '500px', margin: '10px auto'}}
+      severity="info"
+      data-testid="annotation-changed-alert"
+      action={
+        <>
+          <Button color="primary" onClick={null}>
+              Save
+          </Button>
+          <Button color="secondary" onClick={null}>
+              Cancel
+          </Button>
+        </>
+      }
+    >
+      <strong>Annotation Changed</strong>
+    </Alert>
+  );
 
   React.useEffect(() => {
     if (!isFullscreen) return;
@@ -39,31 +123,32 @@ function SequenceViewer({ sequenceData, alignmentData }) {
   };
 
   React.useEffect(() => {
-    if (sequenceData && Object.keys(sequenceData).length > 0) {
-      const editorUpdate = {
-        ...baseViewerProps,
-        isFullscreen,
-        sequenceData,
-      };
+    updateEditor(store, EDITOR_NAME, { ...baseViewerProps, sequenceData });
+  }, [store, sequenceData]);
 
-      if (alignmentData) {
-        addAlignment(store, alignmentData);
-        const editorState = store.getState().VectorEditor?.[EDITOR_NAME];
-        const currentPanels = editorState?.panelsShown || [[]];
-        editorUpdate.panelsShown = updatePanelsShownWithAlignment(currentPanels);
-      } else {
-        const editorState = store.getState().VectorEditor?.[EDITOR_NAME];
-        if (editorState?.panelsShown) {
-          editorUpdate.panelsShown = removePanelFromShown(editorState.panelsShown, 'simpleAlignment');
-        }
+  React.useEffect(() => {
+    const editorUpdate = {
+      isFullscreen,
+    };
+
+    if (alignmentData) {
+      addAlignment(store, alignmentData);
+      const editorState = store.getState().VectorEditor?.[EDITOR_NAME];
+      const currentPanels = editorState?.panelsShown || [[]];
+      editorUpdate.panelsShown = updatePanelsShownWithAlignment(currentPanels);
+    } else {
+      const editorState = store.getState().VectorEditor?.[EDITOR_NAME];
+      if (editorState?.panelsShown) {
+        editorUpdate.panelsShown = removePanelFromShown(editorState.panelsShown, 'simpleAlignment');
       }
-
-      editorUpdate.panelsShown[0].find((panel) => panel.id === 'rail').active = !sequenceData.circular;
-      editorUpdate.panelsShown[0].find((panel) => panel.id === 'circular').active = sequenceData.circular;
-
-      updateEditor(store, EDITOR_NAME, editorUpdate);
     }
-  }, [sequenceData, store, isFullscreen, alignmentData]);
+
+    editorUpdate.panelsShown[0].find((panel) => panel.id === 'rail').active = !sequenceData.circular;
+    editorUpdate.panelsShown[0].find((panel) => panel.id === 'circular').active = sequenceData.circular;
+
+    updateEditor(store, EDITOR_NAME, editorUpdate);
+
+  }, [sequenceData.circular, store, isFullscreen, alignmentData]);
 
   if (!sequenceData || !sequenceData.sequence) {
     return null;
@@ -105,6 +190,7 @@ function SequenceViewer({ sequenceData, alignmentData }) {
         </IconButton>
       )}
       {fullscreenExitButton}
+      {annotationChangedAlert}
       <Editor
         editorName={EDITOR_NAME}
         {...viewerProps}
