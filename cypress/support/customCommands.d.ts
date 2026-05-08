@@ -29,6 +29,11 @@ declare namespace Cypress {
         dragAndDropFile(filePath: any): Chainable<any>;
         checkSequenceInDatabase(sequenceId: any): Chainable<any>;
         checkSequenceNotInDatabase(sequenceId: any): Chainable<any>;
+        sequenceEditorCreateFeature(name: any, start: any, end: any, isPrimer?: boolean): Chainable<any>;
+        sequenceEditorDeleteFeature(name: any): Chainable<any>;
+        sequenceEditorChangeTab(tabName: any): Chainable<any>;
+        sequenceEditorClickUndoTool(): Chainable<any>;
+        sequenceEditorClickRedoTool(): Chainable<any>;
         addTagInTableTest(resourcePlural: any, tagEndpointName: any): Chainable<any>;
         addTagInDetailPageTest(resourcePlural: any, resourceName: any, expectedTagName: any): Chainable<any>;
         openCloningDbTablePaginationTest(resourcePlural: any, pageTestId: any): Chainable<any>;

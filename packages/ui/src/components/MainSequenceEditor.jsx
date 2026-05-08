@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import useUpdateAnnotationInMainSequence from './annotation/useUpdateAnnotationInMainSequence';
 import useStoreEditor from '../hooks/useStoreEditor';
 import DomesticateDialog from './domesticate/DomesticateDialog';
+import AnnotationChangedAlert from './annotation/AnnotationChangedAlert';
 
 const { setMainSequenceSelection, addPrimer } = cloningActions;
 
@@ -153,23 +154,7 @@ function MainSequenceEditor() {
   return (
     <div style={{ textAlign: 'left' }} ref={topDivRef}>
       {annotationChanged &&
-      <Alert
-        style={{maxWidth: '500px', margin: '10px auto'}}
-        severity="info"
-        data-testid="annotation-changed-alert"
-        action={
-          <>
-            <Button color="primary" onClick={updateAnnotationInMainSequence}>
-              Save
-            </Button>
-            <Button color="secondary" onClick={onAnnotationCancel}>
-              Cancel
-            </Button>
-          </>
-        }
-      >
-        <strong>Annotation Changed</strong>
-      </Alert>
+      <AnnotationChangedAlert onSave={updateAnnotationInMainSequence} onCancel={onAnnotationCancel} />
       }
       <Editor {...{ editorName, ...defaultMainEditorProps, ...extraProp, height: '800' }} />
       {domesticateDialogOpen && 

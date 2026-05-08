@@ -24,6 +24,7 @@ import useAppAlerts from '../hooks/useAppAlerts';
 import useSequencingAlignment from '@opencloning/ui/hooks/useSequencingAlignment';
 import { QueryStatusWrapper } from '@opencloning/ui';
 import SequenceSamplesSection from '../components/SequenceSamplesSection';
+import useUpdateAnnotationMutation from '../hooks/useUpdateAnnotationMutation';
 
 const { getSequencingFiles, submitSequencingFileToDatabase } = OpenCloningDBInterface;
 
@@ -194,6 +195,8 @@ function SequenceDetailPage() {
     },
   });
 
+  const updateAnnotationMutation = useUpdateAnnotationMutation(id, sequenceModel);
+
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error?.response?.data?.detail || error?.message || 'Failed to load sequence'}</Alert>;
 
@@ -283,10 +286,10 @@ function SequenceDetailPage() {
           )}
         </QueryStatusWrapper>
       </DetailPageSection>
-      
+
       <Box sx={{ mt: 2 }}>
         {sequenceData ? (
-          <SequenceViewer sequenceData={sequenceData} alignmentData={alignmentMutation.data ?? null} />
+          <SequenceViewer sequenceData={sequenceData} alignmentData={alignmentMutation.data ?? null} onUpdateAnnotation={updateAnnotationMutation.mutateAsync} />
         ) : (
           <Alert severity="warning">Could not parse sequence for display.</Alert>
         )}

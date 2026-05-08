@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useStore } from 'react-redux';
 import { Editor, updateEditor, addAlignment } from '@teselagen/ove';
-import { Paper, IconButton, Alert, Button } from '@mui/material';
+import { Paper, IconButton } from '@mui/material';
 import {Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon} from '@mui/icons-material';
 import defaultMainEditorProps from '../config/defaultMainEditorProps';
 import { updatePanelsShownWithAlignment, removePanelFromShown } from '@opencloning/utils/alignmentUtils';
+import useAppAlerts from '../../../../apps/opencloningdb/src/hooks/useAppAlerts';
+import { jsonToGenbank } from '@teselagen/bio-parsers';
+import AnnotationChangedAlert from './annotation/AnnotationChangedAlert';
 
 const EDITOR_NAME = 'sequenceViewer';
 
@@ -70,15 +73,19 @@ const baseViewerProps = {
   disableBpEditing: true,
   selectionLayer: {},
   sequenceData: {},
-  ToolBarProps: {
-    toolList: ['downloadTool', 'findTool', 'visibilityTool', 'undoTool', 'redoTool'],
-  },
   rightClickOverrides,
 };
 
-function SequenceViewer({ sequenceData, alignmentData }) {
+function SequenceViewer({ sequenceData, alignmentData, onUpdateAnnotation }) {
   const store = useStore();
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleFullScreenChange = React.useCallback((newValue) => {
+    setIsFullscreen(newValue);
+    updateEditor(store, EDITOR_NAME, { isFullscreen: newValue });
+  }, [store, setIsFullscreen]);
+
+  const { addAlert } = useAppAlerts();
 
   const annotationChanged = useSelector(
     (state) => {
@@ -88,34 +95,37 @@ function SequenceViewer({ sequenceData, alignmentData }) {
     }
   );
 
-  const annotationChangedAlert = annotationChanged && (
-    <Alert
-      style={{maxWidth: '500px', margin: '10px auto'}}
-      severity="info"
-      data-testid="annotation-changed-alert"
-      action={
-        <>
-          <Button color="primary" onClick={null}>
-              Save
-          </Button>
-          <Button color="secondary" onClick={null}>
-              Cancel
-          </Button>
-        </>
-      }
-    >
-      <strong>Annotation Changed</strong>
-    </Alert>
-  );
+  const clearHistory = React.useCallback(() => {
+    updateEditor(store, EDITOR_NAME, { sequenceDataHistory: {}, sequenceData });
+  }, [store, sequenceData]);
+
+  const handleUpdateAnnotation = React.useCallback(async () => {
+    const newSequenceData = store.getState().VectorEditor.sequenceViewer.sequenceData;
+    if (newSequenceData.sequence.toUpperCase() !== sequenceData.sequence.toUpperCase()) {
+      addAlert({
+        message: 'Sequence bases have been changed, we cannot update the annotation',
+        severity: 'error',
+      });
+      clearHistory();
+      return;
+    }
+    const newFileContent = jsonToGenbank(newSequenceData);
+    try {
+      await onUpdateAnnotation(newFileContent);
+      clearHistory();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [store, sequenceData, clearHistory, addAlert, onUpdateAnnotation]);
 
   React.useEffect(() => {
     if (!isFullscreen) return;
     const onKeyDown = (e) => {
-      if (e.key === 'Escape') setIsFullscreen(false);
+      if (e.key === 'Escape') handleFullScreenChange(false);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isFullscreen]);
+  }, [handleFullScreenChange, isFullscreen]);
 
   const viewerProps = {
     ...baseViewerProps,
@@ -123,13 +133,11 @@ function SequenceViewer({ sequenceData, alignmentData }) {
   };
 
   React.useEffect(() => {
-    updateEditor(store, EDITOR_NAME, { ...baseViewerProps, sequenceData });
+    updateEditor(store, EDITOR_NAME, { ...baseViewerProps, sequenceData, sequenceDataHistory: {} });
   }, [store, sequenceData]);
 
   React.useEffect(() => {
-    const editorUpdate = {
-      isFullscreen,
-    };
+    const editorUpdate = {};
 
     if (alignmentData) {
       addAlignment(store, alignmentData);
@@ -148,7 +156,7 @@ function SequenceViewer({ sequenceData, alignmentData }) {
 
     updateEditor(store, EDITOR_NAME, editorUpdate);
 
-  }, [sequenceData.circular, store, isFullscreen, alignmentData]);
+  }, [sequenceData.circular, store, alignmentData]);
 
   if (!sequenceData || !sequenceData.sequence) {
     return null;
@@ -190,7 +198,7 @@ function SequenceViewer({ sequenceData, alignmentData }) {
         </IconButton>
       )}
       {fullscreenExitButton}
-      {annotationChangedAlert}
+      {annotationChanged && <AnnotationChangedAlert onSave={handleUpdateAnnotation} onCancel={clearHistory} />}
       <Editor
         editorName={EDITOR_NAME}
         {...viewerProps}

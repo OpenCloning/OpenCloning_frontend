@@ -2,6 +2,7 @@ const endpoints = {
   sequences: '/sequences',
   sequence: (id) => `/sequences/${id}`,
   sequenceTextFile: (id) => `/sequences/${id}/text_file_sequence`,
+  sequenceChangeAnnotation: (id) => `/sequences/${id}/change_annotation`,
   sequenceCloningStrategy: (id) => `/sequences/${id}/cloning_strategy`,
   sequenceChildren: (id) => `/sequences/${id}/children`,
   sequenceChangeCircularity: (id) => `/sequences/${id}/change_circularity`,

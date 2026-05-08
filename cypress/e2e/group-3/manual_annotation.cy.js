@@ -1,15 +1,5 @@
 import { addLane, changeTab, manuallyTypeSequence } from '../common_functions';
 
-function createFeature(name,start, end, isPrimer = false) {
-  cy.get(`.veAxisTick[data-test="${start}"]`).first().click();
-  cy.get(`.veAxisTick[data-test="${end}"]`).first().click({ shiftKey: true });
-  cy.get('div.veSelectionLayer').rightclick();
-  cy.get('.bp3-submenu').contains('Create').trigger('mouseover');
-  cy.get('a.bp3-menu-item').contains(isPrimer ? 'New Primer' : 'New Feature').click();
-  cy.get('.bp3-dialog input').first().type(name);
-  cy.get('.bp3-dialog button[type="submit"]').click();
-
-}
 
 describe('Test manual annotation', () => {
   beforeEach(() => {
@@ -22,7 +12,7 @@ describe('Test manual annotation', () => {
     cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');
     cy.get('.veLabelText').should('not.exist');
 
-    createFeature('feature_name', 1, 30);
+    cy.sequenceEditorCreateFeature('feature_name', 1, 30);
     cy.get('.veLabelText').contains('feature_name').should('exist');
     cy.get('[data-testid="annotation-changed-alert"]').should('exist');
 
@@ -61,7 +51,7 @@ describe('Test manual annotation', () => {
     cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');
     cy.get('.veLabelText').should('not.exist');
 
-    createFeature('feature_name', 1, 30);
+    cy.sequenceEditorCreateFeature('feature_name', 1, 30);
     cy.get('.veLabelText').contains('feature_name').should('exist');
     cy.get('[data-testid="annotation-changed-alert"] button').contains('Cancel').click();
     cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');
@@ -75,7 +65,7 @@ describe('Test manual annotation', () => {
     addLane()
     manuallyTypeSequence('ATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGT');
     cy.get('li#sequence-1 svg[data-testid="VisibilityIcon"]').click();
-    createFeature('feature_name', 1, 30);
+    cy.sequenceEditorCreateFeature('feature_name', 1, 30);
     changeTab('Cloning');
     cy.get('li#sequence-2 svg[data-testid="VisibilityIcon"]').click();
     cy.get('.cloning-history .veLabelText').should('not.exist');
@@ -89,7 +79,7 @@ describe('Test manual annotation', () => {
   it('Can create primers', () => {
     manuallyTypeSequence('ATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGTATGT');
     cy.get('svg[data-testid="VisibilityIcon"]').click();
-    createFeature('primer_name', 1, 30, true);
+    cy.sequenceEditorCreateFeature('primer_name', 1, 30, true);
     cy.get('.veLabelText').contains('primer_name').should('exist');
     cy.get('[data-testid="annotation-changed-alert"] button').contains('Cancel').click();
     cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');

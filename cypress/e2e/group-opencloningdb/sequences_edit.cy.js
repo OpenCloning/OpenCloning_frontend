@@ -19,7 +19,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.e2eLogin(`/sequences?name=${sequenceName}`, 'bootstrap@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === sequenceName);
-      cy.intercept('POST', Cypress.getDbURL(endpoints.sequenceChangeCircularity(sequence.id))).as('changeCircularity');
+      cy.intercept('PATCH', Cypress.getDbURL(endpoints.sequenceChangeCircularity(sequence.id))).as('changeCircularity');
       cy.get('tbody tr button').contains(sequenceName).click();
       cy.get('[data-testid="change-sequence-circularity-button"]').click();
       cy.wait('@changeCircularity');
@@ -218,5 +218,53 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.dbAlertExists('Imported 3 sequences successfully');
       cy.closeDbAlerts();
     });
+  });
+  it('can change annotation', () => {
+    cy.viewport(1920, 1080);
+    cy.e2eLogin(`/sequences?name=lacZ_PCR_product`, 'bootstrap@example.com', 'password');
+    cy.get('tbody tr button').contains('lacZ_PCR_product').click();
+    cy.get('[data-testid="sequence-header"]').contains('lacZ_PCR_product').should('exist');
+    // Remove covering html elements that prevent selecting
+    cy.get('[data-test="cutsiteHideShowTool"]').click();
+    cy.sequenceEditorChangeTab('Linear Map');
+    cy.sequenceEditorCreateFeature('feature_name1', 500, 1000);
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.sequenceEditorCreateFeature('feature_name2', 1500, 2000);
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.sequenceEditorClickUndoTool();
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.sequenceEditorClickUndoTool();
+    cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');
+    cy.sequenceEditorClickRedoTool();
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.sequenceEditorClickRedoTool();
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.get('[data-testid="annotation-changed-alert"] button').contains('Save').click();
+    cy.dbAlertExists('Annotation updated');
+    cy.closeDbAlerts();
+    cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');
+    cy.get('.veEditor').contains('feature_name1').should('exist');
+    cy.get('.veEditor').contains('feature_name2').should('exist');
+    // Check that cancel works
+    cy.sequenceEditorDeleteFeature('feature_name1');
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.get('.veEditor').contains('feature_name1').should('not.exist');
+    cy.get('[data-testid="annotation-changed-alert"] button').contains('Cancel').click();
+    cy.get('[data-testid="annotation-changed-alert"]').should('not.exist');
+    cy.get('.veEditor').contains('feature_name1').should('exist');
+    // Check that it handles failure in server
+    cy.sequenceEditorCreateFeature('feature_name3', 2500, 3000);
+    cy.intercept(
+      'PATCH',
+      Cypress.getDbURL(endpoints.sequenceChangeAnnotation('*')),
+      { forceNetworkError: true }
+    ).as('updateAnnotation');
+
+    cy.get('[data-testid="annotation-changed-alert"] button').contains('Save').click();
+    cy.wait('@updateAnnotation');
+    cy.dbAlertExists('Network Error');
+    cy.closeDbAlerts();
+    cy.get('[data-testid="annotation-changed-alert"]').should('exist');
+    cy.get('.veEditor').contains('feature_name3').should('exist');
   });
 });

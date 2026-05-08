@@ -21,7 +21,7 @@ function ChangeSequenceCircularityButton({
   }, [isCircular]);
 
   const mutation = useMutation({
-    mutationFn: () => openCloningDBHttpClient.post(endpoints.sequenceChangeCircularity(sequenceId)),
+    mutationFn: () => openCloningDBHttpClient.patch(endpoints.sequenceChangeCircularity(sequenceId)),
     onSuccess: () => {
       setLocalIsCircular(prev => !prev);
       addAlert({ message: 'Sequence circularity updated', severity: 'success' });

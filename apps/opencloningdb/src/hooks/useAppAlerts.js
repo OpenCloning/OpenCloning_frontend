@@ -5,7 +5,11 @@ export default function useAppAlerts() {
   const dispatch = useDispatch();
 
   const addAlert = (alert) => {
-    dispatch(appActions.addAlert(alert));
+    const newAlert = { ...alert };
+    if (typeof newAlert.message !== 'string') {
+      newAlert.message = JSON.stringify(newAlert.message);
+    }
+    dispatch(appActions.addAlert(newAlert));
   };
 
   const removeAlert = (message) => {

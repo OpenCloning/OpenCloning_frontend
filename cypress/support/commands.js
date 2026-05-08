@@ -236,3 +236,30 @@ Cypress.Commands.add('checkSequenceNotInDatabase', (sequenceId) => {
   cy.get(`#sequence-${sequenceId}`).should('not.have.class', 'in-database');
   cy.get(`#source-${sequenceId}`).should('not.have.class', 'in-database');
 });
+
+Cypress.Commands.add('sequenceEditorCreateFeature', (name, start, end, isPrimer = false) => {
+  cy.get(`.veAxisTick[data-test="${start}"]`).first().click({ force: true });
+  cy.get(`.veAxisTick[data-test="${end}"]`).first().click({ force: true, shiftKey: true });
+  cy.get('div.veSelectionLayer').rightclick();
+  cy.get('.bp3-submenu').contains('Create').trigger('mouseover');
+  cy.get('a.bp3-menu-item').contains(isPrimer ? 'New Primer' : 'New Feature').click();
+  cy.get('.bp3-dialog input').first().type(name, { delay: 0 });
+  cy.get('.bp3-dialog button[type="submit"]').click();
+});
+
+Cypress.Commands.add('sequenceEditorDeleteFeature', (name) => {
+  cy.get('g').filter(`:contains("${name}")`).rightclick();
+  cy.get('a.bp3-menu-item').contains('Delete Feature').click();
+});
+
+Cypress.Commands.add('sequenceEditorChangeTab', (tabName) => {
+  cy.get('.ve-draggable-tabs div').contains(tabName).click();
+});
+
+Cypress.Commands.add('sequenceEditorClickUndoTool', () => {
+  cy.get('[data-test="veUndoTool"] svg').click();
+});
+
+Cypress.Commands.add('sequenceEditorClickRedoTool', () => {
+  cy.get('[data-test="veRedoTool"] svg').click();
+});
