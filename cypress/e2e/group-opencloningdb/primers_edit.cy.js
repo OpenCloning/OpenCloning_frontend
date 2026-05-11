@@ -55,6 +55,27 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
       });
     });
   });
+
+  it('can delete a primer from the detail page when not in use, but not otherwise', () => {
+    let primerName = 'no_source_primer';
+    cy.e2eLogin(`/primers?name=${primerName}`, 'bootstrap@example.com', 'password');
+    cy.get('tbody button').contains(primerName).click();
+    cy.get('[data-testid="delete-primer-button"]').should('not.be.disabled').click();
+    cy.get('[role="dialog"]').contains('Confirm delete').click();
+    cy.dbAlertExists('Primer deleted successfully');
+    cy.closeDbAlerts();
+    cy.location('pathname').should('eq', '/primers');
+    cy.setInputValue('Name', primerName);
+    cy.get('button').contains('Search').click();
+    cy.get('tbody').contains(primerName).should('not.exist');
+
+    primerName = 'fwd_restriction_then_ligation';
+    cy.setInputValue('Name', primerName);
+    cy.get('button').contains('Search').click();
+    cy.get('tbody button').contains(primerName).click();
+    cy.get('[data-testid="delete-primer-button"]').should('be.disabled');
+  });
+
   it('can bulk upload primers', () => {
     cy.e2eLogin('/primers', 'bootstrap@example.com', 'password');
     cy.get('button').contains('Bulk Upload').click();
