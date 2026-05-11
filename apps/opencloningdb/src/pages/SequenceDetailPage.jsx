@@ -11,6 +11,7 @@ import EditSequenceNameAndType from '../components/EditSequenceNameAndType';
 import DetailPageSection from '../components/DetailPageSection';
 import SequenceTable from '../components/SequenceTable';
 import PrimersTable from '../components/PrimersTable';
+import LinesTable from '../components/LinesTable';
 import PageContainer from '../components/PageContainer';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
@@ -143,16 +144,18 @@ function SequenceDetailPage() {
     retry: false,
     queryKey: ['sequence', id, 'cloning_strategy'],
     queryFn: async () => {
-      const { data: cloningStrategy } = await openCloningDBHttpClient.get(endpoints.sequenceCloningStrategy(id));
-      const { data: sequenceInDb} = await openCloningDBHttpClient.get(endpoints.sequence(id));
-
-      const { data: children } = await openCloningDBHttpClient.get(endpoints.sequenceChildren(id));
+      const [{ data: sequenceInDb}, { data: cloningStrategy }, { data: children }, { data: sequenceLines }] = await Promise.all([
+        openCloningDBHttpClient.get(endpoints.sequence(id)),
+        openCloningDBHttpClient.get(endpoints.sequenceCloningStrategy(id)),
+        openCloningDBHttpClient.get(endpoints.sequenceChildren(id)),
+        openCloningDBHttpClient.get(endpoints.sequenceLines(id)),
+      ]);
       const parentSource = cloningStrategy.sources.find((source) => source.database_id === id);
 
       const sequenceModel = cloningStrategy.sequences.find((sequence) => sequence.id === parentSource.id);
       const parentSequenceIds = cloningStrategy.sources.map((source) => source.database_id).filter((dbId) => dbId !== id);
       const parentSequencesData = await Promise.all(parentSequenceIds.map((sequenceId) => openCloningDBHttpClient.get(endpoints.sequence(sequenceId))));
-      return { parentSequences : parentSequencesData.map((r) => r.data), parentSource, sequenceModel, sequenceInDb, children };
+      return { parentSequences : parentSequencesData.map((r) => r.data), parentSource, sequenceModel, sequenceInDb, children, sequenceLines };
     },
     enabled: Boolean(id),
   });
@@ -174,7 +177,7 @@ function SequenceDetailPage() {
   const { data: primers } = primersQuery;
 
   const { data: sequencingFiles = [] } = sequencingFilesQuery;
-  const { parentSequences, parentSource, sequenceModel, sequenceInDb, children } = React.useMemo(() => data ?? {}, [data]);
+  const { parentSequences, parentSource, sequenceModel, sequenceInDb, children, sequenceLines = [] } = React.useMemo(() => data ?? {}, [data]);
   const sequenceData = React.useMemo(() => sequenceModel ? convertToTeselaJson(sequenceModel) : null, [sequenceModel]);
   const tags = React.useMemo(() => sequenceInDb?.tags ?? [], [sequenceInDb]);
 
@@ -199,12 +202,11 @@ function SequenceDetailPage() {
   const queryClient = useQueryClient();
   const hasParents = (parentSequences?.length ?? 0) > 0;
   const hasChildren = (children?.length ?? 0) > 0;
-  // Placeholder: this will use a dedicated query once the backend endpoint is available.
-  const presentInStrain = false;
+  const presentInLine = sequenceLines.length > 0;
   const deleteDisabledReason = hasChildren
     ? 'Cannot delete: sequence has children'
-    : presentInStrain
-      ? 'Cannot delete: sequence is present in a strain'
+    : presentInLine
+      ? 'Cannot delete: sequence is present in a line'
       : null;
 
   const deleteSequenceMutation = useMutation({
@@ -288,6 +290,14 @@ function SequenceDetailPage() {
         <DetailPageSection title="Children" data-testid="sequence-children">
           <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
             <SequenceTable sequences={children} />
+          </TableContainer>
+        </DetailPageSection>
+      )}
+
+      {sequenceLines.length > 0 && (
+        <DetailPageSection title="Lines" data-testid="sequence-lines">
+          <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
+            <LinesTable lines={sequenceLines} withCheckbox={false} />
           </TableContainer>
         </DetailPageSection>
       )}

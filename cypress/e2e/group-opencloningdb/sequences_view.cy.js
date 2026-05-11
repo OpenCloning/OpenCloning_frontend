@@ -112,6 +112,7 @@ describe('SequencesPage', () => {
         cy.intercept('GET', Cypress.getDbURL(endpoints.sequence(sequence.id))).as('getSequenceDetail');
         cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceCloningStrategy(sequence.id))).as('getSequenceCloningStrategy');
         cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceChildren(sequence.id))).as('getSequenceChildren');
+        cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceLines(sequence.id))).as('getSequenceLines');
         cy.intercept('GET', Cypress.getDbURL(endpoints.sequencePrimers(sequence.id))).as('getSequencePrimers');
         cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');
 
@@ -167,6 +168,11 @@ describe('SequencesPage', () => {
             // Children
             cy.get('[data-testid="sequence-children"]').should('not.exist');
             cy.get('[data-testid="change-sequence-circularity-button"]').should('exist');
+            // Lines
+            cy.get('[data-testid="sequence-lines"]').within(() => {
+              cy.get('tr').should('have.length', 2);
+              cy.get('tr').eq(1).contains('example_sequencing-line').should('exist');
+            });
           } else if (name === 'entry_clone_lacZ') {
             // Parents
             cy.get('[data-testid="sequence-provenance"]').contains('GatewaySource').should('exist');
@@ -181,6 +187,8 @@ describe('SequencesPage', () => {
               cy.get('tr').eq(1).contains('expression_clone_lacZ').should('exist');
             });
             cy.get('[data-testid="change-sequence-circularity-button"]').should('not.exist');
+            // Lines
+            cy.get('[data-testid="sequence-lines"]').should('not.exist'); 
           }
         });
         cy.get('.veEditor').contains(name).should('exist');

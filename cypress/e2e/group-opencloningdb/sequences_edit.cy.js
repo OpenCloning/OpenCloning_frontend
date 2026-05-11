@@ -267,4 +267,34 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.get('[data-testid="annotation-changed-alert"]').should('exist');
     cy.get('.veEditor').contains('feature_name3').should('exist');
   });
+  it('can delete a sequence that has no children and is present in no lines', () => {
+    cy.e2eLogin(`/sequences?uid=templateless_PCR-sample`, 'bootstrap@example.com', 'password');
+    cy.get('tbody tr').filter(`:contains(templateless_PCR-sample)`).first().within( () => {
+      cy.get('button').click();
+    });
+    cy.get('[data-testid="sequence-header"]').contains('templateless_PCR').should('exist');
+    cy.get('button').contains('Delete sequence').click();
+    cy.get('button').contains('Confirm delete').click();
+    cy.dbAlertExists('Sequence deleted successfully');
+    cy.closeDbAlerts();
+    cy.setInputValue('UID', 'templateless_PCR-sample');
+    cy.get('button').contains('Search').click();
+    cy.get('tbody').should('not.contain', 'templateless_PCR-sample');
+
+    // Check that correct constrtaints are applied for deletion:
+
+    // Plasmid in line
+    cy.clearInputValue('UID');
+    cy.setInputValue('Name', 'pREX0008');
+    cy.get('button').contains('Search').click();
+    cy.get('tr button').contains('pREX0008').click();
+    cy.get('[data-testid="delete-sequence-button"]').should('be.disabled');
+
+    // Sequence with children
+    cy.get('button').contains('Back to Sequences').click();
+    cy.setInputValue('Name', 'digested_vector');
+    cy.get('button').contains('Search').click();
+    cy.get('tr button').contains('digested_vector').click();
+    cy.get('[data-testid="delete-sequence-button"]').should('be.disabled');
+  });
 });
