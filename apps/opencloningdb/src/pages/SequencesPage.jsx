@@ -141,9 +141,11 @@ function SequencesPage() {
       <TableContainer component={Paper}>
         <SequenceTable
           sequences={items}
-          showType={true}
-          showSampleUids={true}
-          withCheckbox={true}
+          showType
+          showSampleUids
+          showCreatedBy
+          showCreatedAt
+          withCheckbox
           selectedIds={selectedIds}
           toggleRow={toggleRow}
         />

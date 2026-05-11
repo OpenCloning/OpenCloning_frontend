@@ -10,6 +10,8 @@ function SequenceTable({
   sequences,
   showType = true,
   showSampleUids = false,
+  showCreatedBy = false,
+  showCreatedAt = false,
   withCheckbox = false,
   selectedIds = new Set(),
   toggleRow = () => {},
@@ -34,6 +36,8 @@ function SequenceTable({
           <TableCell>Name</TableCell>
           {showType && <TableCell>Type</TableCell>}
           <TableCell>Tags</TableCell>
+          {showCreatedBy && <TableCell>Created by</TableCell>}
+          {showCreatedAt && <TableCell>Created at</TableCell>}
         </TableRow>
       </TableHead>
       <TableBody>
@@ -68,6 +72,12 @@ function SequenceTable({
             <TableCell>
               <TagChipList tags={seq.tags ?? []} />
             </TableCell>
+            {showCreatedBy && (
+              <TableCell>{seq.created_by?.display_name ?? '—'}</TableCell>
+            )}
+            {showCreatedAt && (
+              <TableCell>{seq.created_at ? new Date(seq.created_at).toLocaleDateString() : '—'}</TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>

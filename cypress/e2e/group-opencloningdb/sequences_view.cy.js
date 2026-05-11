@@ -26,6 +26,8 @@ describe('SequencesPage', () => {
           cy.get('td').eq(2).should('contain', exampleSequence.name);
           cy.get('td').eq(3).should('contain', 'Plasmid');
           cy.get('td').eq(4).contains('example_sequencing').should('exist');
+          cy.get('td').eq(5).should('contain', exampleSequence.created_by.display_name);
+          cy.get('td').eq(6).invoke('text').should('not.be.empty');
         });
     });
 
@@ -55,6 +57,8 @@ describe('SequencesPage', () => {
           cy.get('td').eq(2).should('contain', 'pREX0008');
           cy.get('td').eq(3).should('contain', 'Plasmid');
           cy.get('td').eq(4).contains('example_sequencing').should('exist');
+          cy.get('td').eq(5).invoke('text').should('not.be.empty');
+          cy.get('td').eq(6).invoke('text').should('not.be.empty');
         });
     });
 
