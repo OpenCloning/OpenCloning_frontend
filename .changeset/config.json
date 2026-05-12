@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "manulera/OpenCloning_frontend"
+      "repo": "OpenCloning/OpenCloning_frontend"
     }
   ],
   "commit": false,

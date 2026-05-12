@@ -44,7 +44,7 @@ function SourceTypeSelector({ source }) {
       options.push(<MenuItem key="CopySequence" value="CopySequence">Use an existing sequence</MenuItem>);
     }
   } else {
-    // See https://github.com/manulera/OpenCloning_frontend/issues/101
+    // See https://github.com/OpenCloning/OpenCloning_frontend/issues/101
     if (inputSequences.length < 2) {
       options.push(<MenuItem key="RestrictionEnzymeDigestionSource" value="RestrictionEnzymeDigestionSource">Restriction</MenuItem>);
       options.push(<MenuItem key="PCRSource" value="PCRSource">PCR</MenuItem>);

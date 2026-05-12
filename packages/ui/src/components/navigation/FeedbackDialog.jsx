@@ -16,7 +16,7 @@ function FeedbackDialog({ open, setOpen }) {
             <li style={{ marginBottom: 10 }}>
               If you use GitHub,
               {' '}
-              <a href="https://github.com/manulera/OpenCloning/issues/new" target="_blank" rel="noopener noreferrer">create an issue</a>
+              <a href="https://github.com/OpenCloning/OpenCloning/issues/new" target="_blank" rel="noopener noreferrer">create an issue</a>
             </li>
             <li>
               Otherwise, send an email to

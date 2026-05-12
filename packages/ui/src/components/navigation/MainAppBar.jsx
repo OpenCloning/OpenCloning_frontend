@@ -78,8 +78,8 @@ function MainAppBar() {
   // TODO: turn these into <a> elements.
   const helpMenu = [
     { display: 'Newsletter', onClick: () => window.open('https://eepurl.com/h9-n71') },
-    { display: 'About the project', onClick: () => window.open('https://github.com/manulera/OpenCloning') },
-    { display: 'GitHub repository', onClick: () => window.open('https://github.com/manulera/OpenCloning_frontend') },
+    { display: 'About the project', onClick: () => window.open('https://github.com/OpenCloning/OpenCloning') },
+    { display: 'GitHub repository', onClick: () => window.open('https://github.com/OpenCloning/OpenCloning_frontend') },
     { display: 'Demo videos', onClick: () => window.open('https://www.youtube.com/watch?v=n0hedzvpW88&list=PLpv3x-ensLZkJToD2E6ejefADmHcUPYSJ&index=1') },
     { display: 'App version', onClick: () => setOpenVersionDialog(true) },
   ];
@@ -126,7 +126,7 @@ function MainAppBar() {
         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
           <Button
             className="github-corner"
-            onClick={() => window.open('https://github.com/manulera/OpenCloning')}
+            onClick={() => window.open('https://github.com/OpenCloning/OpenCloning')}
             aria-label="GitHub repository"
           >
             <GithubCornerRight />
