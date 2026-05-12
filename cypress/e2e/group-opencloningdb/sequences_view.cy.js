@@ -178,8 +178,9 @@ describe('SequencesPage', () => {
             cy.get('[data-testid="change-sequence-circularity-button"]').should('exist');
             // Lines
             cy.get('[data-testid="sequence-lines"]').within(() => {
-              cy.get('tr').should('have.length', 2);
-              cy.get('tr').eq(1).contains('example_sequencing-line').should('exist');
+              cy.get('tr').should('have.length', 3);
+              cy.get('tr').contains('example_sequencing-line').should('exist');
+              cy.get('tr').contains('template_sequence-line').should('exist');
             });
           } else if (name === 'entry_clone_lacZ') {
             // Parents
