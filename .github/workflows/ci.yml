@@ -100,7 +100,7 @@ jobs:
 
       - name: Install frontend dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: corepack enable && yarn install
+        run: corepack enable && yarn install --immutable
 
   cypress-tests:
     name: Run Cypress tests
@@ -242,7 +242,7 @@ jobs:
 
       - name: vitest unit tests
         if: matrix.group == 'unit-tests'
-        run: yarn vitest run --coverage
+        run: yarn install --immutable && yarn vitest run --coverage
 
       - name: Upload coverage file
         uses: actions/upload-artifact@v4.6.0
