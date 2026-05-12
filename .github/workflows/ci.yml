@@ -220,7 +220,6 @@ jobs:
           CYPRESS_TEST_GROUP: ${{ matrix.group }}
         with:
           start: yarn start
-          install: false
 
       - name: Cypress run E2E tests (OpenCloningDB)
         if: matrix.group == 'opencloningdb'
@@ -240,7 +239,6 @@ jobs:
           VITE_LOG_LEVEL: "warn"
         with:
           component: true
-          install: false
 
       - name: vitest unit tests
         if: matrix.group == 'unit-tests'
