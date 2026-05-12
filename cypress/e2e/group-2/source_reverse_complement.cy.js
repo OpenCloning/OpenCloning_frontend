@@ -18,8 +18,10 @@ describe('Tests Reverse Complement Source functionality', () => {
     // Check that the resulting sequence is the reverse complement
     cy.get('li#sequence-2 svg[data-testid="VisibilityIcon"]').first().click();
     cy.get('.veTabSequenceMap').contains('Sequence Map').click();
-    cy.get('svg.rowViewTextContainer text').contains('ttcg').should('not.exist');
-    cy.get('svg.rowViewTextContainer text').contains('cgaa').should('exist');
+    cy.get('.main-sequence-editor').within(() => {
+      cy.get('svg.rowViewTextContainer text').contains('ttcg').should('not.exist');
+      cy.get('svg.rowViewTextContainer text').contains('cgaa').should('exist');
+    });
 
     // Check that an error is displayed when server is down
     changeTab('Cloning');
