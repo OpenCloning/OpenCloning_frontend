@@ -39,7 +39,7 @@ describe('<GetSequenceFileAndDatabaseIdComponent />', () => {
     cy.get('.MuiAutocomplete-listbox li', { timeout: 10000 }).should('have.length.greaterThan', 0);
     cy.wait('@getSequences').its('request.url').should('include', `name=${SEQUENCE_NAME}`);
 
-    clickMultiSelectOption('Sequence', SEQUENCE_NAME, 'div');
+    clickMultiSelectOption('Sequence', RegExp(`^${SEQUENCE_NAME}$`), 'div');
     cy.getStub('get_text_file_sequence').then((stub) => {
       cy.get('@setDatabaseIdSpy').should('have.been.calledWith', stub.response.body.id);
       cy.get('@setFileSpy').should('have.been.calledOnce');
@@ -83,7 +83,7 @@ describe('<GetSequenceFileAndDatabaseIdComponent />', () => {
     cy.get('.MuiAutocomplete-listbox li', { timeout: 10000 }).should('have.length.greaterThan', 0);
     cy.wait('@getSequences').its('request.url').should('include', `name=${SEQUENCE_NAME}`);
 
-    clickMultiSelectOption('Sequence', SEQUENCE_NAME, 'div');
+    clickMultiSelectOption('Sequence', RegExp(`^${SEQUENCE_NAME}$`), 'div');
 
     cy.wait('@getSequenceFile');
     cy.contains('Failed to load sequence file.').should('exist');

@@ -20,7 +20,7 @@ describe('<SequenceSelect />', () => {
     cy.get('input').type(SEQUENCE_NAME);
     cy.get('.MuiAutocomplete-listbox li', { timeout: 10000 }).should('have.length.greaterThan', 0);
 
-    clickMultiSelectOption('Sequence', SEQUENCE_NAME, 'div');
+    clickMultiSelectOption('Sequence', RegExp(`^${SEQUENCE_NAME}$`), 'div');
 
     cy.getStub('get_sequences_search_by_name').then((stub) => {
       const stubSequence = stub.response.body.items.find((sequence) => sequence.name === SEQUENCE_NAME);
