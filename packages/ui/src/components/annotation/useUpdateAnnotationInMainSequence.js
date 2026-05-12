@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useStore } from 'react-redux';
-import useAlerts from '../../hooks/useAlerts';
+import useCloningAlerts from '../../hooks/useCloningAlerts';
 import { jsonToGenbank } from '@teselagen/bio-parsers';
 import { cloningActions } from '@opencloning/store/cloning';
 import useStoreEditor from '../../hooks/useStoreEditor';
@@ -9,7 +9,7 @@ const { updateSequence } = cloningActions;
 
 export default function useUpdateAnnotationInMainSequence() {
   const store = useStore();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const dispatch = useDispatch();
   const { updateStoreEditor } = useStoreEditor();
 

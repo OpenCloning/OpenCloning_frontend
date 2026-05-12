@@ -4,12 +4,13 @@ import { useDispatch, useStore } from 'react-redux';
 import { getReverseComplementSequenceString, getSequenceDataBetweenRange } from '@teselagen/sequence-utils';
 import defaultMainEditorProps from '../config/defaultMainEditorProps';
 import { cloningActions } from '@opencloning/store/cloning';
-import useAlerts from '../hooks/useAlerts';
+import useCloningAlerts from '../hooks/useCloningAlerts';
 import { Alert, Button } from '@mui/material';
 import { useSelector } from 'react-redux';
 import useUpdateAnnotationInMainSequence from './annotation/useUpdateAnnotationInMainSequence';
 import useStoreEditor from '../hooks/useStoreEditor';
 import DomesticateDialog from './domesticate/DomesticateDialog';
+import AnnotationChangedAlert from './annotation/AnnotationChangedAlert';
 
 const { setMainSequenceSelection, addPrimer } = cloningActions;
 
@@ -44,7 +45,7 @@ function primerRightClickedOverride(items, { annotation }, props) {
 
 function MainSequenceEditor() {
   const dispatch = useDispatch();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const { updateStoreEditor } = useStoreEditor();
   const updateAnnotationInMainSequence = useUpdateAnnotationInMainSequence();
 
@@ -54,7 +55,7 @@ function MainSequenceEditor() {
       if (!history) return false;
       const sequenceId = state.VectorEditor.mainEditor?.sequenceData?.id;
       if (sequenceId === 'opencloning_primer_design_product') return false;
-      return state.cloning.mainSequenceId && Object.keys(history).length > 0 && history.future.length === 0;
+      return state.cloning.mainSequenceId && Object.keys(history).length > 0 && history.past.length !== 0;
     }
   );
 
@@ -153,23 +154,7 @@ function MainSequenceEditor() {
   return (
     <div style={{ textAlign: 'left' }} ref={topDivRef}>
       {annotationChanged &&
-      <Alert
-        style={{maxWidth: '500px', margin: '10px auto'}}
-        severity="info"
-        data-testid="annotation-changed-alert"
-        action={
-          <>
-            <Button color="primary" onClick={updateAnnotationInMainSequence}>
-              Save
-            </Button>
-            <Button color="secondary" onClick={onAnnotationCancel}>
-              Cancel
-            </Button>
-          </>
-        }
-      >
-        <strong>Annotation Changed</strong>
-      </Alert>
+      <AnnotationChangedAlert onSave={updateAnnotationInMainSequence} onCancel={onAnnotationCancel} />
       }
       <Editor {...{ editorName, ...defaultMainEditorProps, ...extraProp, height: '800' }} />
       {domesticateDialogOpen && 

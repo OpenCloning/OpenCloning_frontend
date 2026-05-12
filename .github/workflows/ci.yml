@@ -39,7 +39,7 @@ jobs:
         id: cache-check
         uses: actions/cache@v3
         with:
-          path: .venv
+          path: OpenCloning_backend/.venv
           key: python-venv-${{ runner.os }}-${{ needs.get-backend-sha.outputs.backend_sha }}
 
   install-python-dependencies:
@@ -49,10 +49,8 @@ jobs:
       - name: Checkout
         if: needs.check-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
-
-      - name: Checkout submodules
-        if: needs.check-cache.outputs.cache-hit != 'true'
-        run: git submodule update --init --recursive
+        with:
+          submodules: recursive
 
       - name: Install Python
         if: needs.check-cache.outputs.cache-hit != 'true'
@@ -60,24 +58,20 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Create and activate virtual environment
+      - name: Install uv
         if: needs.check-cache.outputs.cache-hit != 'true'
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
+        uses: astral-sh/setup-uv@v5
 
       - name: Install python dependencies
         if: needs.check-cache.outputs.cache-hit != 'true'
-        run: |
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install git+https://github.com/manulera/OpenCloning_backend.git@${{ needs.get-backend-sha.outputs.backend_sha }}#subdirectory=packages/opencloning
+        working-directory: OpenCloning_backend
+        run: uv sync --locked
 
       - name: Save venv to cache
         if: needs.check-cache.outputs.cache-hit != 'true'
         uses: actions/cache@v3
         with:
-          path: .venv
+          path: OpenCloning_backend/.venv
           key: python-venv-${{ runner.os }}-${{ needs.get-backend-sha.outputs.backend_sha }}
 
   install-frontend-dependencies:
@@ -94,6 +88,7 @@ jobs:
         with:
           path: |
             node_modules
+            apps/*/node_modules
             /home/runner/.cache/Cypress
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
@@ -121,12 +116,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [1, 2, 3, 4, "component", "unit-tests"]
+        group: [1, 2, 3, 4, "component", "unit-tests", "opencloningdb"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Print git tag
         run: |
@@ -156,26 +152,45 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Restore cached venv
         uses: actions/cache@v3
         with:
-          path: .venv
+          path: OpenCloning_backend/.venv
           key: python-venv-${{ runner.os }}-${{ needs.get-backend-sha.outputs.backend_sha }}
 
       - name: run python dev server in background
+        working-directory: OpenCloning_backend
         run: |
-          source .venv/bin/activate
-          uvicorn opencloning.main:app &
+          uv run opencloning-cli db test reset
+          uv run uvicorn opencloning.main:app --port 8000 &
+          uv run uvicorn opencloning_db.api:app --port 8001 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          OPENCLONING_TESTING: '1'
 
-      - name: check if the server is running
+      - name: check if the backend server is running
         run: |
           for i in {1..3}; do
             if curl -s http://127.0.0.1:8000 > /dev/null; then
-              echo "Server is up!"
+              echo "Backend server is up!"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/3)"
+            sleep 2
+          done
+          echo "Server failed to start"
+          exit 1
+
+      - name: check if the opencloningdb server is running
+        run: |
+          for i in {1..3}; do
+            if curl -f http://127.0.0.1:8001/docs > /dev/null; then
+              echo "OpenCloningDB server is up!"
               exit 0
             fi
             echo "Waiting for server... ($i/3)"
@@ -190,13 +205,14 @@ jobs:
           path: |
             node_modules
             /home/runner/.cache/Cypress
+            apps/*/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: enable corepack
         run: corepack enable
 
-      - name: Cypress run E2E tests
-        if: matrix.group != 'component' && matrix.group != 'unit-tests'
+      - name: Cypress run E2E tests (OpenCloning)
+        if: matrix.group != 'component' && matrix.group != 'unit-tests' && matrix.group != 'opencloningdb'
         uses: cypress-io/github-action@v6
         env:
           VITE_COVERAGE: "true"
@@ -205,6 +221,16 @@ jobs:
         with:
           start: yarn start
           install: false
+
+      - name: Cypress run E2E tests (OpenCloningDB)
+        if: matrix.group == 'opencloningdb'
+        uses: cypress-io/github-action@v6
+        env:
+          VITE_COVERAGE: "true"
+          VITE_LOG_LEVEL: "warn"
+          CYPRESS_TEST_GROUP: ${{ matrix.group }}
+        with:
+          start: yarn workspace opencloningdb dev --port 3000
 
       - name: Cypress run component tests
         if: matrix.group == 'component'
@@ -265,7 +291,6 @@ jobs:
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/coverage-final.json
 
   # Update docker image when committing to master branch if tests pass

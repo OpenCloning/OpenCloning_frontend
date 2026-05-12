@@ -21,7 +21,7 @@ import error2String from '@opencloning/utils/error2String';
 import { categoryFilter, downloadAssemblerFilesAsZip, getFilesToExportFromAssembler, getDefaultAssemblyOutputName, MAX_OUTPUT_NAME_LENGTH, sanitizeOutputName } from './assembler_utils';
 import useBackendRoute from '../../hooks/useBackendRoute';
 import useHttpClient from '../../hooks/useHttpClient';
-import useAlerts from '../../hooks/useAlerts';
+import useCloningAlerts from '../../hooks/useCloningAlerts';
 import UploadPlasmidsButton from './UploadPlasmidsButton';
 import { useConfig } from '../../providers';
 import { isEqual } from 'lodash-es';
@@ -379,7 +379,7 @@ function LoadSyntaxButton({ setSyntax, addPlasmids, clearPlasmids }) {
   const httpClient = useHttpClient();
   const { staticContentPath } = useConfig();
   const backendRoute = useBackendRoute();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const onSyntaxSelect = React.useCallback(async (syntax, plasmids) => {
     const url = backendRoute('validate_syntax');
     try {
@@ -440,7 +440,7 @@ function SyntaxOverviewButton({ syntax }) {
 function Assembler() {
   const [syntax, setSyntax] = React.useState(null);
   const [plasmids, setPlasmids] = React.useState([])
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const appInfo = useSelector(({ cloning }) => cloning.appInfo, isEqual);
 
   const categories = React.useMemo(() => {

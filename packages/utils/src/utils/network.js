@@ -100,11 +100,19 @@ export const shiftState = (newState, oldState, skipPrimers = false) => {
   return shiftStateIds(newState, oldState, skipPrimers);
 };
 
+export function getSequenceIdsThatAreInput(sources) {
+  return sources.reduce((result, source) => result.concat(source.input.map(({sequence}) => sequence)), []);
+}
+
+export function getSequenceIdsThatAreNotInput(sequences, sources) {
+  const sequenceIdsThatAreInput = getSequenceIdsThatAreInput(sources);
+  return sequences.filter((sequence) => !sequenceIdsThatAreInput.includes(sequence.id)).map((sequence) => sequence.id);
+}
+
 export function getGraftSequenceId({ sources, sequences }) {
-  const sequenceIdsThatAreInput = sources.reduce((result, source) => result.concat(source.input.map(({sequence}) => sequence)), []);
-  const allSequenceIds = sequences.map((seq) => seq.id);
-  const sequenceIdsThatAreNotInput = allSequenceIds.filter((sequenceId) => !sequenceIdsThatAreInput.includes(sequenceId));
-  const sourcesWithoutOutput = sources.filter((source) => !allSequenceIds.includes(source.id));
+  const allSequenceIds = new Set(sequences.map((seq) => seq.id));
+  const sequenceIdsThatAreNotInput = getSequenceIdsThatAreNotInput(sequences, sources);
+  const sourcesWithoutOutput = sources.filter((source) => !allSequenceIds.has(source.id));
   if (sourcesWithoutOutput.length === 0 && sequenceIdsThatAreNotInput.length === 1) {
     return sequenceIdsThatAreNotInput[0];
   }
@@ -182,3 +190,18 @@ export const mergeStates = (newState, oldState, skipPrimers = false) => {
   }
   return { mergedState, idShift };
 };
+
+export function getParentSequencesFromSource(source, sequences) {
+  const parentSequenceIds = source.input.map(({sequence}) => sequence);
+  return sequences.filter((sequence) => parentSequenceIds.includes(sequence.id));
+}
+
+export function getParentSourcesFromSource(source, sources) {
+  const parentSourceIds = source.input.map(({sequence}) => sequence);
+  return sources.filter((source) => parentSourceIds.includes(source.id));
+}
+
+export function getSequencesNotInDatabase(sources, sequences) {
+  const sequenceIds = sources.filter((s) => !s.database_id).map((s) => s.id);
+  return sequences.filter((sequence) => sequenceIds.includes(sequence.id));
+}

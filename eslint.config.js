@@ -2,7 +2,8 @@ import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import cypress from 'eslint-plugin-cypress';
-import vitest from '@vitest/eslint-plugin'
+import vitest from '@vitest/eslint-plugin';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -12,25 +13,8 @@ export default [
       ecmaVersion: 2021,
       sourceType: 'module',
       globals: {
-        browser: true,
-        navigator: 'readonly',
-        window: 'readonly',
-        document: 'readonly',
-        HTMLElement: 'readonly',
-        console: 'readonly',
-        File: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly'
+        ...globals.browser,
+        ...globals.node,
       },
       parserOptions: {
         ecmaFeatures: {
@@ -71,6 +55,8 @@ export default [
     },
     languageOptions: {
       globals: {
+        ...globals.browser,
+        ...globals.node,
         cy: 'readonly',
         Cypress: 'readonly',
         describe: 'readonly',
@@ -83,7 +69,10 @@ export default [
     rules: {
       ...cypress.configs.recommended.rules,
       'vitest/expect-expect': 'off',
+      'vitest/valid-expect-in-promise': 'off',
+      'vitest/valid-expect': 'off',
       'vitest/no-focused-tests': ['error', { fixable: false }],
+      'vitest/no-standalone-expect': 'off',
     }
   }
 ];

@@ -27,6 +27,7 @@ import LoadFromDatabaseButton from './LoadFromDatabaseButton';
 import { sequencingFileExtensions } from '@opencloning/utils/sequencingFileExtensions';
 import useHttpClient from '../../hooks/useHttpClient';
 import { getVerificationFileName } from '@opencloning/utils/readNwrite';
+import ImportSequencingFilesInput from './ImportSequencingFilesInput';
 
 const { addFile, removeFile: removeFileAction, removeFilesAssociatedToSequence, setMainSequenceId, setCurrentTab } = cloningActions;
 
@@ -52,9 +53,9 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
     updateStoreEditor('mainEditor', id);
     // TODO: ideally this should be done with a ref
     document.getElementById('opencloning-app-tabs')?.scrollIntoView();
-  }, [id]);
+  }, [id, dispatch, updateStoreEditor]);
 
-  const handleFileUpload = async (newFiles) => {
+  const handleFileUpload = useCallback(async (newFiles) => {
     // Clear the input
     fileInputRef.current.value = '';
     if (newFiles.some((file) => !sequencingFileExtensions.includes(file.name.toLowerCase().split('.').pop()))) {
@@ -109,7 +110,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
       alignments.forEach(({ base64str, file_name }) => { sessionStorage.setItem(`verification-${id}-${file_name}`, base64str); });
     });
     setLoadingMessage('');
-  };
+  }, [id, dispatch, httpClient, backendRoute, store, sequence]);
 
   const onFileChange = useCallback(async (files) => {
     setLoadingMessage('Aligning...');
@@ -126,13 +127,13 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
   const removeFile = useCallback((fileName) => {
     dispatch(removeFileAction({ fileName, sequenceId: id }));
     sessionStorage.removeItem(`verification-${id}-${fileName}`);
-  }, [id]);
+  }, [id, dispatch]);
 
-  const handleClickUpload = () => {
+  const handleClickUpload = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, [fileInputRef]);
 
-  const downloadFile = (fileName) => {
+  const downloadFile = useCallback((fileName) => {
     const base64Content = sessionStorage.getItem(`verification-${id}-${fileName}`);
     if (!base64Content) {
       setError(`File ${fileName} not found in session storage`);
@@ -152,7 +153,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }, [id]);
 
   return (
     <Dialog
@@ -165,14 +166,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
     >
       <DialogTitle>Verification files</DialogTitle>
       <DialogContent>
-        <input
-          type="file"
-          accept={sequencingFileExtensions.map((ext) => `.${ext}`).join(', ')}
-          multiple
-          onChange={(event) => onFileChange(Array.from(event.target.files))}
-          style={{ display: 'none' }}
-          ref={fileInputRef}
-        />
+        <ImportSequencingFilesInput onFileChange={onFileChange} fileInputRef={fileInputRef} />
 
         {loadingMessage && (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2 }}>
@@ -229,13 +223,13 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
           )}
 
           {hasSequencingFile && (
-          <Button
-            variant="contained"
-            onClick={() => { setDialogOpen(false); toggleMain(); }}
-            color="success"
-          >
+            <Button
+              variant="contained"
+              onClick={() => { setDialogOpen(false); toggleMain(); }}
+              color="success"
+            >
             See alignments in editor
-          </Button>
+            </Button>
           )}
         </Box>
 

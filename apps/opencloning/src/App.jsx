@@ -60,11 +60,9 @@ function App() {
 
   const database = useMemo(() => {
     const dbName = config?.database;
-    if (dbName === 'elabftw') {
-      return eLabFTWInterface;
-    }
-    if (dbName === 'dummy') return DummyInterface;
-    return null;
+    if (dbName === 'elabftw') return eLabFTWInterface;
+    else if (dbName === 'dummy') return DummyInterface;
+    else return null;
   }, [config]);
 
   if (config === null) {

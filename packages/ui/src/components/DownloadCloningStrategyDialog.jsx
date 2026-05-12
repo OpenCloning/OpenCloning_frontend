@@ -2,7 +2,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl,
 import React from 'react';
 import { useSelector, useStore } from 'react-redux';
 import { downloadStateAsJson, downloadStateAsZip } from '@opencloning/utils/readNwrite';
-import useAlerts from '../hooks/useAlerts';
+import useCloningAlerts from '../hooks/useCloningAlerts';
 
 
 function DownloadCloningStrategyDialog({ open, setOpen }) {
@@ -11,7 +11,7 @@ function DownloadCloningStrategyDialog({ open, setOpen }) {
   const hasVerificationFiles = useSelector(({ cloning }) => cloning.files.length > 0);
 
   const store = useStore();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
 
   return (
     <Dialog

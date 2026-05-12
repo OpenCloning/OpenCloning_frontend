@@ -49,13 +49,11 @@
       "output_name": null,
       "database_id": null,
       "input": [],
+      "repository_id": "dummy",
+      "coordinates": "1..2",
       "assembly_accession": null,
-      "sequence_accession": "dummy",
       "locus_tag": null,
-      "gene_id": null,
-      "start": 1,
-      "end": 2,
-      "strand": 1
+      "gene_id": null
     },
     {
       "id": 3,
@@ -93,11 +91,7 @@
       "type": "ManuallyTypedSource",
       "output_name": null,
       "database_id": null,
-      "input": [],
-      "overhang_crick_3prime": 3,
-      "overhang_watson_3prime": -3,
-      "user_input": "aaaaaaa",
-      "circular": false
+      "input": []
     },
     {
       "id": 6,
@@ -115,7 +109,7 @@
   "primers": [],
   "description": "",
   "files": null,
-  "schema_version": "0.4.0",
+  "schema_version": "1.0.0",
   "backend_version": null,
   "frontend_version": null
 }

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import { Button, Tooltip, Modal, Box } from '@mui/material';
-import useAlerts from '../../../hooks/useAlerts';
+import useCloningAlerts from '../../../hooks/useCloningAlerts';
 import './styles.css';
 
 import { primersFromTextFile } from '@opencloning/utils/fileParsers';
 import PrimersImportTable from './ImportPrimersTable';
 
 function ImportPrimersButton({ addPrimer }) {
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const existingNames = useSelector((state) => state.cloning.primers.map((p) => p.name), shallowEqual);
 
   // Ref to the hidden file input element

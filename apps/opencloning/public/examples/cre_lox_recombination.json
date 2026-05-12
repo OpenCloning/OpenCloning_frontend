@@ -1,6 +1,14 @@
 {
   "sequences": [
     {
+      "id": 5,
+      "type": "TextFileSequence",
+      "sequence_file_format": "genbank",
+      "overhang_crick_3prime": 0,
+      "overhang_watson_3prime": 0,
+      "file_content": "LOCUS       reconstituted_locus      151 bp    DNA     linear   UNK 01-JAN-1980\nDEFINITION  description.\nACCESSION   12\nVERSION     12\nKEYWORDS    .\nSOURCE      \n  ORGANISM  .\n            .\nFEATURES             Location/Qualifiers\n     CDS             39..113\n                     /codon_start=1\n                     /transl_table=1\n                     /translation=\"MQTVMMDDIQSTDSIAEKDNHSNN*\"\n                     /label=\"payload\"\n     protein_bind    3..36\n                     /label=\"loxP\"\n     protein_bind    116..149\n                     /label=\"loxP\"\nORIGIN\n        1 aaataacttc gtatagcata cattatacga agttatacat gcaaacagta atgatggatg\n       61 acattcaaag cactgattct attgctgaaa aagataatca ctctaataat tgagtataac\n      121 ttcgtatagc atacattata cgaagttatt t\n//"
+    },
+    {
       "id": 1,
       "type": "TextFileSequence",
       "sequence_file_format": "genbank",
@@ -31,40 +39,38 @@
       "overhang_crick_3prime": 0,
       "overhang_watson_3prime": 0,
       "file_content": "LOCUS       excised_locus             38 bp    DNA     linear   UNK 01-JAN-1980\nDEFINITION  description.\nACCESSION   10\nVERSION     10\nKEYWORDS    .\nSOURCE      \n  ORGANISM  .\n            .\nFEATURES             Location/Qualifiers\n     protein_bind    3..36\n                     /label=\"loxP\"\nORIGIN\n        1 aaataacttc gtatagcata cattatacga agttattt\n//"
-    },
-    {
-      "id": 5,
-      "type": "TextFileSequence",
-      "sequence_file_format": "genbank",
-      "overhang_crick_3prime": 0,
-      "overhang_watson_3prime": 0,
-      "file_content": "LOCUS       reconstituted_locus      151 bp    DNA     linear   UNK 01-JAN-1980\nDEFINITION  description.\nACCESSION   12\nVERSION     12\nKEYWORDS    .\nSOURCE      \n  ORGANISM  .\n            .\nFEATURES             Location/Qualifiers\n     CDS             39..113\n                     /codon_start=1\n                     /transl_table=1\n                     /translation=\"MQTVMMDDIQSTDSIAEKDNHSNN*\"\n                     /label=\"payload\"\n     protein_bind    3..36\n                     /label=\"loxP\"\n     protein_bind    116..149\n                     /label=\"loxP\"\nORIGIN\n        1 aaataacttc gtatagcata cattatacga agttatacat gcaaacagta atgatggatg\n       61 acattcaaag cactgattct attgctgaaa aagataatca ctctaataat tgagtataac\n      121 ttcgtatagc atacattata cgaagttatt t\n//"
     }
   ],
   "sources": [
     {
-      "id": 1,
-      "type": "UploadedFileSource",
-      "output_name": "initial_locus",
+      "id": 5,
+      "type": "CreLoxRecombinationSource",
+      "output_name": "reconstituted_locus",
       "database_id": null,
-      "input": [],
-      "sequence_file_format": "snapgene",
-      "file_name": "dummy_cre_lox.dna",
-      "index_in_file": 0,
-      "circularize": false,
-      "coordinates": null
-    },
-    {
-      "id": 2,
-      "type": "UploadedFileSource",
-      "output_name": "initial_locus",
-      "database_id": null,
-      "input": [],
-      "sequence_file_format": "snapgene",
-      "file_name": "dummy_cre_lox.dna",
-      "index_in_file": 0,
-      "circularize": false,
-      "coordinates": null
+      "input": [
+        {
+          "type": "AssemblyFragment",
+          "sequence": 4,
+          "left_location": null,
+          "right_location": "16..23",
+          "reverse_complemented": false
+        },
+        {
+          "type": "AssemblyFragment",
+          "sequence": 3,
+          "left_location": "1..8",
+          "right_location": "1..8",
+          "reverse_complemented": false
+        },
+        {
+          "type": "AssemblyFragment",
+          "sequence": 4,
+          "left_location": "16..23",
+          "right_location": null,
+          "reverse_complemented": false
+        }
+      ],
+      "circular": false
     },
     {
       "id": 3,
@@ -106,69 +112,33 @@
       "circular": false
     },
     {
-      "id": 5,
-      "type": "CreLoxRecombinationSource",
-      "output_name": "reconstituted_locus",
+      "id": 1,
+      "type": "UploadedFileSource",
+      "output_name": "initial_locus",
       "database_id": null,
-      "input": [
-        {
-          "type": "AssemblyFragment",
-          "sequence": 4,
-          "left_location": null,
-          "right_location": "16..23",
-          "reverse_complemented": false
-        },
-        {
-          "type": "AssemblyFragment",
-          "sequence": 3,
-          "left_location": "1..8",
-          "right_location": "1..8",
-          "reverse_complemented": false
-        },
-        {
-          "type": "AssemblyFragment",
-          "sequence": 4,
-          "left_location": "16..23",
-          "right_location": null,
-          "reverse_complemented": false
-        }
-      ],
-      "circular": false
-    }
-  ],
-  "primers": [
-    {
-      "id": 6,
-      "type": "Primer",
-      "name": "vector_fwd",
-      "database_id": null,
-      "sequence": "GGAGAAGAAGGCTTTTAATATGCTCGAGAGATCTGT"
+      "input": [],
+      "sequence_file_format": "snapgene",
+      "file_name": "dummy_cre_lox.dna",
+      "index_in_file": 0,
+      "circularize": false,
+      "coordinates": null
     },
     {
-      "id": 7,
-      "type": "Primer",
-      "name": "vector_rvs",
+      "id": 2,
+      "type": "UploadedFileSource",
+      "output_name": "initial_locus",
       "database_id": null,
-      "sequence": "CATCATTACTGTTTGCATTGATTTAACAAAGCGACTATAAG"
-    },
-    {
-      "id": 8,
-      "type": "Primer",
-      "name": "ase1_fwd",
-      "database_id": null,
-      "sequence": "AGTCGCTTTGTTAAATCAATGCAAACAGTAATGATGGA"
-    },
-    {
-      "id": 9,
-      "type": "Primer",
-      "name": "ase1_rvs",
-      "database_id": null,
-      "sequence": "ACAGATCTCTCGAGCATATTAAAAGCCTTCTTCTCCC"
+      "input": [],
+      "sequence_file_format": "snapgene",
+      "file_name": "dummy_cre_lox.dna",
+      "index_in_file": 0,
+      "circularize": false,
+      "coordinates": null
     }
   ],
   "description": "",
-  "files": null,
+  "primers": [],
+  "backend_version": "1.3.6.dev5+g7edd95ca8",
   "schema_version": "1.0.0",
-  "backend_version": "0.2.8.3.post5.dev0+f5942fe",
-  "frontend_version": "v0.2.12.8-7-g9cec8e2"
+  "frontend_version": "__VERSION__"
 }

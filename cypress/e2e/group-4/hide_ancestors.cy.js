@@ -45,7 +45,8 @@ describe('Tests primer functionality', () => {
     cy.get('.history-loaded-dialog').contains('Add to existing').click();
     cy.get('.history-loaded-dialog button').contains('Select').click();
     cy.contains('li', 'Polymerase extension').should('be.visible');
-    cy.get('li.hidden-ancestors').contains('Gateway LR reaction').should('exist');
+    cy.get('li').contains('Gateway LR reaction').should('be.visible');
+    cy.get('li').contains('Gateway BP reaction').should('not.be.visible');
 
   });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import useBackendRoute from './useBackendRoute';
 import useHttpClient from './useHttpClient';
-import useAlerts from './useAlerts';
+import useCloningAlerts from './useCloningAlerts';
 import { batch, useDispatch, useStore } from 'react-redux';
 import { mergeStates } from '@opencloning/utils/network';
 import { cloningActions } from '@opencloning/store/cloning';
@@ -21,7 +21,7 @@ const { setState: setCloningState, deleteSourceAndItsChildren } = cloningActions
 export default function useSnapgeneHistoryEndpoint() {
   const backendRoute = useBackendRoute();
   const httpClient = useHttpClient();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const dispatch = useDispatch();
   const store = useStore();
   const url = backendRoute('read_snapgene_history');

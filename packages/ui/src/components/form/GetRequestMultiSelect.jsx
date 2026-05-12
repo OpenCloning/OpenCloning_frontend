@@ -66,7 +66,6 @@ export default function GetRequestMultiSelect({
         <Autocomplete
           multiple={multiple}
           onChange={(event, value) => { onChange(value); }}
-          id="tags-standard"
           options={options}
           getOptionLabel={getOptionLabel}
           defaultValue={multiple ? [] : ''}

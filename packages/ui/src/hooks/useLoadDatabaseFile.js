@@ -53,7 +53,7 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
           const sequence = cloningStrategy.sequences.find((e) => e.id === cloningSource.id);
           const seq = convertToTeselaJson(sequence);
           const databaseName = await database.getSequenceName(seqDatabaseId);
-          if (seq.name !== databaseName) {
+          if (databaseName && (seq.name !== databaseName)) {
             seq.name = databaseName;
             const genbank = jsonToGenbank(seq);
             sequence.file_content = genbank;
@@ -68,11 +68,15 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
       }
       // This one won't have the source.id deleted
       const prevState = store.getState().cloning;
+      const { backendVersion, schemaVersion, frontendVersion } = prevState.appInfo;
+      cloningStrategy.backend_version = backendVersion;
+      cloningStrategy.schema_version = schemaVersion;
+      cloningStrategy.frontend_version = frontendVersion;
       cloningStrategy = await validateState(cloningStrategy);
 
       batch(() => {
         // Replace the source with the new one if called from a source
-        if (!ancestors) {
+        if (!ancestors && source) {
           dispatch(deleteSourceAndItsChildren(source.id));
         }
         const cloningState = store.getState().cloning;

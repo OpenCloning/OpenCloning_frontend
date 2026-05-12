@@ -45,6 +45,10 @@ const initialState = {
 
 const reducer = {
 
+  reset(state) {
+    return { ...initialState };
+  },
+
   setCurrentTab(state, action) {
     state.currentTab = action.payload;
   },

@@ -3,24 +3,16 @@ import { clearInputValue, clickMultiSelectOption, setInputValue } from '../commo
 describe('GenomeRegion Source', () => {
   beforeEach(() => {
     cy.visit('/');
-    cy.get('#tab-panel-0 .MuiInputBase-root').click();
-    cy.get('li[data-value="GenomeCoordinatesSource"]').click();
+    cy.clickMultiSelectOption('Source type', 'Genome region', 'li#source-1');
   });
   it('works for reference genome', () => {
-    cy.get('#tab-panel-0 .MuiInputBase-root').eq(1).click();
-    cy.get('li[data-value="reference_genome"]').click();
-    cy.get('#tags-standard').click();
-    cy.get('div[role="presentation"]').contains('Type at least 3 characters to search');
-    cy.get('#tags-standard').clear('');
-    cy.get('#tags-standard').type('cerevisiae');
-    cy.get('#tags-standard-option-0', { timeout: 20000 }).click();
+    cy.clickMultiSelectOption('Type of region', 'Locus in reference genome', 'li#source-1');
+    cy.setInputValue('Species', 'cerevisiae', 'li#source-1');
+    cy.get('[role="presentation"]').contains('Saccharomyces cerevisiae', { timeout: 20000 }).click();
     cy.get('label').contains('Assembly ID', { timeout: 20000 }).siblings('div').children('input')
       .should('have.value', 'GCF_000146045.2');
-    cy.get(':nth-child(3) > .MuiAutocomplete-root > .MuiFormControl-root > .MuiInputBase-root > #tags-standard').click();
-    cy.get('div[role="presentation"]').contains('Type at least 3 characters to search');
-    cy.get(':nth-child(3) > .MuiAutocomplete-root > .MuiFormControl-root > .MuiInputBase-root > #tags-standard').clear('a');
-    cy.get(':nth-child(3) > .MuiAutocomplete-root > .MuiFormControl-root > .MuiInputBase-root > #tags-standard').type('ase1');
-    cy.get('#tags-standard-option-0', { timeout: 20000 }).click();
+    cy.setInputValue('Gene', 'ase1', 'li#source-1');
+    cy.get('[role="presentation"]').contains('ASE1', { timeout: 20000 }).click();
     cy.get('label').contains('Gene coordinates').siblings('div').children('input')
       .should('have.value', 'NC_001147.6 (433688..436345, complement)');
     cy.get('label').contains('Downstream bases').siblings('div').children('input')

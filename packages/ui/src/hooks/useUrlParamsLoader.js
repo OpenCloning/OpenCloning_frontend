@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
 import useDatabase from './useDatabase';
 import useLoadDatabaseFile from './useLoadDatabaseFile';
-import useAlerts from './useAlerts';
+import useCloningAlerts from './useCloningAlerts';
 import useHttpClient from './useHttpClient';
 import useValidateState from './useValidateState';
 import { formatSequenceLocationString, getUrlParameters } from '@opencloning/utils/other';
@@ -18,7 +18,7 @@ const { setState: setCloningState, updateSource } = cloningActions;
 export default function useUrlParamsLoader() {
   const dispatch = useDispatch();
   const database = useDatabase();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const setHistoryFileError = (e) => addAlert({ message: e, severity: 'error' });
   const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendPostRequest: null, setHistoryFileError });
   const validateState = useValidateState();

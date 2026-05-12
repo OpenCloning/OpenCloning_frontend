@@ -17,6 +17,9 @@ function DatabaseMessage({ source }) {
   const handleClose = React.useCallback(() => setLoadingHistory(false), [setLoadingHistory]);
   const [historyFileError, setHistoryFileError] = React.useState(null);
   const { loadDatabaseFile } = useLoadDatabaseFile({ source, setHistoryFileError });
+  if (!database) {
+    return <div>Imported from unknown database</div>;
+  }
   const { LoadHistoryComponent } = database;
   return (
     <>

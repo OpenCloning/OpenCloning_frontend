@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Alert, Button, TextField } from '@mui/material';
 
 import useDatabase from '../../../hooks/useDatabase';
 import { stringIsNotDNA } from '@opencloning/store/cloning_utils';
+import { isEqual } from 'lodash-es';
 
 function PrimerDatabaseImportForm({ submitPrimer, cancelForm }) {
-  const existingNames = useSelector((state) => state.cloning.primers.map((p) => p.name), shallowEqual);
+  const existingNames = useSelector((state) => state.cloning.primers.map((p) => p.name), isEqual);
+  const existingDatabaseIds = useSelector((state) => state.cloning.primers.map((p) => p.database_id).filter(Boolean), isEqual);
   const [primer, setPrimer] = useState(null);
   const [error, setError] = useState('');
   const database = useDatabase();
@@ -44,6 +46,7 @@ function PrimerDatabaseImportForm({ submitPrimer, cancelForm }) {
             primer={primer}
             setPrimer={setPrimer}
             setError={setError}
+            existingDatabaseIds={existingDatabaseIds}
           />
         </div>
         {primer && (
@@ -87,7 +90,7 @@ function PrimerDatabaseImportForm({ submitPrimer, cancelForm }) {
             variant="contained"
             color="primary"
             type="submit"
-            disabled={!primer || error}
+            disabled={!primer || Boolean(error)}
           >
             Import Primer
           </Button>

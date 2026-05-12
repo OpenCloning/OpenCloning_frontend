@@ -81,7 +81,7 @@ export default defineConfig({
               '@mui/material/Tooltip',
               '@mui/material/Unstable_Grid2'
             ],
-            entries: ['packages/**/*.jsx', 'packages/**/*.js', 'cypress/**/*.js'],
+            entries: ['packages/**/*.cy.{js,jsx}', 'apps/**/*.cy.{js,jsx}', 'cypress/**/*.js'],
             exclude: ['fsevents'],
           },
           ssr: {

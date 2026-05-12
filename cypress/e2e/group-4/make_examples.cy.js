@@ -27,7 +27,7 @@ describe('Makes all examples', () => {
     setInputValue('Assembly ID', 'GCA_000002945.3', 'li#source-5');
     cy.get('li#source-5 label').contains('Species', { timeout: 20000 });
     setInputValue('Gene', 'ase1', 'li#source-5');
-    cy.get('#tags-standard-option-0', { timeout: 20000 }).click();
+    cy.get('[role="presentation"]').contains('ASE1', { timeout: 20000, matchCase: false }).click();
     cy.get('li#source-5').contains('Submit').click();
     cy.get('li#sequence-5', { timeout: 20000 }).should('exist');
     // Do a homologous recombination
@@ -52,7 +52,7 @@ describe('Makes all examples', () => {
     setInputValue('Assembly ID', 'GCA_000002945.3', 'li#source-1');
     cy.get('li#source-1 label').contains('Species', { timeout: 20000 });
     setInputValue('Gene', 'ase1', 'li#source-1');
-    cy.get('#tags-standard-option-0', { timeout: 20000 }).click();
+    cy.get('[role="presentation"]').contains('ASE1', { timeout: 20000, matchCase: false }).click();
     cy.get('li#source-1').contains('Submit').click();
     cy.get('li#sequence-1', { timeout: 20000 }).should('exist');
     // Do a pcr on it

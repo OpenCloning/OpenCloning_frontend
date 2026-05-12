@@ -43,6 +43,14 @@ export const file2base64 = (file) => new Promise((resolve) => {
   reader.readAsDataURL(file);
 });
 
+export const file2string = (file) => new Promise((resolve) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    resolve(reader.result);
+  };
+  reader.readAsText(file);
+});
+
 export const downloadTextFile = (text, fileName, type = 'text/plain') => {
   const blob = new Blob([text], { type });
   downloadBlob(blob, fileName);

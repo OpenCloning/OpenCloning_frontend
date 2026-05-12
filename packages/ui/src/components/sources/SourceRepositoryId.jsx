@@ -223,7 +223,6 @@ function IndexJsonSelector({
           }}
           // Change options only when input changes (not when an option is picked)
           onInputChange={(event, newInputValue, reason) => (reason === 'input') && onInputChange(newInputValue)}
-          id="tags-standard"
           options={options}
           noOptionsText={userInput.length < requiredInput ? noOptionsText : 'Nothing found'}
           getOptionLabel={(o) => o.name}

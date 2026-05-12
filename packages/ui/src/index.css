@@ -7,15 +7,6 @@ button {
     border-color: rgb(25, 118, 210);
 }
 
-ul.hidden-ancestors {
-    display: none;
-}
-
-/* So that the eye icon is visible */
-li.hidden-ancestors {
-    margin-bottom: 30px;
-}
-
 .app-container {
     display: flex;
     flex-direction: column;
@@ -288,14 +279,15 @@ div.MuiPaper-root[role=alert] {
 }
 
 div#global-error-message-wrapper {
-    position: fixed;
+    position: relative;
     top: 0;
     z-index: 999;
     max-width: 25em;
 }
 
 div#global-error-message-wrapper > div {
-    margin: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
     /* Allow line breaks in very long strings only when necessary */
     word-break: break-word;
 }

@@ -65,7 +65,6 @@ export default function PostRequestSelect({ setValue, getOptions, getOptionLabel
         onChange={(event, value) => { setValue(value); setUserInput(getOptionLabel(value)); }}
         // Change options only when input changes (not when an option is picked)
         onInputChange={(event, newInputValue, reason) => { if (reason === 'input') { setUserInput(newInputValue); setConnectAttemp(connectAttempt + 1); } }}
-        id="tags-standard"
         options={options}
         noOptionsText={noOptionsText || 'Type at least 3 characters to search'}
         getOptionLabel={getOptionLabel}

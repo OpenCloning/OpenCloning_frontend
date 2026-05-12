@@ -21,7 +21,7 @@ describe('Test empty source functionality', () => {
     cy.get('div.tf-tree svg[data-testid="AddCircleIcon"]').should('exist');
 
     // Creating new sources resets the counter
-    // (see bug from https://github.com/manulera/OpenCloning_frontend/issues/110#issuecomment-1996934760)
+    // (see bug from https://github.com/OpenCloning/OpenCloning_frontend/issues/110#issuecomment-1996934760)
     cy.get('svg[data-testid="AddCircleIcon"]').parent().click();
     cy.get('svg[data-testid="AddCircleIcon"]').parent().click();
     cy.get('svg[data-testid="AddCircleIcon"]').parent().click();

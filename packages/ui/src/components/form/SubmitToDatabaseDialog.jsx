@@ -1,4 +1,4 @@
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import React from 'react';
 import { batch, useDispatch, useSelector, useStore } from 'react-redux';
 import useDatabase from '../../hooks/useDatabase';
@@ -32,7 +32,64 @@ function SubmitToDatabaseDialog({ id, dialogOpen, setDialogOpen, resourceType })
     setIsSubmitting(false);
   };
 
-  if (hasUnsavedIntermediates && !disclaimerAccepted) {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+    // This should never happen
+    if (!database.isSubmissionDataValid(submissionData)) {
+      setErrorMessage('Submission data is invalid');
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      if (resourceType === 'primer') {
+        const oldPrimer = store.getState().cloning.primers.find((p) => p.id === id);
+        const primerDatabaseId = await database.submitPrimerToDatabase({ submissionData, primer: oldPrimer });
+        const newPrimer = { ...oldPrimer, database_id: primerDatabaseId };
+        batch(() => {
+          dispatch(cloningActions.editPrimer(newPrimer));
+          dispatch(cloningActions.addAlert({
+            message: 'Primer created successfully',
+            severity: 'success',
+          }));
+        });
+      } else if (resourceType === 'sequence') {
+        const substate = getSubState(store.getState(), id, true);
+        let databaseId;
+        let primerMappings;
+        let sequenceMappings;
+        try {
+          ({ databaseId, primerMappings = [], sequenceMappings = [] } = await database.submitSequenceToDatabase({ submissionData, substate, id }));
+        } catch (error) {
+          console.error(error);
+          setErrorMessage(error.message);
+          setIsSubmitting(false);
+          return;
+        }
+        batch(() => {
+          primerMappings.forEach((mapping) => dispatch(cloningActions.addDatabaseIdToPrimer(mapping)));
+          dispatch(cloningActions.addDatabaseIdToSequence({ databaseId, id }));
+          sequenceMappings.forEach(({databaseId, localId}) => dispatch(cloningActions.addDatabaseIdToSequence({ databaseId, id: localId })));
+          dispatch(cloningActions.addAlert({
+            message: 'Sequence created successfully',
+            severity: 'success',
+          }));
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error.message);
+      setIsSubmitting(false);
+      return;
+    }
+    setDialogOpen(false);
+    setIsSubmitting(false);
+    setErrorMessage('');
+  }
+
+  if (!database.omitUnsavedIntermediatesDisclaimer && hasUnsavedIntermediates && !disclaimerAccepted) {
     return (
       <Dialog open={dialogOpen} onClose={handleClose} sx={{ textAlign: 'center' }}>
         <DialogTitle>Unsaved Intermediates</DialogTitle>
@@ -59,71 +116,19 @@ function SubmitToDatabaseDialog({ id, dialogOpen, setDialogOpen, resourceType })
       PaperProps={{
         component: 'form',
         sx: { width: '40%' },
-        onSubmit: async (event) => {
-          event.preventDefault();
-          if (isSubmitting) {
-            return;
-          }
-          // This should never happen
-          if (!database.isSubmissionDataValid(submissionData)) {
-            setErrorMessage('Submission data is invalid');
-            return;
-          }
-          try {
-            setIsSubmitting(true);
-            if (resourceType === 'primer') {
-              const oldPrimer = store.getState().cloning.primers.find((p) => p.id === id);
-              const primerDatabaseId = await database.submitPrimerToDatabase({ submissionData, primer: oldPrimer });
-              const newPrimer = { ...oldPrimer, database_id: primerDatabaseId };
-              batch(() => {
-                dispatch(cloningActions.editPrimer(newPrimer));
-                dispatch(cloningActions.addAlert({
-                  message: 'Primer created successfully',
-                  severity: 'success',
-                }));
-              });
-            } else if (resourceType === 'sequence') {
-              const substate = getSubState(store.getState(), id, true);
-              let databaseId;
-              let primerMappings;
-              try {
-                ({ databaseId, primerMappings } = await database.submitSequenceToDatabase({ submissionData, substate, id }));
-              } catch (error) {
-                console.error(error);
-                setErrorMessage(error.message);
-                setIsSubmitting(false);
-                return;
-              }
-              batch(() => {
-                primerMappings.forEach((mapping) => dispatch(cloningActions.addDatabaseIdToPrimer(mapping)));
-                dispatch(cloningActions.addDatabaseIdToSequence({ databaseId, id }));
-                dispatch(cloningActions.addAlert({
-                  message: 'Sequence created successfully',
-                  severity: 'success',
-                }));
-              });
-            }
-          } catch (error) {
-            console.error(error);
-            setErrorMessage(error.message);
-            setIsSubmitting(false);
-            return;
-          }
-          setIsSubmitting(false);
-          setDialogOpen(false);
-          setErrorMessage('');
-        },
+        onSubmit: handleSubmit,
       }}
+      data-testid="submit-to-database-component"
     >
       <DialogTitle>{`Save ${resourceType} to ${database.name}`}</DialogTitle>
       <DialogContent>
         <database.SubmitToDatabaseComponent id={id} submissionData={submissionData} setSubmissionData={setSubmissionData} resourceType={resourceType} />
-        {resourceType === 'sequence' && <database.PrimersNotInDatabaseComponent id={id} submissionData={submissionData} setSubmissionData={setSubmissionData} />}
+        {resourceType === 'sequence' && !isSubmitting && <database.PrimersNotInDatabaseComponent id={id} submissionData={submissionData} setSubmissionData={setSubmissionData} />}
         {errorMessage && <Alert sx={{ marginTop: 2 }} severity="error">{errorMessage}</Alert>}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button type="submit" disabled={isSubmitting || submissionData === null || !database.isSubmissionDataValid(submissionData)}>Submit</Button>
+        <Button type="submit" disabled={isSubmitting || submissionData === null || !database.isSubmissionDataValid(submissionData)}>{isSubmitting ? <CircularProgress /> : 'Submit'}</Button>
       </DialogActions>
     </Dialog>
 

@@ -11,7 +11,6 @@ const TEST_FILE_CONTENT = JSON.stringify({ test: 'content' });
 
 describe('<LoadHistoryComponent />', () => {
   it('loads history file successfully when one file exists', () => {
-    const handleCloseSpy = cy.spy().as('handleCloseSpy');
     const loadDatabaseFileSpy = cy.spy().as('loadDatabaseFileSpy');
 
     // Stub API calls
@@ -42,7 +41,6 @@ describe('<LoadHistoryComponent />', () => {
 
     cy.mount(
       <LoadHistoryComponent
-        handleClose={handleCloseSpy}
         databaseId={DATABASE_ID}
         loadDatabaseFile={loadDatabaseFileSpy}
       />,
@@ -74,7 +72,6 @@ describe('<LoadHistoryComponent />', () => {
   });
 
   it('shows error when multiple history files found', () => {
-    const handleCloseSpy = cy.spy().as('handleCloseSpy');
     const loadDatabaseFileSpy = cy.spy().as('loadDatabaseFileSpy');
 
     cy.stub(eLabFTWHttpClient, 'get').callsFake(async (url) => {
@@ -101,7 +98,6 @@ describe('<LoadHistoryComponent />', () => {
 
     cy.mount(
       <LoadHistoryComponent
-        handleClose={handleCloseSpy}
         databaseId={DATABASE_ID}
         loadDatabaseFile={loadDatabaseFileSpy}
       />,
@@ -113,7 +109,6 @@ describe('<LoadHistoryComponent />', () => {
   });
 
   it('shows error when no history files found', () => {
-    const handleCloseSpy = cy.spy().as('handleCloseSpy');
     const loadDatabaseFileSpy = cy.spy().as('loadDatabaseFileSpy');
 
     cy.stub(eLabFTWHttpClient, 'get').callsFake(async (url) => {
@@ -135,7 +130,6 @@ describe('<LoadHistoryComponent />', () => {
 
     cy.mount(
       <LoadHistoryComponent
-        handleClose={handleCloseSpy}
         databaseId={DATABASE_ID}
         loadDatabaseFile={loadDatabaseFileSpy}
       />,
@@ -147,7 +141,6 @@ describe('<LoadHistoryComponent />', () => {
   });
 
   it('handles API error and allows retry', () => {
-    const handleCloseSpy = cy.spy().as('handleCloseSpy');
     const loadDatabaseFileSpy = cy.spy().as('loadDatabaseFileSpy');
 
     let callNumber = 0;
@@ -181,7 +174,6 @@ describe('<LoadHistoryComponent />', () => {
 
     cy.mount(
       <LoadHistoryComponent
-        handleClose={handleCloseSpy}
         databaseId={DATABASE_ID}
         loadDatabaseFile={loadDatabaseFileSpy}
       />,
@@ -208,28 +200,4 @@ describe('<LoadHistoryComponent />', () => {
     });
   });
 
-  it('close button works', () => {
-    const handleCloseSpy = cy.spy().as('handleCloseSpy');
-    const loadDatabaseFileSpy = cy.spy().as('loadDatabaseFileSpy');
-
-    cy.stub(eLabFTWHttpClient, 'get')
-      .withArgs(`/api/v2/items/${DATABASE_ID}`, { headers: { Authorization: 'test-read-key' } })
-      .resolves({
-        data: {
-          uploads: [],
-        },
-      });
-
-    cy.mount(
-      <LoadHistoryComponent
-        handleClose={handleCloseSpy}
-        databaseId={DATABASE_ID}
-        loadDatabaseFile={loadDatabaseFileSpy}
-      />,
-    );
-
-    cy.get('button').contains('Close').click();
-    cy.get('@handleCloseSpy').should('have.been.called');
-    cy.get('@loadDatabaseFileSpy').should('not.have.been.called');
-  });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { batch, useDispatch, useStore } from 'react-redux';
-import useAlerts from '../hooks/useAlerts';
+import useCloningAlerts from '../hooks/useCloningAlerts';
 import useBackendRoute from '../hooks/useBackendRoute';
 import useValidateState from '../hooks/useValidateState';
 import { cloningActions } from '@opencloning/store/cloning';
@@ -59,7 +59,7 @@ async function processSequenceFiles(files, backendRoute, httpClient) {
 }
 
 function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const dispatch = useDispatch();
   const backendRoute = useBackendRoute();
   const store = useStore();

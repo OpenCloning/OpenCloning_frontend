@@ -11,7 +11,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/manulera/OpenCloning_frontend.git",
+        "url": "https://github.com/OpenCloning/OpenCloning_frontend.git",
         "directory": "packages/store"
     },
     "dependencies": {

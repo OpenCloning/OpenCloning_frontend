@@ -1,11 +1,11 @@
 import React from 'react';
-import useAlerts from './useAlerts';
+import useCloningAlerts from './useCloningAlerts';
 import useBackendRoute from './useBackendRoute';
 import useHttpClient from './useHttpClient';
 
 export default function useValidateState() {
   const backendRoute = useBackendRoute();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
   const httpClient = useHttpClient();
 
   const validateState = React.useCallback(async (newState) => {
@@ -37,7 +37,7 @@ export default function useValidateState() {
       }
       return newState;
     }
-  }, [addAlert, backendRoute]);
+  }, [addAlert, backendRoute, httpClient]);
 
   return validateState;
 }

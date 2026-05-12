@@ -17,9 +17,7 @@ import useDatabase from '../hooks/useDatabase';
 
 const { addToSourcesWithHiddenAncestors, removeFromSourcesWithHiddenAncestors, addSequenceInBetween } = cloningActions;
 
-const SequenceContent = React.memo(({ sequenceId, sequenceIsTemplate }) => {
-  const database = useDatabase();
-  const isSavedToDatabase = database && useSelector((state) => Boolean(getSourceDatabaseId(state.cloning.sources, sequenceId)));
+function SequenceContent({ sequenceId, sequenceIsTemplate, isSavedToDatabase }) {
   return (
     <span className="tf-nc" style={{ borderColor: isSavedToDatabase ? 'green' : 'default' }}>
       <span className="node-text">
@@ -35,15 +33,18 @@ const SequenceContent = React.memo(({ sequenceId, sequenceIsTemplate }) => {
       </span>
     </span>
   );
-});
+};
 
-function SequenceWrapper({ children, sequenceId, sequenceIsTemplate }) {
+const MemoizedSequenceContent = React.memo(SequenceContent);
+
+function SequenceWrapper({ children, sequenceId, sequenceIsTemplate, isSavedToDatabase }) {
   if (sequenceId === null) {
     return children;
   }
+  const className = 'sequence-node' + (isSavedToDatabase ? ' in-database' : '');
   return (
-    <li key={sequenceId} id={`sequence-${sequenceId}`} className="sequence-node">
-      <SequenceContent {...{ sequenceId, sequenceIsTemplate }} />
+    <li key={sequenceId} id={`sequence-${sequenceId}`} className={className}>
+      <MemoizedSequenceContent {...{ sequenceId, sequenceIsTemplate, isSavedToDatabase }} />
       <ul>
         {children}
       </ul>
@@ -94,15 +95,16 @@ function NetWorkNode({ sourceId }) {
     if (tooltipRef.current) {
       tooltipRef.current.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
     }
-  }, [ancestorsHidden, sourceId, sequenceId]);
+  }, [ancestorsHidden, sourceId, sequenceId, dispatch]);
 
   const Icon = ancestorsHidden ? VisibilityIcon : VisibilityOffIcon;
   const visibilityIconToolTip = ancestorsHidden ? 'Show ancestors' : 'Hide ancestors';
   const isSavedToDatabase = database && hasDatabaseId;
+  const className = 'source-node' + (isSavedToDatabase ? ' in-database' : '');
 
   return (
-    <SequenceWrapper {...{ sequenceId, sequenceIsTemplate }}>
-      <li id={`source-${sourceId}`} className={`source-node ${ancestorsHidden ? 'hidden-ancestors' : ''}`}>
+    <SequenceWrapper {...{ sequenceId, sequenceIsTemplate, isSavedToDatabase }}>
+      <li id={`source-${sourceId}`} className={className} style={{ marginBottom: ancestorsHidden ? '30px' : undefined }}>
         <Box component="span" className="tf-nc" style={{ borderColor: isSavedToDatabase ? 'green' : 'default' }}>
           <span className="node-text">
             <SourceBox {...{ sourceId }}>
@@ -116,36 +118,36 @@ function NetWorkNode({ sourceId }) {
               {sourceId}
             </div>
             { (!sourceIsTemplate && sourceInput.length > 0 && sequenceId) && (
-            <div className="before-node before-node-visibility">
-              <Tooltip
-                arrow
-                title={visibilityIconToolTip}
-                placement="left"
-              >
-                <div ref={tooltipRef}>
-                  <Icon onClick={onVisibilityClick} style={{ color: 'grey' }} />
-                </div>
-              </Tooltip>
-            </div>
+              <div className="before-node before-node-visibility">
+                <Tooltip
+                  arrow
+                  title={visibilityIconToolTip}
+                  placement="left"
+                >
+                  <div ref={tooltipRef}>
+                    <Icon onClick={onVisibilityClick} style={{ color: 'grey' }} />
+                  </div>
+                </Tooltip>
+              </div>
             )}
             { (sourceIsTemplate && sourceInput.length > 0)
             && (
-            <div className="before-node before-node-sequence-in-between">
-              <Tooltip arrow title="Add sequence in between" placement={sourceInput.length > 1 ? 'top' : 'left'}>
-                <div>
-                  <AddCircleIcon onClick={() => { dispatch(addSequenceInBetween(sourceId)); }} color="success" />
-                </div>
-              </Tooltip>
-            </div>
+              <div className="before-node before-node-sequence-in-between">
+                <Tooltip arrow title="Add sequence in between" placement={sourceInput.length > 1 ? 'top' : 'left'}>
+                  <div>
+                    <AddCircleIcon onClick={() => { dispatch(addSequenceInBetween(sourceId)); }} color="success" />
+                  </div>
+                </Tooltip>
+              </div>
             )}
           </span>
         </Box>
         {parentSourceIds.length > 0 && (
-        <ul className={ancestorsHidden ? 'hidden-ancestors' : ''}>
-          {parentSourceIds.map((id) => (
-            <MemoizedNetWorkNode sourceId={id} key={`node-${id}`} />
-          ))}
-        </ul>
+          <ul style={ancestorsHidden ? { visibility: 'hidden', height: 0, overflow: 'hidden' } : undefined}>
+            {parentSourceIds.map((id) => (
+              <MemoizedNetWorkNode sourceId={id} key={`node-${id}`} />
+            ))}
+          </ul>
         )}
       </li>
     </SequenceWrapper>

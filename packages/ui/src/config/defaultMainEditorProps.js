@@ -2,6 +2,7 @@ export default {
   isFullscreen: false,
   readOnly: false,
   disableBpEditing: true,
+  hideSingleImport: true,
   annotationVisibility: { reverseSequence: true, cutsites: false },
   ToolBarProps: {
     toolList: [

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import error2String from '@opencloning/utils/error2String';
 import useBackendRoute from './useBackendRoute';
-import useAlerts from './useAlerts';
+import useCloningAlerts from './useCloningAlerts';
 import useHttpClient from './useHttpClient';
 
 export default function useBackendAPI() {
@@ -10,7 +10,7 @@ export default function useBackendAPI() {
   const [sequences, setSequences] = useState([]);
   const backendRoute = useBackendRoute();
   const httpClient = useHttpClient();
-  const { addAlert } = useAlerts();
+  const { addAlert } = useCloningAlerts();
 
   const sendPostRequest = useCallback(async ({ endpoint, requestData, config = {}, source: { output }, modifySource = (s) => s }) => {
     setRequestStatus({ status: 'loading', message: 'loading' });

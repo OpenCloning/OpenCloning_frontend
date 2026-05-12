@@ -15,18 +15,31 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+import './opencloningdb-commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 import React from 'react';
 import { mount } from '@cypress/react';
 import { Provider } from 'react-redux';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import store from '@opencloning/store';
 import '@cypress/code-coverage/support';
 
 Cypress.Commands.add('mount', (component, options = {}) => {
   const { reduxStore = store, ...mountOptions } = options;
-  const wrapped = React.createElement(Provider, { store: reduxStore }, component);
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  const wrapped = React.createElement(
+    Provider,
+    { store: reduxStore },
+    React.createElement(QueryClientProvider, { client: queryClient }, component),
+  );
   return mount(wrapped, mountOptions);
 });
 

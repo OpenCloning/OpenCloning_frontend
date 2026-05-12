@@ -21,11 +21,12 @@
         "./other": "./src/utils/other.js",
         "./transformCoords": "./src/utils/transformCoords.js",
         "./selectedRegionUtils": "./src/utils/selectedRegionUtils.js",
-        "./normalizeSyntax": "./src/utils/normalizeSyntax.js"
+        "./normalizeSyntax": "./src/utils/normalizeSyntax.js",
+        "./alignmentUtils": "./src/utils/alignmentUtils.js"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/manulera/OpenCloning_frontend.git",
+        "url": "https://github.com/OpenCloning/OpenCloning_frontend.git",
         "directory": "packages/utils"
     },
     "dependencies": {

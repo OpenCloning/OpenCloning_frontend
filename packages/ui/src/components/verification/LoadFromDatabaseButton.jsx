@@ -14,18 +14,6 @@ function LoadFromDatabaseButton({ databaseId, onFileChange, setError, existingFi
     setSelectedFiles([]);
   }, [open]);
 
-  React.useEffect(() => {
-    async function getFiles() {
-      setLoading(true);
-      const allFiles = await database.getSequencingFiles(databaseId);
-      setFiles(allFiles.filter((file) => sequencingFileExtensions.includes(file.name.toLowerCase().split('.').pop())));
-      setLoading(false);
-    }
-    if (open) {
-      getFiles();
-    }
-  }, [open]);
-
   const handleSubmit = async () => {
     setOpen(false);
     try {
@@ -35,6 +23,25 @@ function LoadFromDatabaseButton({ databaseId, onFileChange, setError, existingFi
       setError(error.message);
     }
   };
+
+  React.useEffect(() => {
+    async function getFiles() {
+      setLoading(true);
+      const allFiles = await database.getSequencingFiles(databaseId);
+      if (database.autoloadSequencingFiles) {
+        const filesToLoad = await Promise.all(allFiles.map((file) => file.getFile()));
+        onFileChange(filesToLoad);
+        setOpen(false);
+      } else {
+        setFiles(allFiles.filter((file) => sequencingFileExtensions.includes(file.name.toLowerCase().split('.').pop())));
+      }
+      setLoading(false);
+    }
+    if (open) {
+      getFiles();
+    }
+  }, [open]);
+
 
   return (
     <>

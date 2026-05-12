@@ -1,10 +1,10 @@
-import { Button, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import React from 'react';
 import { eLabFTWHttpClient, readHeaders } from './common';
 import RetryAlert from '@opencloning/ui/components/form/RetryAlert';
 import { getFileFromELabFTW } from './utils';
 
-function LoadHistoryComponent({ handleClose, databaseId, loadDatabaseFile }) {
+function LoadHistoryComponent({ databaseId, loadDatabaseFile }) {
   const url = `/api/v2/items/${databaseId}`;
   const [error, setError] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
@@ -42,8 +42,6 @@ function LoadHistoryComponent({ handleClose, databaseId, loadDatabaseFile }) {
     <div>
       {loading && <CircularProgress />}
       {error && <RetryAlert onRetry={() => setRetry((prev) => prev + 1)}>{error}</RetryAlert>}
-      <Button onClick={handleClose}>Close</Button>
-
     </div>
   );
 }
