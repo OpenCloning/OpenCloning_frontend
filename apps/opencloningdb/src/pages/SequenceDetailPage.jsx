@@ -144,18 +144,30 @@ function SequenceDetailPage() {
     retry: false,
     queryKey: ['sequence', id, 'cloning_strategy'],
     queryFn: async () => {
-      const [{ data: sequenceInDb}, { data: cloningStrategy }, { data: children }, { data: sequenceLines }] = await Promise.all([
+      const [{ data: sequenceInDb}, { data: sequenceLines }] = await Promise.all([
         openCloningDBHttpClient.get(endpoints.sequence(id)),
-        openCloningDBHttpClient.get(endpoints.sequenceCloningStrategy(id)),
-        openCloningDBHttpClient.get(endpoints.sequenceChildren(id)),
         openCloningDBHttpClient.get(endpoints.sequenceLines(id)),
       ]);
-      const parentSource = cloningStrategy.sources.find((source) => source.database_id === id);
+      let cloningStrategy = null;
+      let children = [];
+      const isTemplateSequence = sequenceInDb.type === 'template_sequence';
+      if (!isTemplateSequence) {
+        const [{ data: cloningStrategyData }, { data: childrenData }] = await Promise.all([
+          openCloningDBHttpClient.get(endpoints.sequenceCloningStrategy(id)),
+          openCloningDBHttpClient.get(endpoints.sequenceChildren(id)),
+        ]);
+        cloningStrategy = cloningStrategyData;
+        children = childrenData;
+      }
+      const parentSource = cloningStrategy?.sources.find((source) => source.database_id === id);
 
-      const sequenceModel = cloningStrategy.sequences.find((sequence) => sequence.id === parentSource.id);
-      const parentSequenceIds = cloningStrategy.sources.map((source) => source.database_id).filter((dbId) => dbId !== id);
-      const parentSequencesData = await Promise.all(parentSequenceIds.map((sequenceId) => openCloningDBHttpClient.get(endpoints.sequence(sequenceId))));
-      return { parentSequences : parentSequencesData.map((r) => r.data), parentSource, sequenceModel, sequenceInDb, children, sequenceLines };
+      const sequenceModel = cloningStrategy?.sequences.find((sequence) => sequence.id === parentSource.id);
+      const parentSequenceIds = cloningStrategy?.sources.map((source) => source.database_id).filter((dbId) => dbId !== id);
+      let parentSequencesData = [];
+      if (!isTemplateSequence) {
+        parentSequencesData = await Promise.all(parentSequenceIds.map((sequenceId) => openCloningDBHttpClient.get(endpoints.sequence(sequenceId))));
+      }
+      return { parentSequences : parentSequencesData.map((r) => r.data), parentSource, sequenceModel, sequenceInDb, children, sequenceLines, isTemplateSequence };
     },
     enabled: Boolean(id),
   });
@@ -177,7 +189,7 @@ function SequenceDetailPage() {
   const { data: primers } = primersQuery;
 
   const { data: sequencingFiles = [] } = sequencingFilesQuery;
-  const { parentSequences, parentSource, sequenceModel, sequenceInDb, children, sequenceLines = [] } = React.useMemo(() => data ?? {}, [data]);
+  const { parentSequences, parentSource, sequenceModel, sequenceInDb, children, sequenceLines = [], isTemplateSequence } = React.useMemo(() => data ?? {}, [data]);
   const sequenceData = React.useMemo(() => sequenceModel ? convertToTeselaJson(sequenceModel) : null, [sequenceModel]);
   const tags = React.useMemo(() => sequenceInDb?.tags ?? [], [sequenceInDb]);
 
@@ -246,24 +258,27 @@ function SequenceDetailPage() {
         onBack={() => navigate('/sequences')}
         backTitle="Back to Sequences"
         editorComponent={EditSequenceNameAndType}
-        editorComponentProps={{ sequenceData, sequenceInDb }}
+        editorComponentProps={{ sequenceData, sequenceInDb, presentInLine }}
         editorIconToolTipText="Edit name and type"
       />
 
       <TopButtonSection>
-        <AddToCloningButton selectedEntities={[sequenceModel]} entityType="sequence" size="small">
+        {!isTemplateSequence && (
+          <>
+            <AddToCloningButton selectedEntities={[sequenceModel]} entityType="sequence" size="small">
           Add to Design Tab
-        </AddToCloningButton>
-        <ChangeSequenceCircularityButton
-          sequenceId={id}
-          hasParents={hasParents}
-          hasChildren={hasChildren}
-          hasOverhangs={
-            (sequenceInDb?.overhang_crick_3prime ?? 0) !== 0
+            </AddToCloningButton>
+            <ChangeSequenceCircularityButton
+              sequenceId={id}
+              hasParents={hasParents}
+              hasChildren={hasChildren}
+              hasOverhangs={
+                (sequenceInDb?.overhang_crick_3prime ?? 0) !== 0
             || (sequenceInDb?.overhang_watson_3prime ?? 0) !== 0
-          }
-          isCircular={sequenceData?.circular}
-        />
+              }
+              isCircular={sequenceData?.circular}
+            />
+          </>)}
         <DeleteResourceButton
           mutation={deleteSequenceMutation}
           disabledReason={deleteDisabledReason}
@@ -274,17 +289,22 @@ function SequenceDetailPage() {
           dataTestId="delete-sequence-button"
         />
       </TopButtonSection>
+      {isTemplateSequence && (
+        <Alert severity="info" sx={{ maxWidth: 500 }}>This is a sequence template.</Alert>
+      )}
       <SequenceSamplesSection sequenceId={id} sampleUids={sequenceInDb?.sample_uids ?? []} />
-      <DetailPageSection title="Provenance" data-testid="sequence-provenance">
-        <Typography color="text.secondary" sx={{ mb: 1 }}>
-          {parentSource.type}
-        </Typography>
-        {parentSequences?.length > 0  && (
-          <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
-            <SequenceTable sequences={parentSequences} />
-          </TableContainer>
-        )}
-      </DetailPageSection>
+      {sequenceInDb.type !== 'template_sequence' && (
+        <DetailPageSection title="Provenance" data-testid="sequence-provenance">
+          <Typography color="text.secondary" sx={{ mb: 1 }}>
+            {parentSource.type}
+          </Typography>
+          {parentSequences?.length > 0  && (
+            <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
+              <SequenceTable sequences={parentSequences} />
+            </TableContainer>
+          )}
+        </DetailPageSection>
+      )}
 
       {children?.length > 0 && (
         <DetailPageSection title="Children" data-testid="sequence-children">
@@ -312,34 +332,37 @@ function SequenceDetailPage() {
         )}
       </QueryStatusWrapper>
 
+      {sequenceInDb.type !== 'template_sequence' && (
+        <>
+          <DetailPageSection title="Sequencing files" actions={
+            <SequencingFileSectionActions
+              sequencingFiles={sequencingFiles}
+              databaseId={id}
+              onSeeAlignments={() => handleSeeAlignmentsMutation.mutate()}
+              alignmentLoading={handleSeeAlignmentsMutation.isPending || alignmentMutation.isPending}
+            />
+          }>
+            <QueryStatusWrapper queryResult={sequencingFilesQuery}>
+              <List disablePadding>
+                {sequencingFiles.map((file) => (
+                  <SequencingFileRow key={file.name} file={file} sequenceId={id} onGetFile={onGetFile} />
+                ))}
+              </List>
+              {sequencingFiles.length === 0 && (
+                <Typography color="text.secondary">No sequencing files linked</Typography>
+              )}
+            </QueryStatusWrapper>
+          </DetailPageSection>
 
-      <DetailPageSection title="Sequencing files" actions={
-        <SequencingFileSectionActions
-          sequencingFiles={sequencingFiles}
-          databaseId={id}
-          onSeeAlignments={() => handleSeeAlignmentsMutation.mutate()}
-          alignmentLoading={handleSeeAlignmentsMutation.isPending || alignmentMutation.isPending}
-        />
-      }>
-        <QueryStatusWrapper queryResult={sequencingFilesQuery}>
-          <List disablePadding>
-            {sequencingFiles.map((file) => (
-              <SequencingFileRow key={file.name} file={file} sequenceId={id} onGetFile={onGetFile} />
-            ))}
-          </List>
-          {sequencingFiles.length === 0 && (
-            <Typography color="text.secondary">No sequencing files linked</Typography>
-          )}
-        </QueryStatusWrapper>
-      </DetailPageSection>
-
-      <Box sx={{ mt: 2 }}>
-        {sequenceData ? (
-          <SequenceViewer sequenceData={sequenceData} alignmentData={alignmentMutation.data ?? null} onUpdateAnnotation={updateAnnotationMutation.mutateAsync} />
-        ) : (
-          <Alert severity="warning">Could not parse sequence for display.</Alert>
-        )}
-      </Box>
+          <Box sx={{ mt: 2 }}>
+            {sequenceData ? (
+              <SequenceViewer sequenceData={sequenceData} alignmentData={alignmentMutation.data ?? null} onUpdateAnnotation={updateAnnotationMutation.mutateAsync} />
+            ) : (
+              <Alert severity="warning">Could not parse sequence for display.</Alert>
+            )}
+          </Box>
+        </>
+      )}
     </PageContainer>
   );
 }

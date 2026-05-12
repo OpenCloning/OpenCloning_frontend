@@ -40,6 +40,7 @@ const endpoints = {
   workspaces: '/workspaces',
   postWorkspace: '/workspaces',
   workspace: (id) => `/workspaces/${id}`,
+  templateSequences: '/template_sequences',
 };
 
 export default endpoints;

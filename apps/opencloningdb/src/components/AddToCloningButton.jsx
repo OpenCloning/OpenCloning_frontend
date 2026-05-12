@@ -35,7 +35,7 @@ function AddToCloningButton({ selectedEntities, children, entityType, ...rest })
     }
   };
   const handleAddEntities = async () => {
-    const promises = selectedEntities.map((entity) => handleAddEntity(entity.id));
+    const promises = selectedEntities.filter((entity) => entity.type !== 'template_sequence').map((entity) => handleAddEntity(entity.id));
     await Promise.all(promises);
   };
 

@@ -55,7 +55,7 @@ Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
 
 Cypress.Commands.add('addTagInDetailPageTest', (resourcePlural, resourceName, expectedTagName) => {
   cy.intercept('GET', Cypress.getDbURL(listEndpoints[resourcePlural], '*')).as('getRequest');
-  cy.e2eLogin(`/${resourcePlural}`, 'bootstrap@example.com', 'password');
+  cy.e2eLogin(`/${resourcePlural}?name=${resourceName}`, 'bootstrap@example.com', 'password');
   cy.wait('@getRequest').then(({ response }) => {
     const resource = response.body.items.find((resource) => resource.name === resourceName || resource.uid === resourceName);
     const tagId = resource.tags[0].id;

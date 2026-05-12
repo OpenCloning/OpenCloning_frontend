@@ -3,52 +3,22 @@ import {
   Box,
   Button,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
-  Tooltip,
 } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 
 import useAppAlerts from '../hooks/useAppAlerts';
-import { VALID_SEQUENCE_TYPES, CIRCULAR_SEQUENCE_TYPES, LINEAR_SEQUENCE_TYPES } from '../utils/query_utils';
+import SequenceTypeSelect from './SequenceTypeSelect';
 
-function SequenceTypeSelect({ value, onChange, isCircular, helperText }) {
-  return (
-    <Tooltip
-      title="Circular sequences can only be plasmids"
-      disableHoverListener={!isCircular}
-    >
-      <FormControl size="small" sx={{ minWidth: 200 }}>
-        <InputLabel id="sequence-type-label">Type</InputLabel>
-        <Select
-          labelId="sequence-type-label"
-          label="Type"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={isCircular}
-          helperText={helperText}
-        >
-          {VALID_SEQUENCE_TYPES.map((t) => (
-            <MenuItem key={t} value={t}>
-              {isCircular ? CIRCULAR_SEQUENCE_TYPES[t] : LINEAR_SEQUENCE_TYPES[t] ?? t}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Tooltip>
-  );
-}
-
-function EditSequenceNameAndType({ sequenceData, sequenceInDb, onSave }) {
+function EditSequenceNameAndType({ sequenceData, sequenceInDb, presentInLine, onSave }) {
   const queryClient = useQueryClient();
   const { addAlert } = useAppAlerts();
 
   const sequenceId = sequenceInDb.id;
-  const isCircular = sequenceData.circular;
+  const isTemplateSequence = sequenceInDb.type === 'template_sequence';
+  const isCircular = !isTemplateSequence ? sequenceData.circular : null;
+  const changeTypeDisabled = presentInLine || isCircular;
 
   const [name, setName] = React.useState(sequenceInDb.name);
   const [sequenceType, setSequenceType] = React.useState(sequenceInDb.sequence_type);
@@ -86,7 +56,7 @@ function EditSequenceNameAndType({ sequenceData, sequenceInDb, onSave }) {
     } else {
       patchMutation.mutate({
         name: newName,
-        'sequence_type': isCircular ? undefined : sequenceType,
+        'sequence_type': changeTypeDisabled ? undefined : sequenceType,
       });
     }
   };
@@ -108,7 +78,13 @@ function EditSequenceNameAndType({ sequenceData, sequenceInDb, onSave }) {
         sx={{ minWidth: 220 }}
       />
 
-      <SequenceTypeSelect value={sequenceType} onChange={setSequenceType} isCircular={isCircular} />
+      <SequenceTypeSelect
+        value={sequenceType}
+        onChange={setSequenceType}
+        isCircular={isCircular}
+        isTemplateSequence={isTemplateSequence}
+        changeTypeDisabled={changeTypeDisabled}
+      />
 
       <Button
         type="submit"

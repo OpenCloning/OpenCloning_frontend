@@ -24,6 +24,7 @@ import AddToCloningButton from '../components/AddToCloningButton';
 import BulkUploadSequencesButton from '../components/bulk_upload/BulkUploadSequencesButton';
 import PageContainer from '../components/PageContainer';
 import SequenceTable from '../components/SequenceTable';
+import CreateTemplateSequenceButton from '../components/CreateTemplateSequenceButton';
 
 const MIN_WIDTH = 200;
 
@@ -135,6 +136,7 @@ function SequencesPage() {
       />
       <TopButtonSection>
         <BulkUploadSequencesButton />
+        <CreateTemplateSequenceButton />
         <TagEntitiesButton
           selectedEntities={selectedSequences}
           entityType="input_entities"

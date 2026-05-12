@@ -4,9 +4,9 @@ import endpoints from '../../../packages/opencloningdb/src/endpoints';
 describe('SequencesPage', () => {
   it('should render and make the right search request', () => {
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
+    cy.e2eLogin('/sequences?name=pREX0008', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences').then(({ response, request }) => {
-      expect(request.query).to.deep.equal({ page: '1', size: '25' });
+      expect(request.query).to.deep.equal({ page: '1', size: '25', name: 'pREX0008' });
       cy.get('h5').contains('Sequences').should('exist');
 
       const sequences = response.body.items;
@@ -207,7 +207,7 @@ describe('SequencesPage', () => {
 
   it('can add to tab from the detail page', () => {
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
+    cy.e2eLogin('/sequences?name=pREX0008', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences')
     cy.get('tbody button').contains('pREX0008').click();
     cy.get('button').contains('Add to Design Tab', { timeout: 20000 }).click();
@@ -219,7 +219,7 @@ describe('SequencesPage', () => {
     cy.disableCache();
     // If downloaded file exists, delete it
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
+    cy.e2eLogin('/sequences?name=pREX0008', 'view-only-user@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === 'pREX0008');
       cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');

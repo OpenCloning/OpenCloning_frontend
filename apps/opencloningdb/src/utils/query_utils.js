@@ -78,6 +78,10 @@ export const CIRCULAR_SEQUENCE_TYPES = {
   plasmid: 'Plasmid',
 };
 
+export const TEMPLATE_SEQUENCE_TYPES = {
+  allele: 'Allele',
+  plasmid: 'Plasmid'
+};
 
 /**
  * Parse URL search params into sequence filter object.

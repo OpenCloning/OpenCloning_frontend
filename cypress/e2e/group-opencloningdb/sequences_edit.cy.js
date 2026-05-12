@@ -151,6 +151,12 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.dbAlertExists('Sequence updated successfully');
     cy.closeDbAlerts();
   });
+  it('cannot change type in sequence present in a line', () => {
+    cy.e2eLogin(`/sequences?name=ase1delta`, 'bootstrap@example.com', 'password');
+    cy.get('tbody tr button').contains('ase1delta').click();
+    cy.get('[aria-label="Edit name and type"]').click();
+    cy.get('[aria-label="Cannot change type of sequence present in a line"] input').should('be.disabled');
+  });
   it('can bulk upload sequences', () => {
     cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
     cy.get('button').contains('Bulk Upload').click();
@@ -296,5 +302,21 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.get('button').contains('Search').click();
     cy.get('tr button').contains('digested_vector').click();
     cy.get('[data-testid="delete-sequence-button"]').should('be.disabled');
+  });
+  it('can create template sequences', () => {
+    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.get('button').contains('Create Template Sequence').click();
+    cy.get('[data-testid="create-template-sequence-dialog"] label').eq(1).siblings('div').first().click();
+    cy.get('ul[aria-labelledby="sequence-type-label"] li').should('have.length', 2);
+    cy.get('ul[aria-labelledby="sequence-type-label"] li').contains('Allele').click();
+    cy.get('[data-testid="create-template-sequence-dialog"]').within(() => {
+      cy.get('button').should('be.disabled');
+      cy.get('input').first().type('new_template_sequence_allele', { delay: 0 });
+      cy.get('button').should('be.enabled');
+      cy.get('button').contains('Create').click();
+    });
+    cy.dbAlertExists('Template sequence created successfully');
+    cy.closeDbAlerts();
+    cy.get('tbody tr button').contains('new_template_sequence_allele').should('exist');
   });
 });

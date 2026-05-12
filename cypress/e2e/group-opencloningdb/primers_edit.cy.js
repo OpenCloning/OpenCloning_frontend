@@ -47,9 +47,11 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
         cy.get('button').contains('Submit').click();
       });
       cy.wait('@addPrimer');
+      cy.openCloningAlertExists('Primer created successfully');
+      cy.closeAlerts();
       cy.get('.primer-table-container').contains('test_primer').should('exist');
       cy.changeTab('Primers', '[data-testid="opencloningdb-app-tabs"]');
-      cy.get('[data-testid="primers-page"] tbody tr').last().within(() => {
+      cy.get('[data-testid="primers-page"] tbody tr').first().within(() => {
         cy.get('td').contains('test_primer').should('exist');
         cy.get('td').contains('AACCCCTTTGGG').should('exist');
       });

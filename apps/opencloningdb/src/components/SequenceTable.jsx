@@ -6,6 +6,48 @@ import SequenceTypeChip from './SequenceTypeChip';
 import SelectAllCheckbox from './SelectAllCheckbox';
 import SampleUidBadge from './SampleUidBadge';
 
+function SequenceTableRow({ seq, withCheckbox, showSampleUids, showType, showCreatedBy, showCreatedAt, selectedIds, toggleRow }) {
+  return (
+    <TableRow key={seq.id} hover>
+      {withCheckbox && (
+        <TableCell padding="checkbox">
+          <Checkbox
+            size="small"
+            checked={selectedIds.has(seq.id)}
+            onChange={() => toggleRow(seq.id)}
+          />
+        </TableCell>
+      )}
+      {showSampleUids && (
+        <TableCell>
+          {seq.sample_uids?.length > 0 ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {seq.sample_uids.map((uid) => <SampleUidBadge key={uid} uid={uid} />)}
+            </Box>
+          ) : '—'}
+        </TableCell>
+      )}
+      <TableCell>
+        <SequenceLink id={seq.id} name={seq.name} />
+      </TableCell>
+      {showType && (
+        <TableCell>
+          <SequenceTypeChip sequenceType={seq.sequence_type} />
+        </TableCell>
+      )}
+      <TableCell>
+        <TagChipList tags={seq.tags ?? []} />
+      </TableCell>
+      {showCreatedBy && (
+        <TableCell>{seq.created_by?.display_name ?? '—'}</TableCell>
+      )}
+      {showCreatedAt && (
+        <TableCell>{seq.created_at ? new Date(seq.created_at).toLocaleDateString() : '—'}</TableCell>
+      )}
+    </TableRow>
+  );
+}
+
 function SequenceTable({
   sequences,
   showType = true,
@@ -42,43 +84,16 @@ function SequenceTable({
       </TableHead>
       <TableBody>
         {sequences.map((seq) => (
-          <TableRow key={seq.id} hover>
-            {withCheckbox && (
-              <TableCell padding="checkbox">
-                <Checkbox
-                  size="small"
-                  checked={selectedIds.has(seq.id)}
-                  onChange={() => toggleRow(seq.id)}
-                />
-              </TableCell>
-            )}
-            {showSampleUids && (
-              <TableCell>
-                {seq.sample_uids?.length > 0 ? (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {seq.sample_uids.map((uid) => <SampleUidBadge key={uid} uid={uid} />)}
-                  </Box>
-                ) : '—'}
-              </TableCell>
-            )}
-            <TableCell>
-              <SequenceLink id={seq.id} name={seq.name} />
-            </TableCell>
-            {showType && (
-              <TableCell>
-                <SequenceTypeChip sequenceType={seq.sequence_type} />
-              </TableCell>
-            )}
-            <TableCell>
-              <TagChipList tags={seq.tags ?? []} />
-            </TableCell>
-            {showCreatedBy && (
-              <TableCell>{seq.created_by?.display_name ?? '—'}</TableCell>
-            )}
-            {showCreatedAt && (
-              <TableCell>{seq.created_at ? new Date(seq.created_at).toLocaleDateString() : '—'}</TableCell>
-            )}
-          </TableRow>
+          <SequenceTableRow
+            key={seq.id}
+            seq={seq}
+            withCheckbox={withCheckbox}
+            showSampleUids={showSampleUids}
+            showType={showType}
+            showCreatedBy={showCreatedBy}
+            showCreatedAt={showCreatedAt}
+            selectedIds={selectedIds}
+            toggleRow={toggleRow} />
         ))}
       </TableBody>
     </Table>
