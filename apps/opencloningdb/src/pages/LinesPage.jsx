@@ -52,6 +52,13 @@ function LinesQueryFields({ pendingParams, setPendingParams }) {
         onChange={(value) => setPendingParams((p) => ({ ...p, tags: value }))}
         sx={{ minWidth: MIN_WIDTH }}
       />
+      <SearchBarTextField
+        label="Created by"
+        placeholder="Search by user name"
+        value={pendingParams.created_by ?? ''}
+        onChange={(value) => setPendingParams((p) => ({ ...p, created_by: value }))}
+        sx={{ minWidth: MIN_WIDTH }}
+      />
       <Button variant="contained" color="primary" type="submit">
         Search
       </Button>
@@ -112,7 +119,7 @@ function LinesPage() {
         <TagEntitiesButton onSuccess={() => setSelectedIds(new Set())} selectedEntities={selectedEntities} entityType="lines" label="Lines" />
       </TopButtonSection>
       <TableContainer component={Paper}>
-        <LinesTable lines={items} withCheckbox={true} selectedIds={selectedIds} toggleRow={toggleRow} />
+        <LinesTable lines={items} showCreatedBy showCreatedAt withCheckbox={true} selectedIds={selectedIds} toggleRow={toggleRow} />
         <TablePagination
           component="div"
           count={data?.total ?? 0}

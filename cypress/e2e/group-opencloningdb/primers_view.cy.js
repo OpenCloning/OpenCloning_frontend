@@ -17,6 +17,8 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
           cy.get('td').eq(2).should('have.text', primerWithoutTagsNorUID.name);
           cy.get('td').eq(3).should('have.text', '-');
           cy.get('td').eq(4).should('have.text', primerWithoutTagsNorUID.sequence);
+          cy.get('td').eq(5).should('contain', primerWithoutTagsNorUID.created_by.display_name);
+          cy.get('td').eq(6).invoke('text').should('not.be.empty');
         });
       const primerWithTagsAndUID = primers.find((primer) => primer.name === 'fwd_restriction_then_ligation');
       cy.get('tbody tr')
@@ -28,12 +30,15 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
           cy.get('td').eq(2).should('have.text', primerWithTagsAndUID.name);
           cy.get('td').eq(3).contains(primerWithTagsAndUID.tags[0].name).should('exist');
           cy.get('td').eq(4).should('have.text', primerWithTagsAndUID.sequence);
+          cy.get('td').eq(5).should('contain', primerWithTagsAndUID.created_by.display_name);
+          cy.get('td').eq(6).invoke('text').should('not.be.empty');
         });
     });
     cy.intercept('GET', Cypress.getDbURL(endpoints.primers, '*')).as('getPrimers2');
     cy.setInputValue('UID', 'ML7', '[data-testid="primers-page"]');
     cy.setInputValue('Name', 'fwd_restriction_then_ligation', '[data-testid="primers-page"]');
     cy.clickMultiSelectOption('Tags', 'templateless_PCR', '[data-testid="primers-page"]');
+    cy.setInputValue('Created by', 'Bootstrap User', '[data-testid="primers-page"]');
     cy.get('[data-testid="primers-page"] label').contains('With UID').parent().find('input').click({ force: true });
     cy.get('button').contains('Search').click();
     cy.wait('@getPrimers2').then(({ response, request }) => {
@@ -43,6 +48,7 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
       cy.wrap(request.query).should('have.property', 'name', "fwd_restriction_then_ligation");
       cy.wrap(request.query.tags).should('match', /\d+/);
       cy.wrap(request.query).should('have.property', 'has_uid', 'true');
+      cy.wrap(request.query).should('have.property', 'created_by', 'Bootstrap User');
     });
     // Finally a query to verify that multiple tags are working, mock since no need
     cy.intercept('GET', Cypress.getDbURL(endpoints.primers, '*'), { statusCode: 200, body: { items: [] } }).as('getPrimers3');
@@ -56,15 +62,15 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
     });
   });
   it('should set query params from the URL', () => {
-    cy.e2eLogin('/primers', 'view-only-user@example.com', 'password');
+    const url = '/primers?uid=ML7&name=fwd_restriction_then_ligation&tags=1&tags=2&has_uid=true&created_by=Bootstrap+User';
     cy.intercept('GET', Cypress.getDbURL(endpoints.primers, '*'), { statusCode: 200, body: { items: [] } }).as('getPrimers2');
     cy.intercept('GET', Cypress.getDbURL(endpoints.tags), { statusCode: 200, body:[{ id: 1, name: 'crispr_hdr' }, { id: 2, name: 'templateless_PCR' }] }).as('getTags');
-    cy.visit('/primers?uid=ML7&name=fwd_restriction_then_ligation&tags=1&tags=2&has_uid=true');
-
+    cy.e2eLogin(url, 'view-only-user@example.com', 'password');
     cy.wait('@getPrimers2').then(({ response, request }) => {
       cy.wrap(request.query).should('have.property', 'uid', "ML7");
       cy.wrap(request.query).should('have.property', 'name', "fwd_restriction_then_ligation");
       cy.wrap(request.query.tags).should('have.length', 2);
+      cy.wrap(request.query).should('have.property', 'created_by', 'Bootstrap User');
     });
     cy.get('[data-testid="url-params-form"]').within(() => {
       cy.get('label').contains('With UID').parent().find('input').should('be.checked');
@@ -72,6 +78,7 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
       cy.get('label').contains('Name').parent().find('input').should('have.value', 'fwd_restriction_then_ligation');
       cy.get('label').contains('Tags').siblings().find('div').contains('crispr_hdr').should('exist');
       cy.get('label').contains('Tags').siblings().find('div').contains('templateless_PCR').should('exist');
+      cy.get('label').contains('Created by').parent().find('input').should('have.value', 'Bootstrap User');
     });
 
   });

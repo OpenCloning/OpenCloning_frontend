@@ -54,6 +54,13 @@ function SequenceQueryFields({ pendingParams, setPendingParams }) {
         onChange={(value) => setPendingParams((p) => ({ ...p, tags: value }))}
         sx={{ minWidth: MIN_WIDTH }}
       />
+      <SearchBarTextField
+        label="Created by"
+        placeholder="Search by user name"
+        value={pendingParams.created_by ?? ''}
+        onChange={(value) => setPendingParams((p) => ({ ...p, created_by: value }))}
+        sx={{ minWidth: MIN_WIDTH }}
+      />
       <FormControlLabel
         control={
           <Switch

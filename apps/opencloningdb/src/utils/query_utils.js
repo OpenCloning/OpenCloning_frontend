@@ -91,6 +91,7 @@ export function parseSequenceParams(searchParams) {
     sequence_types: parseStringArray(searchParams.getAll('sequence_types'))?.filter((t) => VALID_SEQUENCE_TYPES.includes(t)),
     instantiated: parseBoolean(searchParams.get('instantiated')),
     has_uid: parseBoolean(searchParams.get('has_uid')),
+    created_by: parseString(searchParams.get('created_by')),
   };
 }
 
@@ -101,7 +102,7 @@ export function parseSequenceParams(searchParams) {
 export function applySequenceParamsToSearchParams(params, nextParams) {
   nextParams.delete('page');
 
-  const keys = ['name', 'uid', 'tags', 'sequence_types', 'instantiated', 'has_uid'];
+  const keys = ['name', 'uid', 'tags', 'sequence_types', 'instantiated', 'has_uid', 'created_by'];
   keys.forEach((key) => nextParams.delete(key));
 
   if (params.name) {
@@ -121,7 +122,10 @@ export function applySequenceParamsToSearchParams(params, nextParams) {
   }
   if (params.has_uid === true || params.has_uid === false) {
     nextParams.set('has_uid', params.has_uid ? 'true' : 'false');
-  } 
+  }
+  if (params.created_by) {
+    nextParams.set('created_by', params.created_by);
+  }
 }
 
 /**
@@ -134,6 +138,7 @@ export function parsePrimersParams(searchParams) {
     name: parseString(searchParams.get('name')),
     uid: parseString(searchParams.get('uid')),
     has_uid: parseBoolean(searchParams.get('has_uid')),
+    created_by: parseString(searchParams.get('created_by')),
   };
 }
 
@@ -144,7 +149,7 @@ export function parsePrimersParams(searchParams) {
 export function applyPrimersParamsToSearchParams(params, nextParams) {
   nextParams.delete('page');
 
-  const keys = ['name', 'tags', 'uid', 'has_uid'];
+  const keys = ['name', 'tags', 'uid', 'has_uid', 'created_by'];
   keys.forEach((key) => nextParams.delete(key));
 
   if (params.name) {
@@ -159,6 +164,9 @@ export function applyPrimersParamsToSearchParams(params, nextParams) {
   if (params.has_uid === true || params.has_uid === false) {
     nextParams.set('has_uid', params.has_uid ? 'true' : 'false');
   }
+  if (params.created_by) {
+    nextParams.set('created_by', params.created_by);
+  }
 }
 
 /**
@@ -171,6 +179,7 @@ export function parseLinesParams(searchParams) {
     genotype: parseString(searchParams.get('genotype')),
     plasmid: parseString(searchParams.get('plasmid')),
     uid: parseString(searchParams.get('uid')),
+    created_by: parseString(searchParams.get('created_by')),
   };
 }
 
@@ -181,7 +190,7 @@ export function parseLinesParams(searchParams) {
 export function applyLinesParamsToSearchParams(params, nextParams) {
   nextParams.delete('page');
 
-  const keys = ['tags', 'genotype', 'plasmid', 'uid'];
+  const keys = ['tags', 'genotype', 'plasmid', 'uid', 'created_by'];
   keys.forEach((key) => nextParams.delete(key));
 
   if (params.genotype) {
@@ -195,5 +204,8 @@ export function applyLinesParamsToSearchParams(params, nextParams) {
   }
   if (params.tags) {
     params.tags.forEach((id) => nextParams.append('tags', String(id)));
+  }
+  if (params.created_by) {
+    nextParams.set('created_by', params.created_by);
   }
 }

@@ -36,6 +36,7 @@ describe('SequencesPage', () => {
     cy.setInputValue('Name', 'pREX0008', '[data-testid="sequences-page"]');
     cy.clickMultiSelectOption('Type', 'Plasmid', '[data-testid="sequences-page"]');
     cy.clickMultiSelectOption('Tags', 'example_sequencing', '[data-testid="sequences-page"]');
+    cy.setInputValue('Created by', 'Bootstrap User', '[data-testid="sequences-page"]');
     cy.get('[data-testid="sequences-page"] button').contains('Search').click();
     cy.wait('@getSequences2').then(({ response, request }) => {
       cy.wrap(request.query).should('have.property', 'page', '1');
@@ -44,6 +45,7 @@ describe('SequencesPage', () => {
       cy.wrap(request.query).should('have.property', 'name', 'pREX0008');
       cy.wrap(request.query).should('have.property', 'sequence_types', 'plasmid');
       cy.wrap(request.query.tags).should('match', /\d+/);
+      cy.wrap(request.query).should('have.property', 'created_by', 'Bootstrap User');
 
       const filteredSequences = response.body.items;
       expect(filteredSequences).to.have.length(1);
@@ -75,16 +77,17 @@ describe('SequencesPage', () => {
   });
 
   it('should set query params from the URL', () => {
-    cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
+    const url = '/sequences?uid=example_sequencing-sample&name=pREX0008&sequence_types=plasmid&tags=1&has_uid=true&created_by=Bootstrap+User';
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.intercept('GET', Cypress.getDbURL(endpoints.tags, '*'), { statusCode: 200, body: [{ id: 1, name: 'example_sequencing' }] }).as('getTags');
-    cy.visit('/sequences?uid=example_sequencing-sample&name=pREX0008&sequence_types=plasmid&tags=1&has_uid=true');
+    cy.e2eLogin(url, 'view-only-user@example.com', 'password');
     cy.wait('@getSequences').then(({ request }) => {
       cy.wrap(request.query).should('have.property', 'uid', 'example_sequencing-sample');
       cy.wrap(request.query).should('have.property', 'name', 'pREX0008');
       cy.wrap(request.query).should('have.property', 'sequence_types', 'plasmid');
       cy.wrap(request.query).should('have.property', 'has_uid', 'true');
       cy.wrap(request.query.tags).should('match', /\d+/);
+      cy.wrap(request.query).should('have.property', 'created_by', 'Bootstrap User');
     });
     cy.get('[data-testid="url-params-form"]').within(() => {
       cy.get('label').contains('With UID').parent().find('input').should('be.checked');
@@ -92,6 +95,7 @@ describe('SequencesPage', () => {
       cy.get('label').contains('Name').parent().find('input').should('have.value', 'pREX0008');
       cy.get('label').contains('Type').siblings().find('div').contains('Plasmid').should('exist');
       cy.get('label').contains('Tags').siblings().find('div').contains('example_sequencing').should('exist');
+      cy.get('label').contains('Created by').parent().find('input').should('have.value', 'Bootstrap User');
     });
   });
 

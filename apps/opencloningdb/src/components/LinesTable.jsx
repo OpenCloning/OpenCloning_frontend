@@ -19,7 +19,7 @@ function SeqCell({ sequences }) {
   );
 }
 
-function LinesTable({ lines = [], withCheckbox = false, selectedIds = new Set(), toggleRow = () => {} }) {
+function LinesTable({ lines = [], showCreatedBy = false, showCreatedAt = false, withCheckbox = false, selectedIds = new Set(), toggleRow = () => {} }) {
   const ids = lines.map((line) => line.id);
 
   return (
@@ -40,6 +40,8 @@ function LinesTable({ lines = [], withCheckbox = false, selectedIds = new Set(),
           <TableCell>Genotype</TableCell>
           <TableCell>Plasmids</TableCell>
           <TableCell>Tags</TableCell>
+          {showCreatedBy && <TableCell>Created by</TableCell>}
+          {showCreatedAt && <TableCell>Created at</TableCell>}
         </TableRow>
       </TableHead>
       <TableBody>
@@ -60,6 +62,12 @@ function LinesTable({ lines = [], withCheckbox = false, selectedIds = new Set(),
               <TableCell><SeqCell sequences={getAlleleSequencesInLine(line)} /></TableCell>
               <TableCell><SeqCell sequences={getPlasmidSequencesInLine(line)} /></TableCell>
               <TableCell><TagChipList tags={line.tags} /></TableCell>
+              {showCreatedBy && (
+                <TableCell>{line.created_by?.display_name ?? '—'}</TableCell>
+              )}
+              {showCreatedAt && (
+                <TableCell>{line.created_at ? new Date(line.created_at).toLocaleDateString() : '—'}</TableCell>
+              )}
             </TableRow>
           );
         })}
