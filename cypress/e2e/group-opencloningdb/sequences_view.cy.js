@@ -277,4 +277,18 @@ describe('SequencesPage', () => {
   it('select all checks every row and shows bulk actions', () => {
     cy.openCloningDbTableSelectAllTest('sequences', '[data-testid="sequences-page"]', 'select all sequences', 'Add to Design Tab');
   });
+
+  it('can load ancestors from the design tab', () => {
+    cy.e2eLogin('/sequences?name=entry_clone_lacZ', 'view-only-user@example.com', 'password');
+    cy.get('tbody button').contains('entry_clone_lacZ').click();
+    cy.get('button').contains('Add to Design Tab').click();
+    cy.changeTab('Design');
+    cy.get('.open-cloning li').contains('Imported from').should('exist');
+    cy.get('.open-cloning li').contains('Gateway BP reaction').should('not.exist');
+
+    cy.get('button').contains('Load history').click();
+    cy.get('.open-cloning li').contains('Gateway BP reaction').should('exist');
+    cy.get('.open-cloning li').contains('PCR with primers').should('not.exist');
+    cy.get('.open-cloning li').contains('pDONR221').should('exist');
+  });
 });
