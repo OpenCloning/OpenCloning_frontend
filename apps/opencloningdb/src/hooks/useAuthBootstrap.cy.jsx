@@ -11,7 +11,7 @@ import store from '../store';
 import { clearUser, setUser, setWorkspace } from '../store/authSlice';
 import useAuthBootstrap from './useAuthBootstrap';
 
-const DB_URL = 'http://localhost:8001';
+const DB_URL = 'http://localhost:8000/db';
 
 const TEST_USER = {
   id: 1,

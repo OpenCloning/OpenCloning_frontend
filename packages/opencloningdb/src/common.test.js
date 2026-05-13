@@ -26,7 +26,7 @@ afterEach(() => {
 
 describe('common', () => {
   it('exports the expected base URL', () => {
-    expect(baseUrl).toBe('http://localhost:8001');
+    expect(baseUrl).toBe('http://localhost:8000/db');
   });
 
   it('sets and clears the workspace header', () => {
