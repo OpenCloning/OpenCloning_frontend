@@ -164,7 +164,7 @@ jobs:
       - name: run python dev server in background
         working-directory: OpenCloning_backend
         run: |
-          uv run opencloning-cli db test reset
+          uv run opencloning-cli db seed
           uv run uvicorn opencloning.combined:app --port 8000
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
