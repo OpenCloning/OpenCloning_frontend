@@ -183,7 +183,7 @@ describe('File Source', () => {
   it('loads SnapGene history with warning', () => {
     cy.get('li#source-1 form.submit-sequence-file input').last().selectFile('cypress/test_files/snapgene_history/circularize.dna', { force: true });
     cy.get('li', { timeout: 20000 }).contains('Circularization of fragment');
-    cy.get('#global-error-message-wrapper').contains('SnapGene parsing warning');
+    cy.get('#global-error-message-wrapper').contains('Not all SnapGene history was parsed');
   });
   it('falls back to sequence when SnapGene history fails', () => {
     cy.get('li#source-1 form.submit-sequence-file input').last().selectFile('cypress/test_files/snapgene_history/topo_ta_cloning.dna', { force: true });

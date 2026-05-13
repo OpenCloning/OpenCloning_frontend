@@ -48,7 +48,7 @@ export default function useSnapgeneHistoryEndpoint() {
       }
       if (resp.headers['x-warning']) {
         addAlert({
-          message: `SnapGene parsing warning: ${resp.headers['x-warning']}`,
+          message: `Not all SnapGene history was parsed: ${resp.headers['x-warning']}`,
           severity: 'warning',
         });
       }

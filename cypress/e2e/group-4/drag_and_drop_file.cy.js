@@ -97,7 +97,7 @@ describe('Test drag and drop functionality', () => {
   it('Can load a SnapGene .dna file with history and warning', () => {
     cy.get('div.cloning-history').selectFile('cypress/test_files/snapgene_history/circularize.dna', { action: 'drag-drop' });
     cy.get('li', { timeout: 20000 }).contains('Circularization of fragment');
-    cy.get('#global-error-message-wrapper').contains('SnapGene parsing warning');
+    cy.get('#global-error-message-wrapper').contains('Not all SnapGene history was parsed');
   });
   it('Falls back to sequence when SnapGene .dna history fails', () => {
     cy.get('div.cloning-history').selectFile('cypress/test_files/snapgene_history/topo_ta_cloning.dna', { action: 'drag-drop' });
