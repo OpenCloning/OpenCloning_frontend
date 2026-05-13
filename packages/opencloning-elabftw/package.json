@@ -13,11 +13,11 @@
         "directory": "packages/opencloning-elabftw"
     },
     "dependencies": {
-        "@mui/icons-material": "^5.15.17",
-        "@mui/material": "^5.15.17",
+        "@mui/icons-material": "^5.18.0",
+        "@mui/material": "^5.18.0",
         "@opencloning/ui": "workspace:*",
         "@opencloning/utils": "workspace:*",
-        "axios": "^1.12.2"
+        "axios": "^1.16.0"
     },
     "peerDependencies": {
         "react": "^18.3.1",
