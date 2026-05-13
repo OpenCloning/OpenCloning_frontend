@@ -1,5 +1,17 @@
 # opencloning
 
+## 1.5.11
+
+### Patch Changes
+
+- [#699](https://github.com/OpenCloning/OpenCloning_frontend/pull/699) [`8e841bd`](https://github.com/OpenCloning/OpenCloning_frontend/commit/8e841bdee4797df61bcf8d1972e3c3581d24fbfb) Thanks [@manulera](https://github.com/manulera)! - Improve snapgene warning
+
+- Updated dependencies [[`8e841bd`](https://github.com/OpenCloning/OpenCloning_frontend/commit/8e841bdee4797df61bcf8d1972e3c3581d24fbfb)]:
+  - @opencloning/ui@1.8.1
+  - @opencloning/opencloning-elabftw@1.8.1
+  - @opencloning/store@1.8.1
+  - @opencloning/utils@1.8.1
+
 ## 1.5.10
 
 ### Patch Changes

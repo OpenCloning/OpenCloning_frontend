@@ -1,5 +1,15 @@
 # @opencloning/ui
 
+## 1.8.1
+
+### Patch Changes
+
+- [#699](https://github.com/OpenCloning/OpenCloning_frontend/pull/699) [`8e841bd`](https://github.com/OpenCloning/OpenCloning_frontend/commit/8e841bdee4797df61bcf8d1972e3c3581d24fbfb) Thanks [@manulera](https://github.com/manulera)! - Improve snapgene warning
+
+- Updated dependencies []:
+  - @opencloning/store@1.8.1
+  - @opencloning/utils@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes
