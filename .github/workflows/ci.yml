@@ -170,11 +170,6 @@ jobs:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
-          OPENCLONING_TESTING: "1"
-          OPENCLONING_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/opencloning_dev
-          OPENCLONING_SEQUENCE_FILES_DIR: dev_database/sequence_files
-          OPENCLONING_SEQUENCING_FILES_DIR: dev_database/sequencing_files
-          OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
 
       - name: run posgres in docker
         if: matrix.group == 'opencloningdb'
@@ -187,6 +182,15 @@ jobs:
         run: |
           uv run opencloning-cli db seed
           uv run uvicorn opencloning_db.combined:app
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
+          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          OPENCLONING_TESTING: "1"
+          OPENCLONING_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/opencloning_dev
+          OPENCLONING_SEQUENCE_FILES_DIR: dev_database/sequence_files
+          OPENCLONING_SEQUENCING_FILES_DIR: dev_database/sequencing_files
+          OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
 
       - name: check if the backend server is running
         run: |
