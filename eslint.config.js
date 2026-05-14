@@ -49,7 +49,7 @@ export default [
     }
   },
   {
-    files: ['cypress/**/*.{js,jsx}', '**/*.cy.{js,jsx}'],
+    files: ['cypress/**/*.{js,jsx}', '**/*.cy.{js,jsx}', '**/*.test.js'],
     plugins: {
       cypress
     },
