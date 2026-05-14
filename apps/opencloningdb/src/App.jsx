@@ -26,7 +26,7 @@ import WorkspacePage from './pages/WorkspacePage';
 const queryClient = new QueryClient();
 
 const config = {
-  backendUrl: 'http://localhost:8000',
+  backendUrl: 'http://localhost:8000/cloning',
   showAppBar: false,
   enableAssembler: false,
   enablePlannotate: false,

@@ -161,19 +161,39 @@ jobs:
           path: OpenCloning_backend/.venv
           key: python-venv-${{ runner.os }}-${{ needs.get-backend-sha.outputs.backend_sha }}
 
-      - name: run python dev server in background
+      - name: run python dev server in background (not opencloningdb)
+        if: matrix.group != 'opencloningdb'
         working-directory: OpenCloning_backend
         run: |
-          uv run opencloning-cli db test reset
           uv run uvicorn opencloning.main:app --port 8000 &
-          uv run uvicorn opencloning_db.api:app --port 8001 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
-          OPENCLONING_TESTING: '1'
+
+      - name: run posgres in docker
+        if: matrix.group == 'opencloningdb'
+        working-directory: OpenCloning_backend
+        run: docker compose -f docker/docker-compose.db.yml up -d --wait postgres
+
+      - name: run python dev server in background (opencloningdb)
+        if: matrix.group == 'opencloningdb'
+        working-directory: OpenCloning_backend
+        run: |
+          uv run opencloning-cli db seed
+          uv run uvicorn opencloning_db.combined:app --port 8000 &
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
+          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          OPENCLONING_TESTING: "1"
+          OPENCLONING_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/opencloning_dev
+          OPENCLONING_SEQUENCE_FILES_DIR: dev_database/sequence_files
+          OPENCLONING_SEQUENCING_FILES_DIR: dev_database/sequencing_files
+          OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
 
       - name: check if the backend server is running
+        if: matrix.group != 'opencloningdb'
         run: |
           for i in {1..3}; do
             if curl -s http://127.0.0.1:8000 > /dev/null; then
@@ -187,9 +207,10 @@ jobs:
           exit 1
 
       - name: check if the opencloningdb server is running
+        if: matrix.group == 'opencloningdb'
         run: |
           for i in {1..3}; do
-            if curl -f http://127.0.0.1:8001/docs > /dev/null; then
+            if curl -f http://127.0.0.1:8000/db/docs > /dev/null; then
               echo "OpenCloningDB server is up!"
               exit 0
             fi
@@ -243,6 +264,11 @@ jobs:
       - name: vitest unit tests
         if: matrix.group == 'unit-tests'
         run: yarn install --immutable && yarn vitest run --coverage
+
+      - name: stop posgres in docker
+        if: matrix.group == 'opencloningdb'
+        working-directory: OpenCloning_backend
+        run: docker compose -f docker/docker-compose.db.yml down -v
 
       - name: Upload coverage file
         uses: actions/upload-artifact@v4.6.0
@@ -335,8 +361,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: manulera/opencloningfrontend:latest
-          format: 'table'
-          exit-code: '0'
+          format: "table"
+          exit-code: "0"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"

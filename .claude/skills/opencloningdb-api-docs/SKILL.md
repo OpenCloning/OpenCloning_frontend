@@ -9,7 +9,7 @@ description: Points to OpenCloningDB API endpoint documentation. Use when workin
 
 When using OpenCloningDB as the database, API endpoints are documented at:
 
-**http://localhost:8001/openapi.json**
+**http://localhost:8000/db/openapi.json**
 
 Use this when:
 - Looking up OpenCloningDB-specific endpoints (sequences, primers, etc.)

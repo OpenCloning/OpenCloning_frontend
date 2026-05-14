@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const baseUrl = 'http://localhost:8001';
+export const baseUrl = 'http://localhost:8000/db';
 
 let unauthorizedHandler = null;
 

@@ -1,7 +1,7 @@
 import { setWorkspaceHeader } from '../../packages/opencloningdb/src/common.js';
 import endpoints from '../../packages/opencloningdb/src/endpoints';
 
-const DB_URL = 'http://localhost:8001';
+const DB_URL = 'http://localhost:8000/db';
 const STUB_FOLDER = 'OpenCloning_backend/stubs/db';
 Cypress.getDbURL = (path = '', subpath = '') => `${DB_URL}${path}${subpath}`;
 
