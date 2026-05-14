@@ -161,11 +161,11 @@ jobs:
           path: OpenCloning_backend/.venv
           key: python-venv-${{ runner.os }}-${{ needs.get-backend-sha.outputs.backend_sha }}
 
-      - name: run python dev server in background
+      - name: run python dev server in background (not opencloningdb)
+        if: matrix.group != 'opencloningdb'
         working-directory: OpenCloning_backend
         run: |
-          uv run opencloning-cli db seed
-          uv run uvicorn opencloning.combined:app --port 8000
+          uv run uvicorn opencloning.main:app --port 8000
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
@@ -175,6 +175,19 @@ jobs:
           OPENCLONING_SEQUENCE_FILES_DIR: dev_database/sequence_files
           OPENCLONING_SEQUENCING_FILES_DIR: dev_database/sequencing_files
           OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
+
+      - name: run posgres in docker
+        if: matrix.group == 'opencloningdb'
+        working-directory: OpenCloning_backend
+        run: docker compose \
+          -f docker/docker-compose.db.yml up -d --wait postgres
+
+      - name: run python dev server in background (opencloningdb)
+        if: matrix.group == 'opencloningdb'
+        working-directory: OpenCloning_backend
+        run: |
+          uv run opencloning-cli db seed
+          uv run uvicorn opencloning_db.combined:app
 
       - name: check if the backend server is running
         run: |
@@ -201,12 +214,6 @@ jobs:
           done
           echo "Server failed to start"
           exit 1
-
-      - name: run posgres in docker
-        if: matrix.group == 'opencloningdb'
-        working-directory: OpenCloning_backend
-        run: docker compose \
-          -f docker/docker-compose.db.yml up -d --wait postgres
 
       - name: Restore cached node_modules
         uses: actions/cache@v3
