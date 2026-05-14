@@ -170,7 +170,7 @@ jobs:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
-          OPENCLONING_TESTING: '1'
+          OPENCLONING_TESTING: "1"
           OPENCLONING_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/opencloning_dev
           OPENCLONING_SEQUENCE_FILES_DIR: dev_database/sequence_files
           OPENCLONING_SEQUENCING_FILES_DIR: dev_database/sequencing_files
@@ -201,6 +201,12 @@ jobs:
           done
           echo "Server failed to start"
           exit 1
+
+      - name: run posgres in docker
+        if: matrix.group == 'opencloningdb'
+        working-directory: OpenCloning_backend
+        run: docker compose \
+          -f docker/docker-compose.db.yml up -d --wait postgres
 
       - name: Restore cached node_modules
         uses: actions/cache@v3
@@ -338,8 +344,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: manulera/opencloningfrontend:latest
-          format: 'table'
-          exit-code: '0'
+          format: "table"
+          exit-code: "0"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
