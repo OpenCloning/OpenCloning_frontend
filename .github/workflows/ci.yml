@@ -193,9 +193,10 @@ jobs:
           OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
 
       - name: check if the backend server is running
+        if: matrix.group != 'opencloningdb'
         run: |
           for i in {1..3}; do
-            if curl -s http://127.0.0.1:8000/cloning > /dev/null; then
+            if curl -s http://127.0.0.1:8000 > /dev/null; then
               echo "Backend server is up!"
               exit 0
             fi
@@ -206,6 +207,7 @@ jobs:
           exit 1
 
       - name: check if the opencloningdb server is running
+        if: matrix.group == 'opencloningdb'
         run: |
           for i in {1..3}; do
             if curl -f http://127.0.0.1:8000/db/docs > /dev/null; then
