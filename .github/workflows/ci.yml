@@ -165,7 +165,7 @@ jobs:
         if: matrix.group != 'opencloningdb'
         working-directory: OpenCloning_backend
         run: |
-          uv run uvicorn opencloning.main:app --port 8000
+          uv run uvicorn opencloning.main:app --port 8000 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
@@ -181,7 +181,7 @@ jobs:
         working-directory: OpenCloning_backend
         run: |
           uv run opencloning-cli db seed
-          uv run uvicorn opencloning_db.combined:app
+          uv run uvicorn opencloning_db.combined:app --port 8000 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
