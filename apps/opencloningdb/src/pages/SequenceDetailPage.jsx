@@ -241,8 +241,6 @@ function SequenceDetailPage() {
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error?.response?.data?.detail || error?.message || 'Failed to load sequence'}</Alert>;
 
-  console.log('primers', primers);
-  console.log('query status', primersQuery.status);
   return (
     <PageContainer>
       <Box sx={{ position: 'relative'}}>
