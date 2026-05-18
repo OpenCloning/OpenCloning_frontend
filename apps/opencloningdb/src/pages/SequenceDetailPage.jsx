@@ -323,7 +323,7 @@ function SequenceDetailPage() {
       )}
 
       <QueryStatusWrapper queryResult={primersQuery}>
-        {primers.templates.length > 0 || primers.products.length > 0 && (
+        {(primers.templates.length > 0 || primers.products.length > 0) && (
           <DetailPageSection title="Linked primers">
             <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
               <PrimersTable primers={[...primers.templates, ...primers.products]} withCheckbox={false} />

@@ -9,8 +9,7 @@ export default function QueryStatusWrapper({
   errorMessage = 'Could not load options',
   renderIfLoading = false,
 }) {
-  const { isLoading, isError, refetch } = queryResult;
-
+  const { isError, isPending, isSuccess, refetch } = queryResult;
   if (isError) {
     return (
       <RetryAlert onRetry={refetch} sx={{ alignItems: 'center' }}>
@@ -18,14 +17,17 @@ export default function QueryStatusWrapper({
       </RetryAlert>
     );
   }
-
-  if (isLoading && !renderIfLoading) {
-    return (
-      <Alert severity="info" icon={<CircularProgress color="inherit" size="1em" />}>
-        {loadingMessage}
-      </Alert>
-    );
+  if (!renderIfLoading) {
+    if (isPending) {
+      return (
+        <Alert severity="info" icon={<CircularProgress color="inherit" size="1em" />}>
+          {loadingMessage}
+        </Alert>
+      );
+    }
+    if (!isSuccess) {
+      return null;
+    }
   }
-
   return children;
 }
