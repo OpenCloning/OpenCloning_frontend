@@ -241,6 +241,8 @@ function SequenceDetailPage() {
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error?.response?.data?.detail || error?.message || 'Failed to load sequence'}</Alert>;
 
+  console.log('primers', primers);
+  console.log('query status', primersQuery.status);
   return (
     <PageContainer>
       <Box sx={{ position: 'relative'}}>
@@ -323,7 +325,7 @@ function SequenceDetailPage() {
       )}
 
       <QueryStatusWrapper queryResult={primersQuery}>
-        {(primers.templates.length > 0 || primers.products.length > 0) && (
+        {primersQuery.isSuccess && (primers.templates.length > 0 || primers.products.length > 0) && (
           <DetailPageSection title="Linked primers">
             <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
               <PrimersTable primers={[...primers.templates, ...primers.products]} withCheckbox={false} />
