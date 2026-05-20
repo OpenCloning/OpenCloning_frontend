@@ -1,5 +1,17 @@
 # @opencloning/opencloningdb
 
+## 1.8.0
+
+### Minor Changes
+
+- [#711](https://github.com/OpenCloning/OpenCloning_frontend/pull/711) [`6813620`](https://github.com/OpenCloning/OpenCloning_frontend/commit/6813620f4a47c44857045866d667474efbf9a64c) Thanks [@manulera](https://github.com/manulera)! - Use authentication for cloning endpoints in opencloning-db
+
+### Patch Changes
+
+- Updated dependencies [[`6813620`](https://github.com/OpenCloning/OpenCloning_frontend/commit/6813620f4a47c44857045866d667474efbf9a64c)]:
+  - @opencloning/utils@1.9.0
+  - @opencloning/ui@1.9.0
+
 ## 1.7.2
 
 ### Patch Changes
