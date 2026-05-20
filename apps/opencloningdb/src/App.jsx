@@ -27,6 +27,7 @@ const queryClient = new QueryClient();
 
 const config = {
   backendUrl: 'http://localhost:8000/cloning',
+  requiresBackendAuth: true,
   showAppBar: false,
   enableAssembler: false,
   enablePlannotate: false,

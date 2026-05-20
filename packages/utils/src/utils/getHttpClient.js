@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { attachAuthInterceptors } from './httpClientAuth';
 import urlWhitelist from '../config/urlWhitelist';
 
 export default function getHttpClient(extraUrls = []) {
@@ -20,5 +21,11 @@ export default function getHttpClient(extraUrls = []) {
     return config;
   }, (error) => Promise.reject(error));
 
+  return client;
+}
+
+export function getAuthenticatedHttpClient(extraUrls = []) {
+  const client = getHttpClient(extraUrls);
+  attachAuthInterceptors(client);
   return client;
 }

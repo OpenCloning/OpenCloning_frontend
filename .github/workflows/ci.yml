@@ -116,7 +116,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [1, 2, 3, 4, "component", "unit-tests", "opencloningdb"]
+        group: [1, 2, 3, 4, "component", "unit-tests", "opencloningdb1", "opencloningdb2"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -162,7 +162,7 @@ jobs:
           key: python-venv-${{ runner.os }}-${{ needs.get-backend-sha.outputs.backend_sha }}
 
       - name: run python dev server in background (not opencloningdb)
-        if: matrix.group != 'opencloningdb'
+        if: ${{ !startsWith(matrix.group, 'opencloningdb') }}
         working-directory: OpenCloning_backend
         run: |
           uv run uvicorn opencloning.main:app --port 8000 &
@@ -171,13 +171,17 @@ jobs:
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
 
-      - name: run posgres in docker
-        if: matrix.group == 'opencloningdb'
+      - name: run posgres and garage in docker
+        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         working-directory: OpenCloning_backend
-        run: docker compose -f docker/docker-compose.db.yml up -d --wait postgres
+        run: |
+          docker compose \
+            -f docker/docker-compose.postgres.yml \
+            -f docker/docker-compose.garage.yml \
+            up -d postgres garage
 
       - name: run python dev server in background (opencloningdb)
-        if: matrix.group == 'opencloningdb'
+        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         working-directory: OpenCloning_backend
         run: |
           uv run opencloning-cli db seed
@@ -188,12 +192,18 @@ jobs:
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
           OPENCLONING_TESTING: "1"
           OPENCLONING_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/opencloning_dev
-          OPENCLONING_SEQUENCE_FILES_DIR: dev_database/sequence_files
-          OPENCLONING_SEQUENCING_FILES_DIR: dev_database/sequencing_files
           OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
+          OPENCLONING_OBJECT_STORAGE_ENDPOINT_URL: http://localhost:9000
+          OPENCLONING_OBJECT_STORAGE_ACCESS_KEY_ID: opencloning-dev
+          OPENCLONING_OBJECT_STORAGE_SECRET_ACCESS_KEY: opencloning-dev-secret
+          OPENCLONING_OBJECT_STORAGE_BUCKET: opencloning-dev
+          OPENCLONING_OBJECT_STORAGE_REGION: us-east-1
+          OPENCLONING_OBJECT_STORAGE_FORCE_PATH_STYLE: "true"
+          OPENCLONING_SEQUENCE_OBJECTS_PREFIX: sequences/
+          OPENCLONING_SEQUENCING_OBJECTS_PREFIX: sequencing-files/
 
       - name: check if the backend server is running
-        if: matrix.group != 'opencloningdb'
+        if: ${{ !startsWith(matrix.group, 'opencloningdb') }}
         run: |
           for i in {1..3}; do
             if curl -s http://127.0.0.1:8000 > /dev/null; then
@@ -201,13 +211,13 @@ jobs:
               exit 0
             fi
             echo "Waiting for server... ($i/3)"
-            sleep 2
+            sleep 4
           done
           echo "Server failed to start"
           exit 1
 
       - name: check if the opencloningdb server is running
-        if: matrix.group == 'opencloningdb'
+        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         run: |
           for i in {1..3}; do
             if curl -f http://127.0.0.1:8000/db/docs > /dev/null; then
@@ -215,7 +225,7 @@ jobs:
               exit 0
             fi
             echo "Waiting for server... ($i/3)"
-            sleep 2
+            sleep 4
           done
           echo "Server failed to start"
           exit 1
@@ -233,7 +243,7 @@ jobs:
         run: corepack enable
 
       - name: Cypress run E2E tests (OpenCloning)
-        if: matrix.group != 'component' && matrix.group != 'unit-tests' && matrix.group != 'opencloningdb'
+        if: ${{ matrix.group != 'component' && matrix.group != 'unit-tests' && !startsWith(matrix.group, 'opencloningdb') }}
         uses: cypress-io/github-action@v6
         env:
           VITE_COVERAGE: "true"
@@ -243,7 +253,7 @@ jobs:
           start: yarn start
 
       - name: Cypress run E2E tests (OpenCloningDB)
-        if: matrix.group == 'opencloningdb'
+        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         uses: cypress-io/github-action@v6
         env:
           VITE_COVERAGE: "true"
@@ -265,10 +275,14 @@ jobs:
         if: matrix.group == 'unit-tests'
         run: yarn install --immutable && yarn vitest run --coverage
 
-      - name: stop posgres in docker
-        if: matrix.group == 'opencloningdb'
+      - name: stop posgres and garage in docker
+        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         working-directory: OpenCloning_backend
-        run: docker compose -f docker/docker-compose.db.yml down -v
+        run: |
+          docker compose \
+            -f docker/docker-compose.postgres.yml \
+            -f docker/docker-compose.garage.yml \
+            down -v
 
       - name: Upload coverage file
         uses: actions/upload-artifact@v4.6.0

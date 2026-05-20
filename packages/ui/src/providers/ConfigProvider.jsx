@@ -33,6 +33,7 @@ export function ConfigProvider({ config, children }) {
  *   - showAppBar: boolean
  *   - enableAssembler: boolean
  *   - enablePlannotate: boolean
+ *   - requiresBackendAuth: boolean
  *   - noExternalRequests: boolean
  *   - database: string | null
  * 
