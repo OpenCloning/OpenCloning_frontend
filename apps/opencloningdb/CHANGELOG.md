@@ -1,5 +1,17 @@
 # opencloningdb
 
+## 0.2.2
+
+### Patch Changes
+
+- [#709](https://github.com/OpenCloning/OpenCloning_frontend/pull/709) [`08144c0`](https://github.com/OpenCloning/OpenCloning_frontend/commit/08144c085cb5da37e902edc1a3b9c593c58ab680) Thanks [@manulera](https://github.com/manulera)! - Fix QueryStatusWrapper and its effect on SequenceDetailPage
+
+- Updated dependencies [[`08144c0`](https://github.com/OpenCloning/OpenCloning_frontend/commit/08144c085cb5da37e902edc1a3b9c593c58ab680)]:
+  - @opencloning/ui@1.8.2
+  - @opencloning/opencloningdb@1.7.2
+  - @opencloning/store@1.8.2
+  - @opencloning/utils@1.8.2
+
 ## 0.2.1
 
 ### Patch Changes

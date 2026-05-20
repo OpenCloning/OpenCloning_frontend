@@ -1,5 +1,13 @@
 # @opencloning/opencloning-elabftw
 
+## 1.8.2
+
+### Patch Changes
+
+- Updated dependencies [[`08144c0`](https://github.com/OpenCloning/OpenCloning_frontend/commit/08144c085cb5da37e902edc1a3b9c593c58ab680)]:
+  - @opencloning/ui@1.8.2
+  - @opencloning/utils@1.8.2
+
 ## 1.8.1
 
 ### Patch Changes
