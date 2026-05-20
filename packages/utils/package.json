@@ -9,6 +9,7 @@
         "./readNwrite": "./src/utils/readNwrite.js",
         "./network": "./src/utils/network.js",
         "./getHttpClient": "./src/utils/getHttpClient.js",
+        "./httpClientAuth": "./src/utils/httpClientAuth.js",
         "./sourceFunctions": "./src/utils/sourceFunctions.js",
         "./error2String": "./src/utils/error2String.js",
         "./enzyme_utils": "./src/utils/enzyme_utils.js",
