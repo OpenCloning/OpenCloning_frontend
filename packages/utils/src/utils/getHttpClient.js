@@ -2,7 +2,7 @@ import axios from 'axios';
 import { attachAuthInterceptors } from './httpClientAuth';
 import urlWhitelist from '../config/urlWhitelist';
 
-export default function getHttpClient(extraUrls = [], { requiresAuth = false } = {}) {
+export default function getHttpClient(extraUrls = []) {
   const baseURL = import.meta.env.BASE_URL || null;
   const whitelist = [...urlWhitelist, window.location.origin, ...extraUrls];
   if (baseURL) {
@@ -10,10 +10,6 @@ export default function getHttpClient(extraUrls = [], { requiresAuth = false } =
   }
 
   const client = axios.create();
-
-  if (requiresAuth) {
-    attachAuthInterceptors(client);
-  }
 
   client.interceptors.request.use((config) => {
     const url = new URL(config.url, config.baseURL || window.location.origin);
@@ -25,5 +21,11 @@ export default function getHttpClient(extraUrls = [], { requiresAuth = false } =
     return config;
   }, (error) => Promise.reject(error));
 
+  return client;
+}
+
+export function getAuthenticatedHttpClient(extraUrls = []) {
+  const client = getHttpClient(extraUrls);
+  attachAuthInterceptors(client);
   return client;
 }

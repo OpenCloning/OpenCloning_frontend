@@ -1,5 +1,5 @@
 import React from 'react';
-import getHttpClient from '@opencloning/utils/getHttpClient';
+import getHttpClient, { getAuthenticatedHttpClient } from '@opencloning/utils/getHttpClient';
 import { useConfig } from './useConfig';
 
 export default function useHttpClient() {
@@ -7,11 +7,13 @@ export default function useHttpClient() {
 
   // Memoize the client creation and interceptor setup
   const apiClient = React.useMemo(() => {
+    const createHttpClient = requiresBackendAuth ? getAuthenticatedHttpClient : getHttpClient;
+
     if (!backendUrl) {
       // Return a client without backend URL if config not loaded yet
-      return getHttpClient([], { requiresAuth: requiresBackendAuth });
+      return createHttpClient([]);
     }
-    return getHttpClient([backendUrl], { requiresAuth: requiresBackendAuth });
+    return createHttpClient([backendUrl]);
   }, [backendUrl, requiresBackendAuth]);
 
   return apiClient;
