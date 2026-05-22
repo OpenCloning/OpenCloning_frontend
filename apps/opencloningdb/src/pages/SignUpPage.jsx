@@ -5,6 +5,7 @@ import { Box, Button, TextField, Typography, Link, Alert, CircularProgress } fro
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { fetchUserAndFirstWorkspace } from '../utils/auth_utils';
 import useChangeWorkspace from '../hooks/useChangeWorkspace';
+import { error2String } from '@opencloning/utils';
 
 async function registerAndGetUser(email, displayName, password) {
   const { data: { access_token } } = await openCloningDBHttpClient.post(endpoints.authRegister, {
@@ -55,12 +56,13 @@ export default function SignUpPage() {
           Create account
         </Typography>
         {validationError && <Alert severity="error">{validationError}</Alert>}
-        {error && <Alert severity="error">{error.response?.data?.detail ?? 'Sign up failed'}</Alert>}
+        {error && <Alert severity="error">{error2String(error) ?? 'Sign up failed'}</Alert>}
         <TextField
           label="Display name"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           autoFocus
+          required
           autoComplete="name"
         />
         <TextField

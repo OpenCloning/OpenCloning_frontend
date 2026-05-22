@@ -10,8 +10,9 @@ import {
 import store from '../store';
 import { clearUser, setUser, setWorkspace } from '../store/authSlice';
 import useAuthBootstrap from './useAuthBootstrap';
+import { baseUrl } from '@opencloning/opencloningdb';
 
-const DB_URL = 'http://localhost:8000/db';
+const DB_URL = baseUrl;
 
 const TEST_USER = {
   id: 1,
