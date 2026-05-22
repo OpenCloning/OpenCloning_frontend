@@ -2,7 +2,7 @@ import axios from 'axios';
 import { attachAuthInterceptors, setHttpClientUnauthorizedHandler } from '@opencloning/utils/httpClientAuth';
 
 
-export const baseUrl = `${import.meta.env.VITE_OPENCLONING_DB_URL || 'http://localhost:8000'}/db`;
+export const baseUrl = `${import.meta.env?.VITE_OPENCLONING_DB_BACKEND || 'http://localhost:8000'}/db`;
 
 export const setUnauthorizedHandler = setHttpClientUnauthorizedHandler;
 

@@ -26,7 +26,7 @@ import WorkspacePage from './pages/WorkspacePage';
 const queryClient = new QueryClient();
 
 const config = {
-  backendUrl: `${import.meta.env.VITE_OPENCLONING_DB_URL || 'http://localhost:8000'}/cloning`,
+  backendUrl: `${import.meta.env?.VITE_OPENCLONING_DB_BACKEND || 'http://localhost:8000'}/cloning`,
   requiresBackendAuth: true,
   showAppBar: false,
   enableAssembler: false,

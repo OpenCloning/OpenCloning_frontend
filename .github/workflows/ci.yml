@@ -191,7 +191,7 @@ jobs:
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
           OPENCLONING_TESTING: "1"
-          OPENCLONING_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/opencloning_dev
+          OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
           OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
           OPENCLONING_OBJECT_STORAGE_ENDPOINT_URL: http://localhost:9000
           OPENCLONING_OBJECT_STORAGE_ACCESS_KEY_ID: opencloning-dev
