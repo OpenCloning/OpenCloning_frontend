@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "name": "standalone-app",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "type": "module",
   "private": true,
   "scripts": {

@@ -1,5 +1,13 @@
 # @opencloning/opencloning-elabftw
 
+## 1.9.1
+
+### Patch Changes
+
+- Updated dependencies [[`e4d9515`](https://github.com/OpenCloning/OpenCloning_frontend/commit/e4d9515a7f6fcad09e5c196f3cb090f70fe3a156)]:
+  - @opencloning/ui@1.9.1
+  - @opencloning/utils@1.9.1
+
 ## 1.9.0
 
 ### Patch Changes
