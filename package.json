@@ -9,6 +9,7 @@
         "packages/*"
     ],
     "resolutions": {
+        "lodash": "^4.18.1",
         "@opencloning/opencloning-elabftw": "workspace:*",
         "@opencloning/opencloningdb": "workspace:*",
         "@opencloning/store": "workspace:*",
