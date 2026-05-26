@@ -1,5 +1,15 @@
 # @opencloning/ui
 
+## 1.9.1
+
+### Patch Changes
+
+- [#715](https://github.com/OpenCloning/OpenCloning_frontend/pull/715) [`e4d9515`](https://github.com/OpenCloning/OpenCloning_frontend/commit/e4d9515a7f6fcad09e5c196f3cb090f70fe3a156) Thanks [@manulera](https://github.com/manulera)! - Allow to copy features when editing annotation
+
+- Updated dependencies []:
+  - @opencloning/store@1.9.1
+  - @opencloning/utils@1.9.1
+
 ## 1.9.0
 
 ### Minor Changes
