@@ -73,6 +73,18 @@ function MainSequenceEditor() {
       "--",
       "editFeature",
       "deleteFeature",
+      {
+        text: "Duplicate Feature",
+        disabled: props.readOnly,
+        onClick: () => {
+          const { id, ...rest } = annotation;
+          props.upsertFeature({
+            ...rest,
+            // omit id → upsertDeleteActionGenerator assigns a new shortid
+            name: annotation.name ? `${annotation.name} (copy)` : undefined,
+          });
+        },
+      },
       "showRemoveDuplicatesDialogFeatures",
       "--",
       "toggleCdsFeatureTranslations",
