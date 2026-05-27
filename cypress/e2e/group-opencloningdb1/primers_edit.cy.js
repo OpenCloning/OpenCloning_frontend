@@ -95,6 +95,8 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
         cy.contains('all-fine').should('exist');
         cy.get('[data-testid="CheckCircleIcon"]').should('exist');
       });
+      cy.setAutocompleteValue('Tags to apply (optional)', 'templateless_PCR', 'div');
+      cy.setAutocompleteValue('Tags to apply (optional)', 'restriction_ligation_assembly', 'div');
     });
     cy.intercept('POST', Cypress.getDbURL(endpoints.primersBulk, '*')).as('bulkUploadPrimers');
     cy.get('button').contains('Import Clear').click();
@@ -102,6 +104,8 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
       cy.wrap(response.body).should('have.length', 1);
       cy.wrap(response.body[0].name).should('equal', 'all-fine');
       cy.wrap(request.query).should('have.property', 'strict', 'true');
+      cy.wrap(request.query).should('have.property', 'tags');
+      cy.wrap(request.query.tags).should('have.length', 2);
     });
     cy.dbAlertExists('Imported 1 clear primer successfully');
     cy.closeDbAlerts();
