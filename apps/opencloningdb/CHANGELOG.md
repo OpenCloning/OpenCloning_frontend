@@ -1,5 +1,13 @@
 # opencloningdb
 
+## 0.3.2
+
+### Patch Changes
+
+- [#719](https://github.com/OpenCloning/OpenCloning_frontend/pull/719) [`62eacb4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/62eacb49b0937ffc27e1371c836c7d2ecfe633a4) Thanks [@manulera](https://github.com/manulera)! - Show line children in line detail page.
+
+- [#721](https://github.com/OpenCloning/OpenCloning_frontend/pull/721) [`926028b`](https://github.com/OpenCloning/OpenCloning_frontend/commit/926028b07f7c7bdc9670b9adeb22b06b81d486f7) Thanks [@manulera](https://github.com/manulera)! - Can tag primers and sequences when bulk-uploading
+
 ## 0.3.1
 
 ### Patch Changes
