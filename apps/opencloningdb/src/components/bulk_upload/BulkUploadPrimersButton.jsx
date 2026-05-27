@@ -22,6 +22,12 @@ export default function BulkUploadPrimersButton() {
   const workspaceRole = useSelector((state) => state.auth.workspace?.role);
   const [openModal, setOpenModal] = React.useState(false);
   const [validationRows, setValidationRows] = React.useState([]);
+  const [bulkTags, setBulkTags] = React.useState([]);
+
+  const closeModal = () => {
+    setOpenModal(false);
+    setBulkTags([]);
+  };
 
   const validateMutation = useMutation({
     mutationFn: async (primers) => {
@@ -37,9 +43,14 @@ export default function BulkUploadPrimersButton() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: async ({ primers, modeLabel }) => {
+    mutationFn: async ({ primers, modeLabel, tags }) => {
       const strict = modeLabel === 'clear';
-      const { data } = await openCloningDBHttpClient.post(endpoints.primersBulk, primers, { params: { strict } });
+      const { data } = await openCloningDBHttpClient.post(endpoints.primersBulk, primers, {
+        params: {
+          strict,
+          ...(tags?.length ? { tags } : {}),
+        },
+      });
       return data;
     },
     onSuccess: (createdPrimers, variables) => {
@@ -47,7 +58,7 @@ export default function BulkUploadPrimersButton() {
         message: `Imported ${createdPrimers.length} ${variables.modeLabel} primer${createdPrimers.length === 1 ? '' : 's'} successfully`,
         severity: 'success',
       });
-      setOpenModal(false);
+      closeModal();
       setValidationRows([]);
       queryClient.invalidateQueries({ queryKey: ['primers'] });
     },
@@ -103,7 +114,7 @@ export default function BulkUploadPrimersButton() {
       return;
     }
     const primers2submit = primers.map(({name, sequence, uid}) => ({name, sequence, uid}));
-    submitMutation.mutate({ primers: primers2submit, modeLabel });
+    submitMutation.mutate({ primers: primers2submit, modeLabel, tags: bulkTags });
   };
 
   if (workspaceRole === 'viewer') {
@@ -133,7 +144,7 @@ export default function BulkUploadPrimersButton() {
         onChange={handleFileUpload}
       />
 
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+      <Modal open={openModal} onClose={closeModal}>
         <Box
           data-testid="bulk-upload-primers-modal"
           sx={{
@@ -155,9 +166,11 @@ export default function BulkUploadPrimersButton() {
           <PrimerBulkUploadPreviewTable
             rows={validationRows}
             handleSubmit={handleSubmit}
-            handleCancel={() => setOpenModal(false)}
+            handleCancel={closeModal}
             isSubmitting={submitMutation.isPending}
             isValidating={validateMutation.isPending}
+            bulkTags={bulkTags}
+            onBulkTagsChange={setBulkTags}
           />
         </Box>
       </Modal>

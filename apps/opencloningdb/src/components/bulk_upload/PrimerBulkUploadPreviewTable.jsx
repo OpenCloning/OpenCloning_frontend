@@ -58,7 +58,15 @@ function TableComponent({ rows }) {
   );
 }
 
-export default function PrimerBulkUploadPreviewTable({ rows, handleSubmit, handleCancel, isSubmitting, isValidating }) {
+export default function PrimerBulkUploadPreviewTable({
+  rows,
+  handleSubmit,
+  handleCancel,
+  isSubmitting,
+  isValidating,
+  bulkTags,
+  onBulkTagsChange,
+}) {
   if (isValidating) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -68,7 +76,14 @@ export default function PrimerBulkUploadPreviewTable({ rows, handleSubmit, handl
   }
   const rowsInfo = getPrimerRowsInfo(rows);
   return (
-    <BulkUploadPreviewTableWrapper rowsInfo={rowsInfo} handleSubmit={handleSubmit} handleCancel={handleCancel} isSubmitting={isSubmitting}>
+    <BulkUploadPreviewTableWrapper
+      rowsInfo={rowsInfo}
+      handleSubmit={handleSubmit}
+      handleCancel={handleCancel}
+      isSubmitting={isSubmitting}
+      bulkTags={bulkTags}
+      onBulkTagsChange={onBulkTagsChange}
+    >
       <TableComponent rows={rowsInfo.orderedRows} />
     </BulkUploadPreviewTableWrapper>
   );

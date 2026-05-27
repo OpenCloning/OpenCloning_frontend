@@ -1,12 +1,31 @@
 import React from 'react';
-import { Typography, TableContainer, Paper, Button, CircularProgress, Box, TableRow, TableCell } from '@mui/material';
+import { Typography, TableContainer, Paper, Button, CircularProgress, Box, TableRow, TableCell, FormControl } from '@mui/material';
 import { Cancel as CancelIcon, CheckCircle as CheckCircleIcon, Warning as WarningIcon } from '@mui/icons-material';
+import TagMultiSelect from '../TagMultiSelect';
 
 
-export function BulkUploadPreviewTableWrapper({ rowsInfo, handleSubmit, handleCancel, isSubmitting, children }) {
+export function BulkUploadPreviewTableWrapper({
+  rowsInfo,
+  handleSubmit,
+  handleCancel,
+  isSubmitting,
+  children,
+  bulkTags = [],
+  onBulkTagsChange,
+}) {
   const { clearRows, clearAndWarningRows, warningRowsCount, errorRowsCount, orderedRows } = rowsInfo;
   return (
     <>
+      {onBulkTagsChange && (
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <TagMultiSelect
+            label="Tags to apply (optional)"
+            value={bulkTags}
+            onChange={onBulkTagsChange}
+            data-testid="bulk-upload-tags"
+          />
+        </FormControl>
+      )}
       <Typography variant="body2" sx={{ mb: 2 }}>
           Errors are shown first, then warnings, then clear rows.
       </Typography>

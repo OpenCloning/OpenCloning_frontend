@@ -17,6 +17,12 @@ export default function BulkUploadSequencesButton() {
   const queryClient = useQueryClient();
   const [openModal, setOpenModal] = React.useState(false);
   const [validationRows, setValidationRows] = React.useState([]);
+  const [bulkTags, setBulkTags] = React.useState([]);
+
+  const closeModal = () => {
+    setOpenModal(false);
+    setBulkTags([]);
+  };
 
   const validateMutation = useMutation({
     mutationFn: async (files) => {
@@ -40,7 +46,7 @@ export default function BulkUploadSequencesButton() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: async ({ submittedRows, mode }) => {
+    mutationFn: async ({ submittedRows, mode, tags }) => {
       const strict = mode === 'clear';
       const formData = new FormData();
       submittedRows.forEach((row) => {
@@ -50,7 +56,10 @@ export default function BulkUploadSequencesButton() {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        params: { strict },
+        params: {
+          strict,
+          ...(tags?.length ? { tags } : {}),
+        },
       });
       return data;
     },
@@ -59,7 +68,7 @@ export default function BulkUploadSequencesButton() {
         message: `Imported ${createdSequences.length} sequence${createdSequences.length === 1 ? '' : 's'} successfully`,
         severity: 'success',
       });
-      setOpenModal(false);
+      closeModal();
       setValidationRows([]);
       queryClient.invalidateQueries({ queryKey: ['sequences'] });
     },
@@ -127,7 +136,7 @@ export default function BulkUploadSequencesButton() {
         onChange={handleFileUpload}
       />
 
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+      <Modal open={openModal} onClose={closeModal}>
         <Box
           data-testid="bulk-upload-sequences-modal"
           sx={{
@@ -148,10 +157,12 @@ export default function BulkUploadSequencesButton() {
           </Typography>
           <SequenceBulkUploadPreviewTable
             rows={validationRows}
-            handleSubmit={(submittedRows, mode) => submitMutation.mutate({ submittedRows, mode })}
-            handleCancel={() => setOpenModal(false)}
+            handleSubmit={(submittedRows, mode) => submitMutation.mutate({ submittedRows, mode, tags: bulkTags })}
+            handleCancel={closeModal}
             isSubmitting={submitMutation.isPending}
             isValidating={validateMutation.isPending}
+            bulkTags={bulkTags}
+            onBulkTagsChange={setBulkTags}
           />
         </Box>
       </Modal>

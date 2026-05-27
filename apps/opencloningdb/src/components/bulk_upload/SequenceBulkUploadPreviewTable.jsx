@@ -59,7 +59,9 @@ export default function SequenceBulkUploadPreviewTable({
   handleSubmit,
   handleCancel,
   isSubmitting,
-  isValidating
+  isValidating,
+  bulkTags,
+  onBulkTagsChange,
 }) {
   if (isValidating) {
     return (
@@ -70,7 +72,14 @@ export default function SequenceBulkUploadPreviewTable({
   }
   const rowsInfo = getSequenceRowsInfo(rows);
   return (
-    <BulkUploadPreviewTableWrapper rowsInfo={rowsInfo} handleSubmit={handleSubmit} handleCancel={handleCancel} isSubmitting={isSubmitting}>
+    <BulkUploadPreviewTableWrapper
+      rowsInfo={rowsInfo}
+      handleSubmit={handleSubmit}
+      handleCancel={handleCancel}
+      isSubmitting={isSubmitting}
+      bulkTags={bulkTags}
+      onBulkTagsChange={onBulkTagsChange}
+    >
       <TableComponent rows={rowsInfo.orderedRows} />
     </BulkUploadPreviewTableWrapper>
   );

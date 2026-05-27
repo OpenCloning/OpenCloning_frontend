@@ -194,6 +194,8 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.get('[data-testid="CheckCircleIcon"]').should('exist');
         cy.get('td').eq(5).should('be.empty');
       });
+      cy.setAutocompleteValue('Tags to apply (optional)', 'templateless_PCR', 'div');
+      cy.setAutocompleteValue('Tags to apply (optional)', 'restriction_ligation_assembly', 'div');
       cy.intercept('POST', Cypress.getDbURL(endpoints.sequencesBulk, '*')).as('bulkUploadSequences');
       cy.get('button').contains('Import Clear').click();
       cy.wait('@bulkUploadSequences').then(({ response, request }) => {
@@ -201,6 +203,8 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.wrap(response.body[0].name).should('equal', 'pPML1_(GB0045)');
         cy.wrap(response.body[1].name).should('equal', 'pNH__(GB0064)');
         cy.wrap(request.query).should('have.property', 'strict', 'true');
+        cy.wrap(request.query).should('have.property', 'tags');
+        cy.wrap(request.query.tags).should('have.length', 2);
       });
       cy.dbAlertExists('Imported 2 sequences successfully');
       cy.closeDbAlerts();
