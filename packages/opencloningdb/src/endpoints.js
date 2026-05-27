@@ -27,6 +27,8 @@ const endpoints = {
   lineTags: (id) => `/lines/${id}/tags`,
   inputEntityTags: (id) => `/input_entities/${id}/tags`,
   postLine: '/lines',
+  linesValidateUpload: '/lines/validate-upload',
+  linesBulk: '/lines/bulk',
   tags: '/tags',
   tagPost: '/tags',
   tagUnlinkLine: (lineId, tagId) => `/lines/${lineId}/tags/${tagId}`,

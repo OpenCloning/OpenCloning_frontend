@@ -19,6 +19,7 @@ import TagEntitiesButton from '../components/TagEntitiesButton';
 import TopButtonSection from '../components/TopButtonSection';
 import PageContainer from '../components/PageContainer';
 import LinesTable from '../components/LinesTable';
+import BulkUploadLinesButton from '../components/bulk_upload/BulkUploadLinesButton';
 
 const MIN_WIDTH = 150;
 
@@ -116,6 +117,7 @@ function LinesPage() {
         component={LinesQueryFields}
       />
       <TopButtonSection>
+        <BulkUploadLinesButton />
         <TagEntitiesButton onSuccess={() => setSelectedIds(new Set())} selectedEntities={selectedEntities} entityType="lines" label="Lines" />
       </TopButtonSection>
       <TableContainer component={Paper}>
