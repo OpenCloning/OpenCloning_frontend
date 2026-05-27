@@ -264,16 +264,24 @@ function LineDetailPage() {
         </DetailPageSection>
       )}
 
+      {alleles.length === 0 && plasmids.length === 0 && (
+        <Typography sx={{ mb: 1 }} color="text.secondary">No genotype or plasmids in this line.</Typography>
+      )}
+
       {parentLines.length > 0 && (
         <DetailPageSection title="Parent lines" data-testid="line-parent-lines">
-          <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
+          <TableContainer component={Paper} sx={{ maxWidth: 1000 }}>
             <LinesTable lines={parentLines} withCheckbox={false} />
           </TableContainer>
         </DetailPageSection>
       )}
 
-      {alleles.length === 0 && plasmids.length === 0 && parentLines.length === 0 && (
-        <Typography color="text.secondary">No genotype, plasmids, or parents for this line.</Typography>
+      {children.length > 0 && (
+        <DetailPageSection title="Children" data-testid="line-children">
+          <TableContainer component={Paper} sx={{ maxWidth: 1000 }}>
+            <LinesTable lines={children} withCheckbox={false} />
+          </TableContainer>
+        </DetailPageSection>
       )}
 
     </PageContainer>

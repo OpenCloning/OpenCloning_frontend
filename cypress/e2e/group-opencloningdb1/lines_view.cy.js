@@ -101,7 +101,11 @@ describe('LinesPage', () => {
       cy.get('button').contains('Transformation').should('exist');
       cy.get('button').contains('parent_strain').click();
       cy.get('[data-testid="resource-detail-header-title"] h5').contains('parent_strain', { timeout: 20000 }).should('exist');
-      cy.get('p').contains('No genotype, plasmids, or parents for this line.').should('exist');
+      cy.get('p').contains('No genotype or plasmids in this line.').should('exist');
+      cy.get('[data-testid="line-children"]').within(() => {
+        cy.contains('crispr_hdr-line').should('exist');
+        cy.contains('golden_gate-line').should('exist');
+      });
     });
   });
 
