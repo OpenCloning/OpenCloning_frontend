@@ -41,6 +41,8 @@ const endpoints = {
   postWorkspace: '/workspaces',
   workspace: (id) => `/workspaces/${id}`,
   templateSequences: '/template_sequences',
+  templateSequencesValidateUpload: '/template_sequences/validate-upload',
+  templateSequencesBulk: '/template_sequences/bulk',
 };
 
 export default endpoints;

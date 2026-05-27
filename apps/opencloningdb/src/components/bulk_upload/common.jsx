@@ -12,8 +12,12 @@ export function BulkUploadPreviewTableWrapper({
   children,
   bulkTags = [],
   onBulkTagsChange,
+  importMode = 'clearAndWarnings',
 }) {
   const { clearRows, clearAndWarningRows, warningRowsCount, errorRowsCount, orderedRows } = rowsInfo;
+  const allClearRequired = importMode === 'allClearRequired';
+  const canImportAll = clearRows.length === orderedRows.length && orderedRows.length > 0;
+
   return (
     <>
       {onBulkTagsChange && (
@@ -27,9 +31,11 @@ export function BulkUploadPreviewTableWrapper({
         </FormControl>
       )}
       <Typography variant="body2" sx={{ mb: 2 }}>
-          Errors are shown first, then warnings, then clear rows.
+        {allClearRequired
+          ? 'All rows must be clear to import. Errors are shown first.'
+          : 'Errors are shown first, then warnings, then clear rows.'}
       </Typography>
-  
+
       <TableContainer
         component={Paper}
         variant="outlined"
@@ -37,11 +43,13 @@ export function BulkUploadPreviewTableWrapper({
       >
         {children}
       </TableContainer>
-  
+
       <Typography variant="body2" sx={{ mb: 2 }}>
-        {clearRows.length} clear, {warningRowsCount} warning, {errorRowsCount} error out of {orderedRows.length} uploaded items.
+        {allClearRequired
+          ? `${clearRows.length} clear, ${errorRowsCount} error out of ${orderedRows.length} uploaded items.`
+          : `${clearRows.length} clear, ${warningRowsCount} warning, ${errorRowsCount} error out of ${orderedRows.length} uploaded items.`}
       </Typography>
-  
+
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         <Button
           variant="outlined"
@@ -51,21 +59,34 @@ export function BulkUploadPreviewTableWrapper({
         >
           Cancel
         </Button>
-        <Button
-          variant="contained"
-          onClick={() => handleSubmit(clearRows, 'clear')}
-          disabled={clearRows.length < 1 || isSubmitting}
-        >
-          {isSubmitting ? <CircularProgress size={24} /> : 'Import Clear'}
-        </Button>
-        <Button
-          variant="contained"
-          color="warning"
-          onClick={() => handleSubmit(clearAndWarningRows, 'clear and warning')}
-          disabled={clearAndWarningRows.length < 1 || isSubmitting}
-        >
-          {isSubmitting ? <CircularProgress size={24} /> : 'Import Clear + Warnings'}
-        </Button>
+        {allClearRequired ? (
+          <Button
+            variant="contained"
+            onClick={() => handleSubmit(orderedRows)}
+            disabled={!canImportAll || isSubmitting}
+            data-testid="bulk-upload-import-button"
+          >
+            {isSubmitting ? <CircularProgress size={24} /> : 'Import'}
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="contained"
+              onClick={() => handleSubmit(clearRows, 'clear')}
+              disabled={clearRows.length < 1 || isSubmitting}
+            >
+              {isSubmitting ? <CircularProgress size={24} /> : 'Import Clear'}
+            </Button>
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={() => handleSubmit(clearAndWarningRows, 'clear and warning')}
+              disabled={clearAndWarningRows.length < 1 || isSubmitting}
+            >
+              {isSubmitting ? <CircularProgress size={24} /> : 'Import Clear + Warnings'}
+            </Button>
+          </>
+        )}
       </Box>
     </>
   );

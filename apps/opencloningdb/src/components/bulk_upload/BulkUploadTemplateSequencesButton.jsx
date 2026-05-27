@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
@@ -8,14 +9,21 @@ import {
   Typography,
 } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import useAppAlerts from '../../hooks/useAppAlerts';
-import SequenceBulkUploadPreviewTable from './SequenceBulkUploadPreviewTable';
-import { useSelector } from 'react-redux';
+import TemplateSequenceBulkUploadPreviewTable from './TemplateSequenceBulkUploadPreviewTable';
+import {
+  prepareTemplateSequenceRowsForValidation,
+  VALID_TEMPLATE_SEQUENCE_TYPE_KEYS,
+} from '../../utils/bulk_upload';
+import { error2String } from '@opencloning/utils';
 
-export default function BulkUploadSequencesButton() {
+const VALID_TYPES_HINT = VALID_TEMPLATE_SEQUENCE_TYPE_KEYS.join(', ');
+
+export default function BulkUploadTemplateSequencesButton() {
   const hiddenFileInput = React.useRef(null);
-  const { addAlert } = useAppAlerts();
   const queryClient = useQueryClient();
+  const { addAlert } = useAppAlerts();
   const workspaceRole = useSelector((state) => state.auth.workspace?.role);
   const [openModal, setOpenModal] = React.useState(false);
   const [validationRows, setValidationRows] = React.useState([]);
@@ -27,56 +35,51 @@ export default function BulkUploadSequencesButton() {
   };
 
   const validateMutation = useMutation({
-    mutationFn: async (files) => {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-      const { data } = await openCloningDBHttpClient.post(endpoints.sequencesValidateUpload, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    mutationFn: async (items) => {
+      const { data } = await openCloningDBHttpClient.post(
+        endpoints.templateSequencesValidateUpload,
+        items,
+      );
       return data;
     },
     onError: (error) => {
       addAlert({
-        message: String(error?.response?.data?.detail) || String(error?.message) || 'Failed to validate sequences',
+        message: error2String(error),
         severity: 'error',
       });
     },
   });
 
   const submitMutation = useMutation({
-    mutationFn: async ({ submittedRows, mode, tags }) => {
-      const strict = mode === 'clear';
-      const formData = new FormData();
-      submittedRows.forEach((row) => {
-        formData.append('files', row.file);
-      });
-      const { data } = await openCloningDBHttpClient.post(endpoints.sequencesBulk, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    mutationFn: async ({ items, tags }) => {
+      const { data } = await openCloningDBHttpClient.post(endpoints.templateSequencesBulk, items, {
         params: {
-          strict,
           ...(tags?.length ? { tags } : {}),
         },
       });
       return data;
     },
-    onSuccess: (createdSequences) => {
+    onSuccess: (created) => {
       addAlert({
-        message: `Imported ${createdSequences.length} sequence${createdSequences.length === 1 ? '' : 's'} successfully`,
+        message: `Imported ${created.length} template sequence${created.length === 1 ? '' : 's'} successfully`,
         severity: 'success',
       });
       closeModal();
       setValidationRows([]);
       queryClient.invalidateQueries({ queryKey: ['sequences'] });
     },
-    onError: () => {
+    onError: (error) => {
+      const conflictRows = error?.response?.status === 409 ? error?.response?.data : null;
+      if (Array.isArray(conflictRows)) {
+        setValidationRows(conflictRows);
+        addAlert({
+          message: 'Conflicts detected while importing. Review the updated validation results.',
+          severity: 'warning',
+        });
+        return;
+      }
       addAlert({
-        message: 'Submission failed',
+        message: 'Server error while importing template sequences',
         severity: 'error',
       });
     },
@@ -91,32 +94,33 @@ export default function BulkUploadSequencesButton() {
   };
 
   const handleFileUpload = async (event) => {
-    const uploadedFiles = Array.from(event.target.files ?? []);
-    if (uploadedFiles.length < 1) {
+    const fileUploaded = event.target.files?.[0];
+    if (!fileUploaded) {
       return;
     }
 
     try {
+      const parsed = await delimitedFileToJson(fileUploaded, ['name', 'sequence_type'], true);
+      const normalizedItems = prepareTemplateSequenceRowsForValidation(parsed);
       setOpenModal(true);
-      const rows = await validateMutation.mutateAsync(uploadedFiles);
-      if (!Array.isArray(rows) || rows.length < 1) {
-        throw new Error('No validation rows returned');
-      }
-      // Add file as a field
-      rows.forEach((row, index) => {
-        row.file = uploadedFiles[index];
-      });
+      const rows = await validateMutation.mutateAsync(normalizedItems);
       setValidationRows(rows);
-
     } catch (error) {
-      setOpenModal(false);
       addAlert({
-        message: error?.response?.data?.detail || error?.message || 'Failed to validate sequence files',
+        message: error2String(error),
         severity: 'error',
       });
     } finally {
       event.target.value = null;
     }
+  };
+
+  const handleSubmit = (rows) => {
+    if (rows.length < 1) {
+      return;
+    }
+    const items = rows.map(({ name, sequence_type }) => ({ name, sequence_type }));
+    submitMutation.mutate({ items, tags: bulkTags });
   };
 
   return (
@@ -125,26 +129,30 @@ export default function BulkUploadSequencesButton() {
         arrow
         title={(
           <span style={{ fontSize: '1.2em' }}>
-            Upload sequence files for bulk validation preview
+            Upload a .csv or .tsv file with headers name, sequence_type (case-insensitive).
+            {' '}
+            Valid sequence_type values:
+            {' '}
+            {VALID_TYPES_HINT}
           </span>
         )}
       >
-        <Button onClick={handleUploadClick} data-testid="bulk-upload-sequences-button">
-          Bulk Upload Sequences
+        <Button onClick={handleUploadClick} data-testid="bulk-upload-template-sequences-button">
+          Bulk Upload Templates
         </Button>
       </Tooltip>
 
       <input
         style={{ display: 'none' }}
         type="file"
-        multiple
+        accept=".csv,.tsv"
         ref={hiddenFileInput}
         onChange={handleFileUpload}
       />
 
       <Modal open={openModal} onClose={closeModal}>
         <Box
-          data-testid="bulk-upload-sequences-modal"
+          data-testid="bulk-upload-template-sequences-modal"
           sx={{
             bgcolor: 'background.paper',
             p: 3,
@@ -159,11 +167,11 @@ export default function BulkUploadSequencesButton() {
           }}
         >
           <Typography variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
-            Bulk Upload Sequences Preview
+            Bulk Upload Template Sequences Preview
           </Typography>
-          <SequenceBulkUploadPreviewTable
+          <TemplateSequenceBulkUploadPreviewTable
             rows={validationRows}
-            handleSubmit={(submittedRows, mode) => submitMutation.mutate({ submittedRows, mode, tags: bulkTags })}
+            handleSubmit={handleSubmit}
             handleCancel={closeModal}
             isSubmitting={submitMutation.isPending}
             isValidating={validateMutation.isPending}
