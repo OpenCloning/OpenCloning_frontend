@@ -22,6 +22,7 @@ import TagEntitiesButton from '../components/TagEntitiesButton';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
 import BulkUploadSequencesButton from '../components/bulk_upload/BulkUploadSequencesButton';
+import BulkUploadTemplateSequencesButton from '../components/bulk_upload/BulkUploadTemplateSequencesButton';
 import PageContainer from '../components/PageContainer';
 import SequenceTable from '../components/SequenceTable';
 import CreateTemplateSequenceButton from '../components/CreateTemplateSequenceButton';
@@ -136,6 +137,7 @@ function SequencesPage() {
       />
       <TopButtonSection>
         <BulkUploadSequencesButton />
+        <BulkUploadTemplateSequencesButton />
         <CreateTemplateSequenceButton />
         <TagEntitiesButton
           selectedEntities={selectedSequences}

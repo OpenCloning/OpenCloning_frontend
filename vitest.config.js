@@ -29,6 +29,8 @@ export default defineConfig({
       'packages/opencloningdb',
       'packages/opencloning-elabftw',
       'apps/syntax-builder',
+      'apps/opencloning',
+      'apps/opencloningdb',
     ],
   },
 });

@@ -1,3 +1,79 @@
+import { SEQUENCE_TYPE_LABELS } from './query_utils';
+
+export const VALID_TEMPLATE_SEQUENCE_TYPE_KEYS = Object.keys(SEQUENCE_TYPE_LABELS);
+
+export function normalizeTemplateSequenceSubmission(row) {
+  return {
+    name: String(row.name ?? '').trim(),
+    sequence_type: String(row.sequence_type ?? '').trim(),
+  };
+}
+
+export function parseTemplateSequenceTypes(rows) {
+  const invalidTypes = new Set();
+  const items = rows.map((row) => {
+    const normalized = normalizeTemplateSequenceSubmission(row);
+    if (!VALID_TEMPLATE_SEQUENCE_TYPE_KEYS.includes(normalized.sequence_type)) {
+      if (normalized.sequence_type) {
+        invalidTypes.add(normalized.sequence_type);
+      } else {
+        invalidTypes.add('(empty)');
+      }
+    }
+    return normalized;
+  });
+  return { items, invalidTypes: [...invalidTypes] };
+}
+
+export function prepareTemplateSequenceRowsForValidation(rows) {
+  if (!Array.isArray(rows) || rows.length < 1) {
+    throw new Error('File does not contain template sequence rows');
+  }
+
+  const { items, invalidTypes } = parseTemplateSequenceTypes(rows);
+  if (invalidTypes.length > 0) {
+    throw new Error(
+      `Invalid sequence_type value(s): ${invalidTypes.join(', ')}. Valid values: ${VALID_TEMPLATE_SEQUENCE_TYPE_KEYS.join(', ')}`,
+    );
+  }
+
+  const normalizedItems = items.filter((item) => item.name.length > 0);
+  if (normalizedItems.length < 1) {
+    throw new Error('File does not contain template sequence rows with names');
+  }
+
+  return normalizedItems;
+}
+
+export function templateSequenceRowIssues(row) {
+  const issues = [];
+  if (row.sequence_type_invalid) issues.push('Invalid sequence_type');
+  if (row.name_exists) issues.push('Name already exists in workspace');
+  if (row.name_duplicated) issues.push('Name duplicated in uploaded file');
+  return issues;
+}
+
+export function templateSequenceRowStatus(row) {
+  return templateSequenceRowIssues(row).length > 0 ? 'error' : 'clear';
+}
+
+export function getTemplateSequenceRowsInfo(rows) {
+  const errorRows = rows.filter((row) => templateSequenceRowStatus(row) === 'error');
+  const clearRows = rows.filter((row) => templateSequenceRowStatus(row) === 'clear');
+  const orderedRows = [...errorRows, ...clearRows];
+  return {
+    errorRows,
+    warningRows: [],
+    clearRows,
+    orderedRows,
+    clearAndWarningRows: clearRows,
+    clearRowsCount: clearRows.length,
+    warningRowsCount: 0,
+    errorRowsCount: errorRows.length,
+    totalRowsCount: rows.length,
+  };
+}
+
 export function rowIssues(row) {
   const issues = [];
   if (row.sequence_invalid) issues.push('Invalid DNA sequence');

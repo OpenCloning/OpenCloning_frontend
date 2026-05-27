@@ -160,7 +160,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   it('can bulk upload sequences', () => {
     cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
     cy.get('button').contains('Bulk Upload').click();
-    cy.get('input[type="file"]').selectFile(bulkSequenceFiles, { force: true });
+    cy.get('input[type="file"]').eq(0).selectFile(bulkSequenceFiles, { force: true });
     cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {
         cy.contains('hello.fasta').should('exist');
@@ -210,7 +210,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.closeDbAlerts();
     });
     cy.get('button').contains('Bulk Upload').click();
-    cy.get('input[type="file"]').selectFile(bulkSequenceFiles.slice(2), { force: true });
+    cy.get('input[type="file"]').eq(0).selectFile(bulkSequenceFiles.slice(2), { force: true });
     cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
       cy.get('tr [data-testid="CheckCircleIcon"]').should('not.exist');
       cy.get('tr [data-testid="WarningIcon"]').should('exist');
@@ -228,6 +228,46 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.dbAlertExists('Imported 3 sequences successfully');
       cy.closeDbAlerts();
     });
+  });
+  it('can bulk upload template sequences', () => {
+    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
+    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/with_conflict.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('template_sequence_allele').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(2).within(() => {
+        cy.contains('dup_in_file').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
+      cy.get('button').contains('Cancel').click();
+    });
+    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/invalid_type.tsv', { force: true });
+    cy.dbAlertExists('Invalid sequence_type value(s): not_a_type');
+    cy.closeDbAlerts();
+    cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
+    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/valid_single.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('bulk_template_cypress_1').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+      });
+      cy.intercept('POST', Cypress.getDbURL(endpoints.templateSequencesBulk, '*')).as('bulkUploadTemplates');
+      cy.get('[data-testid="bulk-upload-import-button"]').click();
+      cy.wait('@bulkUploadTemplates').then(({ response, request }) => {
+        cy.wrap(response.body).should('have.length', 1);
+        cy.wrap(response.body[0].name).should('equal', 'bulk_template_cypress_1');
+        cy.wrap(response.body[0].sequence_type).should('equal', 'allele');
+        cy.wrap(request.body).should('have.length', 1);
+        cy.wrap(request.body[0].name).should('equal', 'bulk_template_cypress_1');
+        cy.wrap(request.body[0].sequence_type).should('equal', 'allele');
+      });
+    });
+    cy.dbAlertExists('Imported 1 template sequence successfully');
+    cy.closeDbAlerts();
   });
   it('can change annotation', () => {
     cy.viewport(1920, 1080);
