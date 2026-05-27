@@ -255,6 +255,44 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.contains('bulk_template_cypress_1').should('exist');
         cy.get('[data-testid="CheckCircleIcon"]').should('exist');
       });
+      cy.intercept(
+        {
+          method: 'POST',
+          url: Cypress.getDbURL(endpoints.templateSequencesBulk, '*'),
+          times: 1,
+        },
+        {
+          statusCode: 409,
+          body: [
+            {name:"intercept_conflict_a", sequence_type:"allele", name_exists:true, name_duplicated:false},
+            {name:"intercept_conflict_b", sequence_type:"locus", name_exists:false, name_duplicated:true}
+          ],
+        },
+      ).as('bulkUploadTemplates409');
+      cy.get('[data-testid="bulk-upload-import-button"]').click();
+    });
+    cy.dbAlertExists('Conflicts detected while importing. Review the updated validation results.');
+    cy.closeDbAlerts();
+    cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
+      cy.contains('intercept_conflict_a').should('exist');
+      cy.contains('intercept_conflict_b').should('exist');
+      cy.contains('Allele').should('exist');
+      cy.contains('Locus').should('exist');
+      cy.contains('Name already exists in workspace').should('exist');
+      cy.contains('Name duplicated in uploaded file').should('exist');
+      cy.contains('tr', 'intercept_conflict_a').find('[data-testid="CancelIcon"]').should('exist');
+      cy.contains('tr', 'intercept_conflict_b').find('[data-testid="CancelIcon"]').should('exist');
+      cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
+      cy.get('button').contains('Cancel').click();
+    });
+
+    cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
+    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/valid_single.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('bulk_template_cypress_1').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+      });
       cy.intercept('POST', Cypress.getDbURL(endpoints.templateSequencesBulk, '*')).as('bulkUploadTemplates');
       cy.get('[data-testid="bulk-upload-import-button"]').click();
       cy.wait('@bulkUploadTemplates').then(({ response, request }) => {
