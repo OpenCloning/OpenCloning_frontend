@@ -113,15 +113,34 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="bulk-upload-lines-button"]').click();
     cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/with_conflict.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
-      cy.contains('crispr_hdr-line').should('exist');
-      cy.contains('UID already exists in workspace').should('exist');
-      cy.contains('bulk_line_dup').should('exist');
-      cy.contains('UID duplicated in uploaded file').should('exist');
-      cy.contains('Genotype "missing-allele-xyz" not found').should('exist');
-      cy.contains('Parent UID "missing-parent-xyz" not found').should('exist');
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('crispr_hdr-line').should('exist');
+        cy.contains('UID already exists in workspace').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(2).within(() => {
+        cy.contains('bulk_line_dup').should('exist');
+        cy.contains('UID duplicated in uploaded file').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(4).within(() => {
+        cy.contains('bulk_line_bad_genotype').should('exist');
+        cy.contains('Genotype "missing-allele-xyz" not found').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(5).within(() => {
+        cy.contains('bulk_line_bad_parent').should('exist');
+        cy.contains('Parent UID "missing-parent-xyz" not found').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(6).within(() => {
+        cy.contains('bulk_line_clear').should('exist');
+        cy.get('td').eq(5).should('be.empty');
+      });
       cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
       cy.get('button').contains('Cancel').click();
     });
+
 
     cy.get('[data-testid="bulk-upload-lines-button"]').click();
     cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/valid_single.tsv', { force: true });
@@ -130,9 +149,16 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
         cy.contains('bulk_line_cypress_1').should('exist');
         cy.get('[data-testid="CheckCircleIcon"]').should('exist');
       });
-      const conflictRows = JSON.parse(`[
-        {"uid":"intercept_conflict_line","genotype":[],"plasmids":[],"parent_uids":[],"uid_exists":true,"uid_duplicated":false,"genotype_flags":[],"plasmid_flags":[],"parent_flags":[]}
-      ]`);
+      const conflictRows = [
+        {
+          uid: 'intercept_conflict_line',
+          genotype: [],
+          plasmids: [],
+          parent_uids: [],
+          uid_exists: true,
+          uid_duplicated: false,
+        },
+      ];
       cy.intercept(
         {
           method: 'POST',
