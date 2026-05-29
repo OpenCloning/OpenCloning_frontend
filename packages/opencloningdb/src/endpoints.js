@@ -12,6 +12,8 @@ const endpoints = {
   sequenceSearch: '/sequences/search',
   sequencesValidateUpload: '/sequences/validate-upload',
   sequencesBulk: '/sequences/bulk',
+  sequencesCloningStrategyBulkValidate: '/sequences/cloning_strategy/bulk/validate',
+  sequencesCloningStrategyBulk: '/sequences/cloning_strategy/bulk',
   sequencingFileDownload: (id) => `/sequencing_files/${id}/download`,
   sequenceSequencingFileDelete: (sequenceId, fileId) => `/sequences/${sequenceId}/sequencing_files/${fileId}`,
   postSequence: '/sequences',

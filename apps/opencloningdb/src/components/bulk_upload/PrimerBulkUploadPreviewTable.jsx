@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { getPrimerRowsInfo, primerRowStatus, rowIssues } from '../../utils/bulk_upload';
-import { BulkUploadPreviewTableWrapper, CommonTableRow } from './common';
+import { CommonTableRow } from './common';
+import BulkUploadPreview from './BulkUploadPreview';
 
 
 
@@ -67,24 +68,17 @@ export default function PrimerBulkUploadPreviewTable({
   bulkTags,
   onBulkTagsChange,
 }) {
-  if (isValidating) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <CircularProgress size={24} />
-      </Box>
-    );
-  }
-  const rowsInfo = getPrimerRowsInfo(rows);
   return (
-    <BulkUploadPreviewTableWrapper
-      rowsInfo={rowsInfo}
+    <BulkUploadPreview
+      rows={rows}
+      getRowsInfo={getPrimerRowsInfo}
+      renderTable={(orderedRows) => <TableComponent rows={orderedRows} />}
       handleSubmit={handleSubmit}
       handleCancel={handleCancel}
       isSubmitting={isSubmitting}
+      isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
-    >
-      <TableComponent rows={rowsInfo.orderedRows} />
-    </BulkUploadPreviewTableWrapper>
+    />
   );
 }

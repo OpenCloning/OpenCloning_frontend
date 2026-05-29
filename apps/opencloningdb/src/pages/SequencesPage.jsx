@@ -21,6 +21,7 @@ import { UrlParamsForm } from '../components/urlParamsForm';
 import TagEntitiesButton from '../components/TagEntitiesButton';
 import TopButtonSection from '../components/TopButtonSection';
 import AddToCloningButton from '../components/AddToCloningButton';
+import BulkUploadCloningStrategiesButton from '../components/bulk_upload/BulkUploadCloningStrategiesButton';
 import BulkUploadSequencesButton from '../components/bulk_upload/BulkUploadSequencesButton';
 import BulkUploadTemplateSequencesButton from '../components/bulk_upload/BulkUploadTemplateSequencesButton';
 import PageContainer from '../components/PageContainer';
@@ -137,6 +138,7 @@ function SequencesPage() {
       />
       <TopButtonSection>
         <BulkUploadSequencesButton />
+        <BulkUploadCloningStrategiesButton />
         <BulkUploadTemplateSequencesButton />
         <CreateTemplateSequenceButton />
         <TagEntitiesButton
