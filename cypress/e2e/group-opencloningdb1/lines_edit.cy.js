@@ -108,6 +108,99 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="line-parent-lines"]').contains('crispr_hdr-line').should('exist');
 
   });
+  it('can bulk upload lines', () => {
+    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.get('[data-testid="bulk-upload-lines-button"]').click();
+    cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/with_conflict.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('crispr_hdr-line').should('exist');
+        cy.contains('UID already exists in workspace').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(2).within(() => {
+        cy.contains('bulk_line_dup').should('exist');
+        cy.contains('UID duplicated in uploaded file').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(4).within(() => {
+        cy.contains('bulk_line_bad_genotype').should('exist');
+        cy.contains('Genotype "missing-allele-xyz" not found').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(5).within(() => {
+        cy.contains('bulk_line_bad_parent').should('exist');
+        cy.contains('Parent UID "missing-parent-xyz" not found').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(6).within(() => {
+        cy.contains('bulk_line_clear').should('exist');
+        cy.get('td').eq(5).should('be.empty');
+      });
+      cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
+      cy.get('button').contains('Cancel').click();
+    });
+
+
+    cy.get('[data-testid="bulk-upload-lines-button"]').click();
+    cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/valid_single.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('bulk_line_cypress_1').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+      });
+      const conflictRows = [
+        {
+          uid: 'intercept_conflict_line',
+          genotype: [],
+          plasmids: [],
+          parent_uids: [],
+          uid_exists: true,
+          uid_duplicated: false,
+        },
+      ];
+      cy.intercept(
+        {
+          method: 'POST',
+          url: Cypress.getDbURL(endpoints.linesBulk, '*'),
+          times: 1,
+        },
+        {
+          statusCode: 409,
+          body: conflictRows,
+        },
+      ).as('bulkUploadLines409');
+      cy.get('[data-testid="bulk-upload-import-button"]').click();
+    });
+    cy.wait('@bulkUploadLines409');
+    cy.dbAlertExists('Conflicts detected while importing. Review the updated validation results.');
+    cy.closeDbAlerts();
+    cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
+      cy.contains('intercept_conflict_line').should('exist');
+      cy.contains('UID already exists in workspace').should('exist');
+      cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
+      cy.get('button').contains('Cancel').click();
+    });
+
+    cy.get('[data-testid="bulk-upload-lines-button"]').click();
+    cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/valid_single.tsv', { force: true });
+    cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
+      cy.intercept('POST', Cypress.getDbURL(endpoints.linesBulk, '*')).as('bulkUploadLines');
+      cy.get('[data-testid="bulk-upload-import-button"]').click();
+      cy.wait('@bulkUploadLines').then(({ response, request }) => {
+        cy.wrap(response.body).should('have.length', 1);
+        cy.wrap(response.body[0].uid).should('equal', 'bulk_line_cypress_1');
+        cy.wrap(request.body).should('have.length', 1);
+        cy.wrap(request.body[0].uid).should('equal', 'bulk_line_cypress_1');
+        cy.wrap(request.body[0].genotype).should('deep.equal', ['3xHA-ase1']);
+        cy.wrap(request.body[0].plasmids).should('deep.equal', ['pFA6a-3HA-kanMX6']);
+        cy.wrap(request.body[0].parent_uids).should('deep.equal', ['parent_strain']);
+      });
+    });
+    cy.dbAlertExists('Imported 1 line successfully');
+    cy.closeDbAlerts();
+    cy.get('tbody').contains('bulk_line_cypress_1').should('exist');
+  });
   it('can remove plasmids and alleles from a line in a transformation', () => {
     cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();

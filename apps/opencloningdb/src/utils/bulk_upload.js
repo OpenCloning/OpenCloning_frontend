@@ -57,6 +57,87 @@ export function templateSequenceRowStatus(row) {
   return templateSequenceRowIssues(row).length > 0 ? 'error' : 'clear';
 }
 
+export function splitSpaceSeparatedField(value) {
+  return String(value ?? '').trim().split(/\s+/).filter(Boolean);
+}
+
+export function normalizeLineSubmission(row) {
+  return {
+    uid: String(row.uid ?? '').trim(),
+    genotype: splitSpaceSeparatedField(row.genotype),
+    plasmids: splitSpaceSeparatedField(row.plasmids),
+    parent_uids: splitSpaceSeparatedField(row.parent_uids),
+  };
+}
+
+export function prepareLineRowsForValidation(rows) {
+  if (!Array.isArray(rows) || rows.length < 1) {
+    throw new Error('File does not contain line rows');
+  }
+
+  const items = rows.map(normalizeLineSubmission);
+  const rowsWithMissingUid = items.filter((item) => item.uid.length < 1);
+  if (rowsWithMissingUid.length > 0) {
+    throw new Error('File contains line rows without a UID');
+  }
+
+  const tooManyParents = items.find((item) => item.parent_uids.length > 2);
+  if (tooManyParents) {
+    throw new Error(`Line "${tooManyParents.uid}" has more than two parent UIDs`);
+  }
+
+  return items;
+}
+
+function lineBulkSequenceNameFlagIssues(flags, label) {
+  const issues = [];
+  (flags ?? []).forEach((flag) => {
+    if (flag.not_found) issues.push(`${label} "${flag.name}" not found`);
+    if (flag.ambiguous) issues.push(`${label} "${flag.name}" is ambiguous`);
+    if (flag.duplicated) issues.push(`${label} "${flag.name}" duplicated in uploaded file`);
+  });
+  return issues;
+}
+
+export function lineBulkRowIssues(row) {
+  const issues = [];
+  if (row.uid_exists) issues.push('UID already exists in workspace');
+  if (row.uid_duplicated) issues.push('UID duplicated in uploaded file');
+  issues.push(...lineBulkSequenceNameFlagIssues(row.genotype_flags, 'Genotype'));
+  issues.push(...lineBulkSequenceNameFlagIssues(row.plasmid_flags, 'Plasmid'));
+  (row.parent_flags ?? []).forEach((flag) => {
+    if (flag.line_id == null) {
+      issues.push(`Parent UID "${flag.uid}" not found`);
+    }
+  });
+  return issues;
+}
+
+export function lineBulkRowStatus(row) {
+  return lineBulkRowIssues(row).length > 0 ? 'error' : 'clear';
+}
+
+export function getLineBulkRowsInfo(rows) {
+  const errorRows = rows.filter((row) => lineBulkRowStatus(row) === 'error');
+  const clearRows = rows.filter((row) => lineBulkRowStatus(row) === 'clear');
+  const orderedRows = [...errorRows, ...clearRows];
+  return {
+    errorRows,
+    warningRows: [],
+    clearRows,
+    orderedRows,
+    clearAndWarningRows: clearRows,
+    clearRowsCount: clearRows.length,
+    warningRowsCount: 0,
+    errorRowsCount: errorRows.length,
+    totalRowsCount: rows.length,
+  };
+}
+
+export function formatLineBulkList(values) {
+  return (values ?? []).join(' ') || '—';
+}
+
 export function getTemplateSequenceRowsInfo(rows) {
   const errorRows = rows.filter((row) => templateSequenceRowStatus(row) === 'error');
   const clearRows = rows.filter((row) => templateSequenceRowStatus(row) === 'clear');
