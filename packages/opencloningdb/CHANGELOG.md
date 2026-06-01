@@ -1,5 +1,15 @@
 # @opencloning/opencloningdb
 
+## 1.8.2
+
+### Patch Changes
+
+- [#725](https://github.com/OpenCloning/OpenCloning_frontend/pull/725) [`093feb9`](https://github.com/OpenCloning/OpenCloning_frontend/commit/093feb9f9fc2aef437dc56cc70e64b26c656d6dd) Thanks [@manulera](https://github.com/manulera)! - Add support for bulk submission of cloning strategies
+
+- [#724](https://github.com/OpenCloning/OpenCloning_frontend/pull/724) [`77771ac`](https://github.com/OpenCloning/OpenCloning_frontend/commit/77771ac74d72fbd43146490efeb60798773e4734) Thanks [@manulera](https://github.com/manulera)! - Bulk submit lines
+
+- [#722](https://github.com/OpenCloning/OpenCloning_frontend/pull/722) [`871688a`](https://github.com/OpenCloning/OpenCloning_frontend/commit/871688a3576b4f2aa7ffbd8ca919b95daf01e9e4) Thanks [@manulera](https://github.com/manulera)! - Allow submitting template sequences in bulk
+
 ## 1.8.1
 
 ### Patch Changes
