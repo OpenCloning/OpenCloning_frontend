@@ -1,15 +1,8 @@
 import React from 'react';
-import {
-  Box,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { getSequenceRowsInfo, sequenceRowIssues, sequenceRowStatus } from '../../utils/bulk_upload';
-import { BulkUploadPreviewTableWrapper, CommonTableRow } from './common';
+import { CommonTableRow } from './common';
+import BulkUploadPreview from './BulkUploadPreview';
 
 function SequenceBulkUploadPreviewTableRow({ row }) {
   const issues = sequenceRowIssues(row);
@@ -63,24 +56,17 @@ export default function SequenceBulkUploadPreviewTable({
   bulkTags,
   onBulkTagsChange,
 }) {
-  if (isValidating) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <CircularProgress size={24} />
-      </Box>
-    );
-  }
-  const rowsInfo = getSequenceRowsInfo(rows);
   return (
-    <BulkUploadPreviewTableWrapper
-      rowsInfo={rowsInfo}
+    <BulkUploadPreview
+      rows={rows}
+      getRowsInfo={getSequenceRowsInfo}
+      renderTable={(orderedRows) => <TableComponent rows={orderedRows} />}
       handleSubmit={handleSubmit}
       handleCancel={handleCancel}
       isSubmitting={isSubmitting}
+      isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
-    >
-      <TableComponent rows={rowsInfo.orderedRows} />
-    </BulkUploadPreviewTableWrapper>
+    />
   );
 }

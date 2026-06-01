@@ -1,49 +1,35 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Box,
-  Button,
-  Modal,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Button, Tooltip } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
-import useAppAlerts from '../../hooks/useAppAlerts';
 import PrimerBulkUploadPreviewTable from './PrimerBulkUploadPreviewTable';
 import { normalizePrimerSubmission } from '../../utils/bulk_upload';
+import BulkUploadModal from './BulkUploadModal';
+import useBulkUploadFlow from './useBulkUploadFlow';
 
 
 export default function BulkUploadPrimersButton() {
-  const hiddenFileInput = React.useRef(null);
-  const queryClient = useQueryClient();
-  const { addAlert } = useAppAlerts();
-  const workspaceRole = useSelector((state) => state.auth.workspace?.role);
-  const [openModal, setOpenModal] = React.useState(false);
-  const [validationRows, setValidationRows] = React.useState([]);
-  const [bulkTags, setBulkTags] = React.useState([]);
-
-  const closeModal = () => {
-    setOpenModal(false);
-    setBulkTags([]);
-  };
-
-  const validateMutation = useMutation({
-    mutationFn: async (primers) => {
+  const {
+    addAlert,
+    bulkTags,
+    closeModal,
+    handleUploadClick,
+    hiddenFileInput,
+    isSubmitting,
+    isValidating,
+    isViewer,
+    openModal,
+    setBulkTags,
+    submitRows,
+    validationRows,
+    validateSubmission,
+  } = useBulkUploadFlow({
+    supportsTags: true,
+    validateMutationFn: async (primers) => {
       const { data } = await openCloningDBHttpClient.post(endpoints.primersValidateUpload, primers);
       return data;
     },
-    onError: (error) => {
-      addAlert({
-        message: String(error?.response?.data?.detail) || String(error?.message) || 'Failed to validate primers',
-        severity: 'error',
-      });
-    },
-  });
-
-  const submitMutation = useMutation({
-    mutationFn: async ({ primers, modeLabel, tags }) => {
+    submitMutationFn: async ({ primers, modeLabel, tags }) => {
       const strict = modeLabel === 'clear';
       const { data } = await openCloningDBHttpClient.post(endpoints.primersBulk, primers, {
         params: {
@@ -53,36 +39,12 @@ export default function BulkUploadPrimersButton() {
       });
       return data;
     },
-    onSuccess: (createdPrimers, variables) => {
-      addAlert({
-        message: `Imported ${createdPrimers.length} ${variables.modeLabel} primer${createdPrimers.length === 1 ? '' : 's'} successfully`,
-        severity: 'success',
-      });
-      closeModal();
-      setValidationRows([]);
+    getSuccessMessage: (createdPrimers, variables) => `Imported ${createdPrimers.length} ${variables.modeLabel} primer${createdPrimers.length === 1 ? '' : 's'} successfully`,
+    onSubmitSuccess: (_data, _variables, queryClient) => {
       queryClient.invalidateQueries({ queryKey: ['primers'] });
-    },
-    onError: (error) => {
-      const conflictRows = error?.response?.status === 409 ? error?.response?.data : null;
-      if (Array.isArray(conflictRows)) {
-        setValidationRows(conflictRows);
-        addAlert({
-          message: 'Conflicts detected while importing. Review the updated validation results.',
-          severity: 'warning',
-        });
-        return;
-      }
-      addAlert({
-        message: 'Server error while importing primers',
-        severity: 'error',
-      });
     },
   });
 
-
-  const handleUploadClick = () => {
-    hiddenFileInput.current?.click();
-  };
 
   const handleFileUpload = async (event) => {
     const fileUploaded = event.target.files?.[0];
@@ -96,9 +58,7 @@ export default function BulkUploadPrimersButton() {
       if (normalizedRows.length < 1) {
         throw new Error('File does not contain primer rows');
       }
-      setOpenModal(true);
-      const rows = await validateMutation.mutateAsync(normalizedRows);
-      setValidationRows(rows);
+      await validateSubmission(normalizedRows);
     } catch (error) {
       addAlert({
         message: error?.response?.data?.detail || error?.message || 'Failed to parse or validate primers file',
@@ -114,10 +74,10 @@ export default function BulkUploadPrimersButton() {
       return;
     }
     const primers2submit = primers.map(({name, sequence, uid}) => ({name, sequence, uid}));
-    submitMutation.mutate({ primers: primers2submit, modeLabel, tags: bulkTags });
+    submitRows({ primers: primers2submit, modeLabel, tags: bulkTags });
   };
 
-  if (workspaceRole === 'viewer') {
+  if (isViewer) {
     return null;
   }
 
@@ -144,36 +104,22 @@ export default function BulkUploadPrimersButton() {
         onChange={handleFileUpload}
       />
 
-      <Modal open={openModal} onClose={closeModal}>
-        <Box
-          data-testid="bulk-upload-primers-modal"
-          sx={{
-            bgcolor: 'background.paper',
-            p: 3,
-            width: 'min(1280px, 98vw)',
-            maxHeight: '90vh',
-            overflow: 'hidden',
-            mx: 'auto',
-            my: '5vh',
-            borderRadius: 1,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
-            Bulk Upload Primers Preview
-          </Typography>
-          <PrimerBulkUploadPreviewTable
-            rows={validationRows}
-            handleSubmit={handleSubmit}
-            handleCancel={closeModal}
-            isSubmitting={submitMutation.isPending}
-            isValidating={validateMutation.isPending}
-            bulkTags={bulkTags}
-            onBulkTagsChange={setBulkTags}
-          />
-        </Box>
-      </Modal>
+      <BulkUploadModal
+        open={openModal}
+        onClose={closeModal}
+        dataTestId="bulk-upload-primers-modal"
+        title="Bulk Upload Primers Preview"
+      >
+        <PrimerBulkUploadPreviewTable
+          rows={validationRows}
+          handleSubmit={handleSubmit}
+          handleCancel={closeModal}
+          isSubmitting={isSubmitting}
+          isValidating={isValidating}
+          bulkTags={bulkTags}
+          onBulkTagsChange={setBulkTags}
+        />
+      </BulkUploadModal>
     </>
   );
 }

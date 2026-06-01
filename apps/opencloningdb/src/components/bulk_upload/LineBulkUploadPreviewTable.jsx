@@ -1,12 +1,13 @@
 import React from 'react';
-import { Box, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import {
   formatLineBulkList,
   getLineBulkRowsInfo,
   lineBulkRowIssues,
   lineBulkRowStatus,
 } from '../../utils/bulk_upload';
-import { BulkUploadPreviewTableWrapper, CommonTableRow } from './common';
+import { CommonTableRow } from './common';
+import BulkUploadPreview from './BulkUploadPreview';
 
 function LineBulkUploadPreviewTableRow({ row }) {
   const issues = lineBulkRowIssues(row);
@@ -59,23 +60,16 @@ export default function LineBulkUploadPreviewTable({
   isSubmitting,
   isValidating,
 }) {
-  if (isValidating) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <CircularProgress size={24} />
-      </Box>
-    );
-  }
-  const rowsInfo = getLineBulkRowsInfo(rows);
   return (
-    <BulkUploadPreviewTableWrapper
-      rowsInfo={rowsInfo}
+    <BulkUploadPreview
+      rows={rows}
+      getRowsInfo={getLineBulkRowsInfo}
+      renderTable={(orderedRows) => <TableComponent rows={orderedRows} />}
       handleSubmit={handleSubmit}
       handleCancel={handleCancel}
       isSubmitting={isSubmitting}
+      isValidating={isValidating}
       importMode="allClearRequired"
-    >
-      <TableComponent rows={rowsInfo.orderedRows} />
-    </BulkUploadPreviewTableWrapper>
+    />
   );
 }

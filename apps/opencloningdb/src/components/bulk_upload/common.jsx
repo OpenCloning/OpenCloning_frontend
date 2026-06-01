@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, TableContainer, Paper, Button, CircularProgress, Box, TableRow, TableCell, FormControl } from '@mui/material';
-import { Cancel as CancelIcon, CheckCircle as CheckCircleIcon, Warning as WarningIcon } from '@mui/icons-material';
+import { Cancel as CancelIcon, CheckCircle as CheckCircleIcon, Info as InfoIcon, Warning as WarningIcon } from '@mui/icons-material';
 import TagMultiSelect from '../TagMultiSelect';
 
 
@@ -14,9 +14,17 @@ export function BulkUploadPreviewTableWrapper({
   onBulkTagsChange,
   importMode = 'clearAndWarnings',
 }) {
-  const { clearRows, clearAndWarningRows, warningRowsCount, errorRowsCount, orderedRows } = rowsInfo;
+  const { clearRows, clearAndWarningRows, warningRowsCount, errorRowsCount, infoRowsCount = 0, orderedRows } = rowsInfo;
   const allClearRequired = importMode === 'allClearRequired';
   const canImportAll = clearRows.length === orderedRows.length && orderedRows.length > 0;
+  const summaryText = allClearRequired
+    ? `${clearRows.length} clear, ${errorRowsCount} error${infoRowsCount ? `, ${infoRowsCount} informational` : ''} out of ${orderedRows.length} uploaded items.`
+    : `${clearRows.length} clear, ${warningRowsCount} warning, ${errorRowsCount} error${infoRowsCount ? `, ${infoRowsCount} informational` : ''} out of ${orderedRows.length} uploaded items.`;
+  const orderingText = allClearRequired
+    ? 'All rows must be clear to import. Errors are shown first.'
+    : infoRowsCount > 0
+      ? 'Errors are shown first, then warnings, informational rows, and clear rows.'
+      : 'Errors are shown first, then warnings, then clear rows.';
 
   return (
     <>
@@ -31,9 +39,7 @@ export function BulkUploadPreviewTableWrapper({
         </FormControl>
       )}
       <Typography variant="body2" sx={{ mb: 2 }}>
-        {allClearRequired
-          ? 'All rows must be clear to import. Errors are shown first.'
-          : 'Errors are shown first, then warnings, then clear rows.'}
+        {orderingText}
       </Typography>
 
       <TableContainer
@@ -45,9 +51,7 @@ export function BulkUploadPreviewTableWrapper({
       </TableContainer>
 
       <Typography variant="body2" sx={{ mb: 2 }}>
-        {allClearRequired
-          ? `${clearRows.length} clear, ${errorRowsCount} error out of ${orderedRows.length} uploaded items.`
-          : `${clearRows.length} clear, ${warningRowsCount} warning, ${errorRowsCount} error out of ${orderedRows.length} uploaded items.`}
+        {summaryText}
       </Typography>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
@@ -95,11 +99,14 @@ export function BulkUploadPreviewTableWrapper({
 export function StatusIcon({ status }) {
   const isClear = status === 'clear';
   const isError = status === 'error';
+  const isInfo = status === 'info';
 
   return isClear ? (
     <CheckCircleIcon color="success" />
   ) : isError ? (
     <CancelIcon color="error" />
+  ) : isInfo ? (
+    <InfoIcon color="info" />
   ) : (
     <WarningIcon color="warning" />
   );
