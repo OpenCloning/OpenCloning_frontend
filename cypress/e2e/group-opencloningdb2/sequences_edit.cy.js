@@ -232,7 +232,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   it('can bulk upload template sequences', () => {
     cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
     cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
-    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/with_conflict.tsv', { force: true });
+    cy.get('input[type="file"]').eq(2).selectFile('cypress/test_files/bulk_template_sequences/with_conflict.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {
         cy.contains('template_sequence_allele').should('exist');
@@ -245,11 +245,10 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
       cy.get('button').contains('Cancel').click();
     });
-    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/invalid_type.tsv', { force: true });
+    cy.get('input[type="file"]').eq(2).selectFile('cypress/test_files/bulk_template_sequences/invalid_type.tsv', { force: true });
     cy.dbAlertExists('Invalid sequence_type value(s): not_a_type');
     cy.closeDbAlerts();
-    cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
-    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/valid_single.tsv', { force: true });
+    cy.get('input[type="file"]').eq(2).selectFile('cypress/test_files/bulk_template_sequences/valid_single.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {
         cy.contains('bulk_template_cypress_1').should('exist');
@@ -286,8 +285,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.get('button').contains('Cancel').click();
     });
 
-    cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
-    cy.get('input[type="file"]').eq(1).selectFile('cypress/test_files/bulk_template_sequences/valid_single.tsv', { force: true });
+    cy.get('input[type="file"]').eq(2).selectFile('cypress/test_files/bulk_template_sequences/valid_single.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {
         cy.contains('bulk_template_cypress_1').should('exist');
