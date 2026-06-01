@@ -305,6 +305,87 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.dbAlertExists('Imported 1 template sequence successfully');
     cy.closeDbAlerts();
   });
+  it('can bulk upload cloning strategies', () => {
+    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.get('input[type="file"]').eq(1).selectFile([
+      'cypress/test_files/old_and_bug_fix/crispr_hdr.json', // old format
+      'cypress/test_files/bulk_cloning_strategies/linearised_pFA6a-kanMX6_wrong_database_id.json', // wrong database id
+      'cypress/test_files/bulk_cloning_strategies/manually_typed.json', // new sequence
+      'cypress/test_files/wrong_history.json', // wrong JSON format
+    ], { force: true });
+    cy.get('[data-testid="bulk-upload-cloning-strategies-modal"]').within(() => {
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('wrong_history.json').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(2).within(() => {
+        cy.contains('pFA6a-kanMX6').should('exist');
+        cy.get('[data-testid="WarningIcon"]').should('exist');
+      });
+      cy.get('tr').eq(3).within(() => {
+        cy.contains('crispr_hdr').should('exist');
+        cy.get('[data-testid="InfoIcon"]').should('exist');
+      });
+      cy.get('tr').eq(4).within(() => {
+        cy.contains('manually_typed').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+      });
+      cy.intercept({
+        method: 'POST',
+        url: Cypress.getDbURL(endpoints.sequencesCloningStrategyBulk, '*'),
+        times: 1,
+      }, {
+        statusCode: 500,
+      }).as('bulkUploadCloningStrategies');
+      cy.get('button').contains('Import Clear + Warnings').click();
+      cy.wait('@bulkUploadCloningStrategies').then(({ request }) => {
+        cy.wrap(request.body).should('have.length', 2);
+        cy.wrap(request.body[0]).should('have.property', 'file_name', 'linearised_pFA6a-kanMX6_wrong_database_id.json');
+        cy.wrap(request.body[1]).should('have.property', 'file_name', 'manually_typed.json');
+      });
+      cy.dbAlertExists('Internal server error');
+      cy.closeDbAlerts();
+      cy.intercept(
+        {
+          method: 'POST',
+          url: Cypress.getDbURL(endpoints.sequencesCloningStrategyBulk, '*'),
+          times: 1,
+        }).as('bulkUploadCloningStrategies2');
+      cy.get('button').contains(/^Import Clear$/).click();
+      cy.wait('@bulkUploadCloningStrategies2').then(({ request }) => {
+        cy.wrap(request.body).should('have.length', 1);
+        cy.wrap(request.body[0]).should('have.property', 'file_name', 'manually_typed.json');
+      });
+      cy.dbAlertExists('Imported 1 cloning strategy successfully');
+      cy.closeDbAlerts();
+    });
+    cy.get('tbody tr button').contains('manually_typed').should('exist');
+    // Display error after submission
+    cy.get('input[type="file"]').eq(1).selectFile([
+      'cypress/test_files/bulk_cloning_strategies/linearised_pFA6a-kanMX6_wrong_database_id.json', // old format
+    ], { force: true });
+    cy.get('[data-testid="bulk-upload-cloning-strategies-modal"]').within(() => {
+      cy.intercept({
+        method: 'POST',
+        url: Cypress.getDbURL(endpoints.sequencesCloningStrategyBulk, '*'),
+        times: 1,
+      }, {
+        statusCode: 409,
+        body: [
+          { file_name: 'bla.json', parsing_errors: ['test parsing error'] }
+        ],
+      }).as('bulkUploadCloningStrategies3');
+      cy.get('button').contains('Import Clear + Warnings').click();
+      cy.wait('@bulkUploadCloningStrategies3')
+      cy.get('tr').eq(1).within(() => {
+        cy.contains('bla.json').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+        cy.contains('test parsing error').should('exist');
+      });
+    });
+    cy.dbAlertExists('Conflicts detected while importing');
+    cy.closeDbAlerts();
+  });
   it('can change annotation', () => {
     cy.viewport(1920, 1080);
     cy.e2eLogin(`/sequences?name=lacZ_PCR_product`, 'bootstrap@example.com', 'password');
