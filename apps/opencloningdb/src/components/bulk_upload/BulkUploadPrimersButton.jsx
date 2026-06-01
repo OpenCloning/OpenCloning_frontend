@@ -39,8 +39,6 @@ export default function BulkUploadPrimersButton() {
       });
       return data;
     },
-    getValidateErrorMessage: (error) => error?.response?.data?.detail || error?.message || 'Failed to validate primers',
-    getSubmitErrorMessage: () => 'Server error while importing primers',
     getSuccessMessage: (createdPrimers, variables) => `Imported ${createdPrimers.length} ${variables.modeLabel} primer${createdPrimers.length === 1 ? '' : 's'} successfully`,
     onSubmitSuccess: (_data, _variables, queryClient) => {
       queryClient.invalidateQueries({ queryKey: ['primers'] });

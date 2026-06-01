@@ -43,8 +43,6 @@ export default function BulkUploadCloningStrategiesButton() {
       });
       return data;
     },
-    getValidateErrorMessage: error2String,
-    getSubmitErrorMessage: error2String,
     getSuccessMessage: (createdSequences, variables) => {
       const strategyCount = variables.syncResults.length;
       return `Imported ${strategyCount} cloning strateg${strategyCount === 1 ? 'y' : 'ies'} successfully${createdSequences.length > 0 ? ` (${createdSequences.length} sequences created)` : ''}`;

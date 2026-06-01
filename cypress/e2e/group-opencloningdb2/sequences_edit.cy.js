@@ -159,8 +159,21 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   });
   it('can bulk upload sequences', () => {
     cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    // Test a connection error
+    cy.intercept({
+      method: 'POST',
+      url: Cypress.getDbURL(endpoints.sequencesValidateUpload, '*'),
+      times: 1,
+    }, {
+      statusCode: 500,
+    }).as('bulkUploadSequences500');
+    cy.get('input[type="file"]').eq(0).selectFile(bulkSequenceFiles, { force: true });
+    cy.dbAlertExists('Internal server error');
+    cy.closeDbAlerts();
+    cy.get('[data-testid="bulk-upload-sequences-modal"]').should('not.exist');
     cy.get('button').contains('Bulk Upload').click();
     cy.get('input[type="file"]').eq(0).selectFile(bulkSequenceFiles, { force: true });
+    cy.wait('@bulkUploadSequences500');
     cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {
         cy.contains('hello.fasta').should('exist');
@@ -317,18 +330,28 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.get('tr').eq(1).within(() => {
         cy.contains('wrong_history.json').should('exist');
         cy.get('[data-testid="CancelIcon"]').should('exist');
+        cy.contains('cloning strategy is invalid').should('exist');
+        cy.get('td').eq(2).contains('Invalid')
       });
       cy.get('tr').eq(2).within(() => {
         cy.contains('pFA6a-kanMX6').should('exist');
         cy.get('[data-testid="WarningIcon"]').should('exist');
+        cy.contains('database_id mismatch').should('exist');
+        cy.contains('provided 999999').should('exist');
+        cy.get('td').eq(2).contains('Review warnings')
       });
       cy.get('tr').eq(3).within(() => {
         cy.contains('crispr_hdr').should('exist');
         cy.get('[data-testid="InfoIcon"]').should('exist');
+        cy.contains('previous version').should('exist');
+        cy.contains('Already synced')
+        cy.get('td').eq(2).contains('Already synced')
       });
       cy.get('tr').eq(4).within(() => {
         cy.contains('manually_typed').should('exist');
         cy.get('[data-testid="CheckCircleIcon"]').should('exist');
+        cy.get('td').eq(2).contains('Ready to import')
+        cy.get('td').eq(5).should('be.empty')
       });
       cy.intercept({
         method: 'POST',

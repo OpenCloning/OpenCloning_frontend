@@ -50,8 +50,6 @@ export default function BulkUploadSequencesButton() {
       });
       return data;
     },
-    getValidateErrorMessage: (error) => error?.response?.data?.detail || error?.message || 'Failed to validate sequences',
-    getSubmitErrorMessage: () => 'Submission failed',
     getSuccessMessage: (createdSequences) => `Imported ${createdSequences.length} sequence${createdSequences.length === 1 ? '' : 's'} successfully`,
     onSubmitSuccess: (_data, _variables, queryClient) => {
       queryClient.invalidateQueries({ queryKey: ['sequences'] });

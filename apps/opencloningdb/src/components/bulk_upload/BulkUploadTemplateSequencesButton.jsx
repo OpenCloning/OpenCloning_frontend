@@ -45,8 +45,6 @@ export default function BulkUploadTemplateSequencesButton() {
       });
       return data;
     },
-    getValidateErrorMessage: error2String,
-    getSubmitErrorMessage: () => 'Server error while importing template sequences',
     getSuccessMessage: (created) => `Imported ${created.length} template sequence${created.length === 1 ? '' : 's'} successfully`,
     onSubmitSuccess: (_data, _variables, queryClient) => {
       queryClient.invalidateQueries({ queryKey: ['sequences'] });

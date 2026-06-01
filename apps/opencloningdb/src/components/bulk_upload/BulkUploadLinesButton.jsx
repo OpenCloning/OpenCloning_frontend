@@ -30,8 +30,6 @@ export default function BulkUploadLinesButton() {
       const { data } = await openCloningDBHttpClient.post(endpoints.linesBulk, items);
       return data;
     },
-    getValidateErrorMessage: error2String,
-    getSubmitErrorMessage: () => 'Server error while importing lines',
     getSuccessMessage: (created) => `Imported ${created.length} line${created.length === 1 ? '' : 's'} successfully`,
     onSubmitSuccess: (_data, _variables, queryClient) => {
       queryClient.invalidateQueries({ queryKey: ['lines'] });

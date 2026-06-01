@@ -1,18 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { error2String } from '@opencloning/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useAppAlerts from '../../hooks/useAppAlerts';
-
-function defaultErrorMessage(error) {
-  return error?.response?.data?.detail || error?.message || 'Request failed';
-}
 
 export default function useBulkUploadFlow({
   supportsTags = false,
   validateMutationFn,
   submitMutationFn,
-  getValidateErrorMessage = defaultErrorMessage,
-  getSubmitErrorMessage = defaultErrorMessage,
   getSuccessMessage,
   onSubmitSuccess,
   conflictMessage = 'Conflicts detected while importing. Review the updated validation results.',
@@ -64,7 +59,7 @@ export default function useBulkUploadFlow({
       }
 
       addAlert({
-        message: getSubmitErrorMessage(error, variables),
+        message: error2String(error),
         severity: 'error',
       });
     },
@@ -88,13 +83,13 @@ export default function useBulkUploadFlow({
           setOpenModal(false);
         }
         addAlert({
-          message: getValidateErrorMessage(error),
+          message: error2String(error),
           severity: 'error',
         });
         return null;
       }
     },
-    [addAlert, getValidateErrorMessage, validateMutation],
+    [addAlert, validateMutation],
   );
 
   return {
