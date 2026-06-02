@@ -19,15 +19,22 @@ export default function BulkUploadLinesButton() {
     isViewer,
     openModal,
     submitRows,
+    bulkTags,
+    setBulkTags,
     validationRows,
     validateSubmission,
   } = useBulkUploadFlow({
+    supportsTags: true,
     validateMutationFn: async (items) => {
       const { data } = await openCloningDBHttpClient.post(endpoints.linesValidateUpload, items);
       return data;
     },
-    submitMutationFn: async (items) => {
-      const { data } = await openCloningDBHttpClient.post(endpoints.linesBulk, items);
+    submitMutationFn: async ({ items, tags }) => {
+      const { data } = await openCloningDBHttpClient.post(endpoints.linesBulk, items, {
+        params: {
+          ...(tags?.length ? { tags } : {}),
+        },
+      });
       return data;
     },
     getSuccessMessage: (created) => `Imported ${created.length} line${created.length === 1 ? '' : 's'} successfully`,
@@ -74,7 +81,7 @@ export default function BulkUploadLinesButton() {
       plasmids,
       ['parent_uids']: parentUids,
     }));
-    submitRows(items);
+    submitRows({ items, tags: bulkTags });
   };
 
   return (
@@ -113,6 +120,8 @@ export default function BulkUploadLinesButton() {
           handleCancel={closeModal}
           isSubmitting={isSubmitting}
           isValidating={isValidating}
+          bulkTags={bulkTags}
+          onBulkTagsChange={setBulkTags}
         />
       </BulkUploadModal>
     </>
