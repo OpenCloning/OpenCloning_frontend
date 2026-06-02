@@ -23,6 +23,7 @@ import AddToCloningButton from '../components/AddToCloningButton';
 import BulkUploadPrimersButton from '../components/bulk_upload/BulkUploadPrimersButton';
 import PageContainer from '../components/PageContainer';
 import PrimersTable from '../components/PrimersTable';
+import useRowSelection from '../hooks/useRowSelection';
 
 const MIN_WIDTH = 200;
 
@@ -75,7 +76,6 @@ function PrimerQueryFields({ pendingParams, setPendingParams }) {
 function PrimersPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-  const [selectedIds, setSelectedIds] = useState(new Set());
   const [searchParams] = useSearchParams();
 
 
@@ -100,13 +100,8 @@ function PrimersPage() {
   });
 
   const items = data?.items ?? [];
-
-  const toggleRow = (id) =>
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const orderedIds = useMemo(() => items.map((item) => item.id), [items]);
+  const { selectedIds, toggleRow, clearSelection } = useRowSelection(orderedIds);
 
   const selectedPrimers = items.filter((primer) => selectedIds.has(primer.id));
 
@@ -129,7 +124,7 @@ function PrimersPage() {
           selectedEntities={selectedPrimers}
           entityType="input_entities"
           label="Primers"
-          onSuccess={() => {setSelectedIds(new Set());}}
+          onSuccess={clearSelection}
         />
         <AddToCloningButton selectedEntities={selectedPrimers} entityType="primer">
           Add to Design Tab

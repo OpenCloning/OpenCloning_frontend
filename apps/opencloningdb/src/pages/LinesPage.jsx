@@ -20,6 +20,7 @@ import TopButtonSection from '../components/TopButtonSection';
 import PageContainer from '../components/PageContainer';
 import LinesTable from '../components/LinesTable';
 import BulkUploadLinesButton from '../components/bulk_upload/BulkUploadLinesButton';
+import useRowSelection from '../hooks/useRowSelection';
 
 const MIN_WIDTH = 150;
 
@@ -70,7 +71,6 @@ function LinesQueryFields({ pendingParams, setPendingParams }) {
 function LinesPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-  const [selectedIds, setSelectedIds] = useState(new Set());
   const [searchParams] = useSearchParams();
 
   const filters = useMemo(
@@ -94,12 +94,8 @@ function LinesPage() {
   });
 
   const items = data?.items ?? [];
-
-  const toggleRow = (id) => setSelectedIds((prev) => {
-    const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
-    return next;
-  });
+  const orderedIds = useMemo(() => items.map((item) => item.id), [items]);
+  const { selectedIds, toggleRow, clearSelection } = useRowSelection(orderedIds);
 
   const selectedEntities = useMemo(() => items.filter((item) => selectedIds.has(item.id)), [items, selectedIds]);
 
@@ -118,7 +114,7 @@ function LinesPage() {
       />
       <TopButtonSection>
         <BulkUploadLinesButton />
-        <TagEntitiesButton onSuccess={() => setSelectedIds(new Set())} selectedEntities={selectedEntities} entityType="lines" label="Lines" />
+        <TagEntitiesButton onSuccess={clearSelection} selectedEntities={selectedEntities} entityType="lines" label="Lines" />
       </TopButtonSection>
       <TableContainer component={Paper}>
         <LinesTable lines={items} showCreatedBy showCreatedAt withCheckbox={true} selectedIds={selectedIds} toggleRow={toggleRow} />
@@ -126,12 +122,12 @@ function LinesPage() {
           component="div"
           count={data?.total ?? 0}
           page={page}
-          onPageChange={(_, newPage) => { setPage(newPage); setSelectedIds(new Set()); }}
+          onPageChange={(_, newPage) => { setPage(newPage); clearSelection(); }}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={(e) => {
             setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
-            setSelectedIds(new Set());
+            clearSelection();
           }}
           rowsPerPageOptions={[10, 25, 50]}
         />

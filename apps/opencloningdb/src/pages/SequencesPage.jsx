@@ -28,6 +28,7 @@ import BulkUploadTemplateSequencesButton from '../components/bulk_upload/BulkUpl
 import PageContainer from '../components/PageContainer';
 import SequenceTable from '../components/SequenceTable';
 import CreateTemplateSequenceButton from '../components/CreateTemplateSequenceButton';
+import useRowSelection from '../hooks/useRowSelection';
 
 const MIN_WIDTH = 200;
 
@@ -85,7 +86,6 @@ function SequenceQueryFields({ pendingParams, setPendingParams }) {
 function SequencesPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-  const [selectedIds, setSelectedIds] = useState(new Set());
   const [searchParams] = useSearchParams();
 
 
@@ -114,13 +114,8 @@ function SequencesPage() {
   });
 
   const items = data?.items ?? [];
-
-  const toggleRow = (id) =>
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const orderedIds = useMemo(() => items.map((item) => item.id), [items]);
+  const { selectedIds, toggleRow, clearSelection } = useRowSelection(orderedIds);
 
   const selectedSequences = items.filter((seq) => selectedIds.has(seq.id));
 
@@ -150,7 +145,7 @@ function SequencesPage() {
           selectedEntities={selectedSequences}
           entityType="input_entities"
           label="Sequences"
-          onSuccess={() => {setSelectedIds(new Set());}}
+          onSuccess={clearSelection}
         />
         <AddToCloningButton selectedEntities={selectedSequences} entityType="sequence">
           Add to Design Tab

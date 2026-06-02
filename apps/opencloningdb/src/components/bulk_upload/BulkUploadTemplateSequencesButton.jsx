@@ -90,7 +90,7 @@ export default function BulkUploadTemplateSequencesButton() {
   return (
     <>
       <BulkUploadMenuButton
-        label="Bulk Upload Templates"
+        label="Bulk Upload Template Sequences"
         dataTestId="bulk-upload-template-sequences-button"
         onUploadClick={handleUploadClick}
         templatePath={BULK_SUBMISSION_TEMPLATES.templateSequences}
