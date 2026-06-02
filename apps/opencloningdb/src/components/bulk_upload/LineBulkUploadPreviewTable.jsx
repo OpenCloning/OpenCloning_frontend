@@ -59,6 +59,8 @@ export default function LineBulkUploadPreviewTable({
   handleCancel,
   isSubmitting,
   isValidating,
+  bulkTags,
+  onBulkTagsChange,
 }) {
   return (
     <BulkUploadPreview
@@ -69,6 +71,8 @@ export default function LineBulkUploadPreviewTable({
       handleCancel={handleCancel}
       isSubmitting={isSubmitting}
       isValidating={isValidating}
+      bulkTags={bulkTags}
+      onBulkTagsChange={onBulkTagsChange}
       importMode="allClearRequired"
     />
   );

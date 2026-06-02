@@ -185,6 +185,8 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="bulk-upload-lines-button"]').click();
     cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/valid_single.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
+      cy.setAutocompleteValue('Tags to apply (optional)', 'templateless_PCR', 'div');
+      cy.setAutocompleteValue('Tags to apply (optional)', 'restriction_ligation_assembly', 'div');
       cy.intercept('POST', Cypress.getDbURL(endpoints.linesBulk, '*')).as('bulkUploadLines');
       cy.get('[data-testid="bulk-upload-import-button"]').click();
       cy.wait('@bulkUploadLines').then(({ response, request }) => {
@@ -195,6 +197,8 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
         cy.wrap(request.body[0].genotype).should('deep.equal', ['3xHA-ase1']);
         cy.wrap(request.body[0].plasmids).should('deep.equal', ['pFA6a-3HA-kanMX6']);
         cy.wrap(request.body[0].parent_uids).should('deep.equal', ['parent_strain']);
+        cy.wrap(request.query).should('have.property', 'tags');
+        cy.wrap(request.query.tags).should('have.length', 2);
       });
     });
     cy.dbAlertExists('Imported 1 line successfully');

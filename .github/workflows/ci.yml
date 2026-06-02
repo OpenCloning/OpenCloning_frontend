@@ -171,14 +171,11 @@ jobs:
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
 
-      - name: run posgres and garage in docker
+      - name: run postgres in docker
         if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         working-directory: OpenCloning_backend
         run: |
-          docker compose \
-            -f docker/docker-compose.postgres.yml \
-            -f docker/docker-compose.garage.yml \
-            up -d postgres garage
+          docker compose -f docker/docker-compose.postgres.yml up -d postgres
 
       - name: run python dev server in background (opencloningdb)
         if: ${{ startsWith(matrix.group, 'opencloningdb') }}
@@ -193,14 +190,6 @@ jobs:
           OPENCLONING_TESTING: "1"
           OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
           OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
-          OPENCLONING_OBJECT_STORAGE_ENDPOINT_URL: http://localhost:9000
-          OPENCLONING_OBJECT_STORAGE_ACCESS_KEY_ID: opencloning-dev
-          OPENCLONING_OBJECT_STORAGE_SECRET_ACCESS_KEY: opencloning-dev-secret
-          OPENCLONING_OBJECT_STORAGE_BUCKET: opencloning-dev
-          OPENCLONING_OBJECT_STORAGE_REGION: us-east-1
-          OPENCLONING_OBJECT_STORAGE_FORCE_PATH_STYLE: "true"
-          OPENCLONING_SEQUENCE_OBJECTS_PREFIX: sequences/
-          OPENCLONING_SEQUENCING_OBJECTS_PREFIX: sequencing-files/
           OPENCLONING_RATE_LIMIT_ENABLED: false
 
       - name: check if the backend server is running
@@ -276,14 +265,11 @@ jobs:
         if: matrix.group == 'unit-tests'
         run: yarn install --immutable && yarn vitest run --coverage
 
-      - name: stop posgres and garage in docker
+      - name: stop postgres in docker
         if: ${{ startsWith(matrix.group, 'opencloningdb') }}
         working-directory: OpenCloning_backend
         run: |
-          docker compose \
-            -f docker/docker-compose.postgres.yml \
-            -f docker/docker-compose.garage.yml \
-            down -v
+          docker compose -f docker/docker-compose.postgres.yml down -v
 
       - name: Upload coverage file
         uses: actions/upload-artifact@v4.6.0
