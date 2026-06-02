@@ -245,6 +245,11 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   it('can bulk upload template sequences', () => {
     cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
     cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
+    // Can download the template
+    cy.get('div[role="presentation"] a').contains('Download template').then((link) => {
+      cy.wrap(link).invoke('attr', 'href').should('include', '/bulk_submission_templates/bulk_submit_template_sequence.tsv');
+    });
+    cy.get('[data-testid="bulk-upload-upload-file"]').click();
     cy.get('input[type="file"]').eq(2).selectFile('cypress/test_files/bulk_template_sequences/with_conflict.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-template-sequences-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {

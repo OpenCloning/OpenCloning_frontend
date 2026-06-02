@@ -11,6 +11,7 @@ import {
   Button,
   Switch,
   FormControlLabel,
+  ButtonGroup,
 } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { parseSequenceParams, applySequenceParamsToSearchParams } from '../utils/query_utils';
@@ -137,10 +138,14 @@ function SequencesPage() {
         component={SequenceQueryFields}
       />
       <TopButtonSection>
-        <BulkUploadSequencesButton />
-        <BulkUploadCloningStrategiesButton />
-        <BulkUploadTemplateSequencesButton />
-        <CreateTemplateSequenceButton />
+        <ButtonGroup
+          color="primary"
+        >
+          <BulkUploadSequencesButton />
+          <BulkUploadCloningStrategiesButton />
+          <BulkUploadTemplateSequencesButton />
+          <CreateTemplateSequenceButton />
+        </ButtonGroup>
         <TagEntitiesButton
           selectedEntities={selectedSequences}
           entityType="input_entities"

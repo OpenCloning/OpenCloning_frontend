@@ -1,10 +1,11 @@
 import React from 'react';
-import { Button, Tooltip } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import PrimerBulkUploadPreviewTable from './PrimerBulkUploadPreviewTable';
 import { normalizePrimerSubmission } from '../../utils/bulk_upload';
 import BulkUploadModal from './BulkUploadModal';
+import BulkUploadMenuButton from './BulkUploadMenuButton';
+import { BULK_SUBMISSION_TEMPLATES } from './bulkSubmissionTemplates';
 import useBulkUploadFlow from './useBulkUploadFlow';
 
 
@@ -83,18 +84,17 @@ export default function BulkUploadPrimersButton() {
 
   return (
     <>
-      <Tooltip
-        arrow
-        title={(
+      <BulkUploadMenuButton
+        label="Bulk Upload Primers"
+        dataTestId="bulk-upload-primers-button"
+        onUploadClick={handleUploadClick}
+        templatePath={BULK_SUBMISSION_TEMPLATES.primers}
+        tooltip={(
           <span style={{ fontSize: '1.2em' }}>
             Upload a .csv or .tsv file with headers name, sequence, uid
           </span>
         )}
-      >
-        <Button onClick={handleUploadClick} data-testid="bulk-upload-primers-button">
-          Bulk Upload Primers
-        </Button>
-      </Tooltip>
+      />
 
       <input
         style={{ display: 'none' }}
