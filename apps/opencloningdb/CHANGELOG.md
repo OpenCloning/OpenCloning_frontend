@@ -1,5 +1,17 @@
 # opencloningdb
 
+## 0.3.4
+
+### Patch Changes
+
+- [#728](https://github.com/OpenCloning/OpenCloning_frontend/pull/728) [`2886986`](https://github.com/OpenCloning/OpenCloning_frontend/commit/28869861fcab8b3dc6127637776945efe672f127) Thanks [@manulera](https://github.com/manulera)! - Make bulk submission buttons outlined and enable downloading templates for submission.
+
+- [#728](https://github.com/OpenCloning/OpenCloning_frontend/pull/728) [`2886986`](https://github.com/OpenCloning/OpenCloning_frontend/commit/28869861fcab8b3dc6127637776945efe672f127) Thanks [@manulera](https://github.com/manulera)! - Allow shift-select in row selection to select multiple rows in table
+
+- [#728](https://github.com/OpenCloning/OpenCloning_frontend/pull/728) [`2886986`](https://github.com/OpenCloning/OpenCloning_frontend/commit/28869861fcab8b3dc6127637776945efe672f127) Thanks [@manulera](https://github.com/manulera)! - Remember latest workspace using localstorage
+
+- [#726](https://github.com/OpenCloning/OpenCloning_frontend/pull/726) [`2d2e911`](https://github.com/OpenCloning/OpenCloning_frontend/commit/2d2e9114b2ce96cfd8992d2c19b2e582a1ca3df5) Thanks [@manulera](https://github.com/manulera)! - Allow tags when bulk-submitting lines
+
 ## 0.3.3
 
 ### Patch Changes
