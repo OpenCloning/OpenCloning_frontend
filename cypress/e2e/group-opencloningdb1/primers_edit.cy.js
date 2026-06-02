@@ -80,7 +80,12 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
 
   it('can bulk upload primers', () => {
     cy.e2eLogin('/primers', 'bootstrap@example.com', 'password');
-    cy.get('button').contains('Bulk Upload').click();
+    cy.get('[data-testid="bulk-upload-primers-button"]').click();
+    // Can download the template
+    cy.get('div[role="presentation"] a').contains('Download template').then((link) => {
+      cy.wrap(link).invoke('attr', 'href').should('include', '/bulk_submission_templates/bulk_submit_primers.tsv');
+    });
+    cy.get('[data-testid="bulk-upload-upload-file"]').click();
     cy.get('input[type="file"]').selectFile('cypress/test_files/import_oligos/database_import.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-primers-modal"]').within(() => {
       cy.get('tr').eq(1).within(() => {

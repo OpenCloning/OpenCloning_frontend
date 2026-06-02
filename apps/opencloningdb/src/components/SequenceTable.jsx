@@ -14,7 +14,7 @@ function SequenceTableRow({ seq, withCheckbox, showSampleUids, showType, showCre
           <Checkbox
             size="small"
             checked={selectedIds.has(seq.id)}
-            onChange={() => toggleRow(seq.id)}
+            onChange={(e) => toggleRow(seq.id, e)}
           />
         </TableCell>
       )}

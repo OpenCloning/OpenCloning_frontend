@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button, Tooltip } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import { error2String } from '@opencloning/utils';
 import LineBulkUploadPreviewTable from './LineBulkUploadPreviewTable';
 import { prepareLineRowsForValidation } from '../../utils/bulk_upload';
 import BulkUploadModal from './BulkUploadModal';
+import BulkUploadMenuButton from './BulkUploadMenuButton';
+import { BULK_SUBMISSION_TEMPLATES } from './bulkSubmissionTemplates';
 import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadLinesButton() {
@@ -86,19 +87,18 @@ export default function BulkUploadLinesButton() {
 
   return (
     <>
-      <Tooltip
-        arrow
-        title={(
+      <BulkUploadMenuButton
+        label="Bulk Upload Lines"
+        dataTestId="bulk-upload-lines-button"
+        onUploadClick={handleUploadClick}
+        templatePath={BULK_SUBMISSION_TEMPLATES.lines}
+        tooltip={(
           <span style={{ fontSize: '1.2em' }}>
             Upload a .csv or .tsv file with headers uid, plasmids, genotype, parent_uids (case-insensitive).
             Plasmids, genotype, and parent_uids are space-separated lists. At most two parent UIDs per line.
           </span>
         )}
-      >
-        <Button onClick={handleUploadClick} data-testid="bulk-upload-lines-button">
-          Bulk Upload Lines
-        </Button>
-      </Tooltip>
+      />
 
       <input
         style={{ display: 'none' }}

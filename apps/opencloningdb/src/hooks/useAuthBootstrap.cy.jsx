@@ -10,6 +10,7 @@ import {
 import store from '../store';
 import { clearUser, setUser, setWorkspace } from '../store/authSlice';
 import useAuthBootstrap from './useAuthBootstrap';
+import { LAST_WORKSPACE_ID_KEY } from '../utils/auth_utils';
 import { baseUrl } from '@opencloning/opencloningdb';
 
 const DB_URL = baseUrl;
@@ -23,6 +24,12 @@ const TEST_WORKSPACE = {
   id: 7,
   name: 'Main Lab',
   role: 'owner',
+};
+
+const OTHER_WORKSPACE = {
+  id: 12,
+  name: 'Side Project',
+  role: 'member',
 };
 
 function AuthBootstrapProbe() {
@@ -94,6 +101,54 @@ describe('useAuthBootstrap', () => {
     cy.get('[data-cy="path"]').should('have.text', '/');
     return cy.then(() => {
       expect(store.getState().auth.user).to.deep.equal(TEST_USER);
+      expect(store.getState().auth.workspace).to.deep.equal(TEST_WORKSPACE);
+      expect(openCloningDBHttpClient.defaults.headers.common['X-Workspace-Id']).to.equal(TEST_WORKSPACE.id);
+    });
+  });
+
+  it('restores the remembered workspace when multiple workspaces are available', () => {
+    localStorage.setItem('token', 'bootstrap-token');
+    localStorage.setItem(LAST_WORKSPACE_ID_KEY, String(OTHER_WORKSPACE.id));
+
+    cy.intercept('GET', `${DB_URL}${endpoints.authMe}`, (req) => {
+      expect(req.headers.authorization).to.equal('Bearer bootstrap-token');
+      req.reply({ statusCode: 200, body: TEST_USER });
+    }).as('authMe');
+
+    cy.intercept('GET', `${DB_URL}${endpoints.workspaces}`, (req) => {
+      expect(req.headers.authorization).to.equal('Bearer bootstrap-token');
+      req.reply({ statusCode: 200, body: [TEST_WORKSPACE, OTHER_WORKSPACE] });
+    }).as('workspaces');
+
+    mountHook();
+
+    cy.wait('@authMe');
+    cy.wait('@workspaces');
+    cy.get('[data-cy="workspace-name"]').should('have.text', OTHER_WORKSPACE.name);
+    return cy.then(() => {
+      expect(store.getState().auth.workspace).to.deep.equal(OTHER_WORKSPACE);
+      expect(openCloningDBHttpClient.defaults.headers.common['X-Workspace-Id']).to.equal(OTHER_WORKSPACE.id);
+    });
+  });
+
+  it('falls back to the first workspace when the remembered id is stale', () => {
+    localStorage.setItem('token', 'bootstrap-token');
+    localStorage.setItem(LAST_WORKSPACE_ID_KEY, '999');
+
+    cy.intercept('GET', `${DB_URL}${endpoints.authMe}`, (req) => {
+      req.reply({ statusCode: 200, body: TEST_USER });
+    }).as('authMe');
+
+    cy.intercept('GET', `${DB_URL}${endpoints.workspaces}`, (req) => {
+      req.reply({ statusCode: 200, body: [TEST_WORKSPACE, OTHER_WORKSPACE] });
+    }).as('workspaces');
+
+    mountHook();
+
+    cy.wait('@authMe');
+    cy.wait('@workspaces');
+    cy.get('[data-cy="workspace-name"]').should('have.text', TEST_WORKSPACE.name);
+    return cy.then(() => {
       expect(store.getState().auth.workspace).to.deep.equal(TEST_WORKSPACE);
       expect(openCloningDBHttpClient.defaults.headers.common['X-Workspace-Id']).to.equal(TEST_WORKSPACE.id);
     });

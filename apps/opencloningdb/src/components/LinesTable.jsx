@@ -53,7 +53,7 @@ function LinesTable({ lines = [], showCreatedBy = false, showCreatedAt = false, 
                 <Checkbox
                   size="small"
                   checked={selectedIds.has(line.id)}
-                  onChange={() => toggleRow(line.id)}
+                  onChange={(e) => toggleRow(line.id, e)}
                 />
               </TableCell>)}
               <TableCell>

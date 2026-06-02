@@ -38,7 +38,7 @@ function PrimersTable({ primers, showCreatedBy = false, showCreatedAt = false, w
                 <Checkbox
                   size="small"
                   checked={selectedIds.has(primer.id)}
-                  onChange={() => toggleRow(primer.id)}
+                  onChange={(e) => toggleRow(primer.id, e)}
                 />
               </TableCell>
             )}

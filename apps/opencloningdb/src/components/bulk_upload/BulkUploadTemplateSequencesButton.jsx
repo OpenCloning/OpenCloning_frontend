@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button, Tooltip } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import TemplateSequenceBulkUploadPreviewTable from './TemplateSequenceBulkUploadPreviewTable';
@@ -9,6 +8,8 @@ import {
 } from '../../utils/bulk_upload';
 import { error2String } from '@opencloning/utils';
 import BulkUploadModal from './BulkUploadModal';
+import BulkUploadMenuButton from './BulkUploadMenuButton';
+import { BULK_SUBMISSION_TEMPLATES } from './bulkSubmissionTemplates';
 import useBulkUploadFlow from './useBulkUploadFlow';
 
 const VALID_TYPES_HINT = VALID_TEMPLATE_SEQUENCE_TYPE_KEYS.join(', ');
@@ -88,9 +89,12 @@ export default function BulkUploadTemplateSequencesButton() {
 
   return (
     <>
-      <Tooltip
-        arrow
-        title={(
+      <BulkUploadMenuButton
+        label="Bulk Upload Template Sequences"
+        dataTestId="bulk-upload-template-sequences-button"
+        onUploadClick={handleUploadClick}
+        templatePath={BULK_SUBMISSION_TEMPLATES.templateSequences}
+        tooltip={(
           <span style={{ fontSize: '1.2em' }}>
             Upload a .csv or .tsv file with headers name, sequence_type (case-insensitive).
             {' '}
@@ -99,11 +103,7 @@ export default function BulkUploadTemplateSequencesButton() {
             {VALID_TYPES_HINT}
           </span>
         )}
-      >
-        <Button onClick={handleUploadClick} data-testid="bulk-upload-template-sequences-button">
-          Bulk Upload Templates
-        </Button>
-      </Tooltip>
+      />
 
       <input
         style={{ display: 'none' }}

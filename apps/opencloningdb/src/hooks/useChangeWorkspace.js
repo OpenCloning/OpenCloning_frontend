@@ -3,6 +3,7 @@ import { batch, useDispatch } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import { setWorkspaceHeader, clearWorkspaceHeader } from '@opencloning/opencloningdb';
 import { setWorkspace, clearUser, setUser } from '../store/authSlice';
+import { setRememberedWorkspaceId } from '../utils/auth_utils';
 import useStableNavigate from './useStableNavigate';
 import { cloningActions } from '@opencloning/store/cloning';
 
@@ -15,6 +16,7 @@ export default function useChangeWorkspace() {
 
   const changeWorkspace = React.useCallback(
     (workspace) => {
+      setRememberedWorkspaceId(workspace.id);
       queryClient.clear();
       setWorkspaceHeader(workspace.id);
       batch(() => {
