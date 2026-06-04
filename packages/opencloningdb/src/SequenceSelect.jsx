@@ -9,18 +9,23 @@ const messages = {
 };
 
 const getGetQuery = (sequenceTypes) => {
-  return (name) => ({
-    queryKey: ['sequences', { sequence_types: sequenceTypes, name }],
+  return (query) => ({
+    queryKey: ['sequences', { sequence_types: sequenceTypes, query }],
     queryFn: async () => {
-      const { data } = await openCloningDBHttpClient.get(endpoints.sequences, {
-        params: { sequence_types: sequenceTypes, name },
-      });
-      return data.items;
+      const results = await Promise.all([
+        openCloningDBHttpClient.get(endpoints.sequences, {
+          params: { sequence_types: sequenceTypes, uid: query },
+        }),
+        openCloningDBHttpClient.get(endpoints.sequences, {
+          params: { sequence_types: sequenceTypes, name: query },
+        }),
+      ]);
+      return [...results[0].data.items, ...results[1].data.items];
     },
   })};
 
 function SequenceSelect({ value, onChange, label, multiple = true, sequenceTypes = undefined, ...rest }) {
-  const { query, autocompleteProps, clearInput } = useDebouncedSearchQuery(getGetQuery(sequenceTypes));
+  const { query, autocompleteProps, clearInput } = useDebouncedSearchQuery(getGetQuery(sequenceTypes), {minChars: 1});
 
   return (
     <QuerySelect
