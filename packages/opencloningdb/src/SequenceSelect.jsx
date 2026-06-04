@@ -8,6 +8,15 @@ const messages = {
   errorMessage: 'Could not retrieve sequences from OpenCloningDB',
 };
 
+function formatSequenceName({id, name, sample_uids}) {
+  if (!name) return `Sequence ${id}`;
+  let out = name;
+  if (sample_uids && sample_uids.length > 0) {
+    out += ` (${sample_uids.join(', ')})`;
+  }
+  return out;
+}
+
 const getGetQuery = (sequenceTypes) => {
   return (query) => ({
     queryKey: ['sequences', { sequence_types: sequenceTypes, query }],
@@ -34,7 +43,7 @@ function SequenceSelect({ value, onChange, label, multiple = true, sequenceTypes
       loadingMessage={messages.loadingMessage}
       errorMessage={messages.errorMessage}
       multiple={multiple}
-      getOptionLabel={(seq) => seq.name ?? `Sequence ${seq.id}`}
+      getOptionLabel={formatSequenceName}
       getOptionKey={(seq) => seq.id}
       value={value}
       onChange={onChange}
