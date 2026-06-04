@@ -95,12 +95,12 @@ export default function BulkUploadCloningStrategiesButton() {
         arrow
         title={(
           <span style={{ fontSize: '1.2em' }}>
-            Upload one or more cloning strategy JSON files for validation preview
+            Upload OpenCloning JSON files (cloning strategy files)
           </span>
         )}
       >
         <Button onClick={handleUploadClick} data-testid="bulk-upload-cloning-strategies-button">
-          Bulk Upload Strategies
+          Upload OpenCloning JSON files
         </Button>
       </Tooltip>
 

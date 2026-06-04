@@ -118,12 +118,18 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="bulk-upload-upload-file"]').click();
     cy.get('input[type="file"]').selectFile('cypress/test_files/bulk_lines/with_conflict.tsv', { force: true });
     cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
+      cy.contains('All rows must be clear to import');
       cy.get('tr').eq(1).within(() => {
         cy.contains('crispr_hdr-line').should('exist');
         cy.contains('UID already exists in workspace').should('exist');
         cy.get('[data-testid="CancelIcon"]').should('exist');
       });
       cy.get('tr').eq(2).within(() => {
+        cy.contains('bulk_line_dup').should('exist');
+        cy.contains('UID duplicated in uploaded file').should('exist');
+        cy.get('[data-testid="CancelIcon"]').should('exist');
+      });
+      cy.get('tr').eq(3).within(() => {
         cy.contains('bulk_line_dup').should('exist');
         cy.contains('UID duplicated in uploaded file').should('exist');
         cy.get('[data-testid="CancelIcon"]').should('exist');
@@ -140,9 +146,10 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
       });
       cy.get('tr').eq(6).within(() => {
         cy.contains('bulk_line_clear').should('exist');
+        cy.get('[data-testid="CheckCircleIcon"]').should('exist');
         cy.get('td').eq(5).should('be.empty');
       });
-      cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
+      cy.get('button').contains('Import').should('be.disabled');
       cy.get('button').contains('Cancel').click();
     });
 
@@ -176,7 +183,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
           body: conflictRows,
         },
       ).as('bulkUploadLines409');
-      cy.get('[data-testid="bulk-upload-import-button"]').click();
+      cy.get('button').contains('Import').click();
     });
     cy.wait('@bulkUploadLines409');
     cy.dbAlertExists('Conflicts detected while importing. Review the updated validation results.');
@@ -184,7 +191,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="bulk-upload-lines-modal"]').within(() => {
       cy.contains('intercept_conflict_line').should('exist');
       cy.contains('UID already exists in workspace').should('exist');
-      cy.get('[data-testid="bulk-upload-import-button"]').should('be.disabled');
+      cy.get('button').contains('Import').should('be.disabled');
       cy.get('button').contains('Cancel').click();
     });
 
@@ -195,7 +202,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
       cy.setAutocompleteValue('Tags to apply (optional)', 'templateless_PCR', 'div');
       cy.setAutocompleteValue('Tags to apply (optional)', 'restriction_ligation_assembly', 'div');
       cy.intercept('POST', Cypress.getDbURL(endpoints.linesBulk, '*')).as('bulkUploadLines');
-      cy.get('[data-testid="bulk-upload-import-button"]').click();
+      cy.get('button').contains('Import').click();
       cy.wait('@bulkUploadLines').then(({ response, request }) => {
         cy.wrap(response.body).should('have.length', 1);
         cy.wrap(response.body[0].uid).should('equal', 'bulk_line_cypress_1');

@@ -104,7 +104,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
       cy.setAutocompleteValue('Tags to apply (optional)', 'restriction_ligation_assembly', 'div');
     });
     cy.intercept('POST', Cypress.getDbURL(endpoints.primersBulk, '*')).as('bulkUploadPrimers');
-    cy.get('button').contains('Import Clear').click();
+    cy.get('button').contains('Import entries without warnings').click();
     cy.wait('@bulkUploadPrimers').then(({ response, request }) => {
       cy.wrap(response.body).should('have.length', 1);
       cy.wrap(response.body[0].name).should('equal', 'all-fine');
@@ -114,16 +114,18 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
     });
     cy.dbAlertExists('Imported 1 clear primer successfully');
     cy.closeDbAlerts();
+    cy.get('[data-testid="bulk-upload-primers-button"]').click();
+    cy.get('[data-testid="bulk-upload-upload-file"]').click();
     cy.get('input[type="file"]').selectFile('cypress/test_files/import_oligos/database_import.tsv', { force: true });
     cy.get('tr [data-testid="CheckCircleIcon"]').should('not.exist');
     cy.intercept('POST', Cypress.getDbURL(endpoints.primersBulk, '*')).as('bulkUploadPrimers2');
-    cy.get('button').contains('Import Clear + Warnings').click();
+    cy.get('button').contains('Import entries with warnings too').click();
     cy.wait('@bulkUploadPrimers2').then(({ response, request }) => {
       cy.wrap(response.body).should('have.length', 1);
       cy.wrap(response.body[0].name).should('equal', 'fwd_restriction_then_ligation');
       cy.wrap(request.query).should('have.property', 'strict', 'false');
     });
-    cy.dbAlertExists('Imported 1 clear and warning primer successfully');
+    cy.dbAlertExists('Imported 1 with warnings primer successfully');
     cy.closeDbAlerts();
   });
 });

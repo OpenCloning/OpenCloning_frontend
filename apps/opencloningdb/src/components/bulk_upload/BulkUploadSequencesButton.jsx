@@ -81,12 +81,12 @@ export default function BulkUploadSequencesButton() {
         arrow
         title={(
           <span style={{ fontSize: '1.2em' }}>
-            Upload sequence files for bulk validation preview
+            Upload sequence files (.fasta, .gb, .dna, .gbk, .ape)
           </span>
         )}
       >
         <Button onClick={handleUploadClick} data-testid="bulk-upload-sequences-button">
-          Bulk Upload Sequences
+          Upload Sequences
         </Button>
       </Tooltip>
 
