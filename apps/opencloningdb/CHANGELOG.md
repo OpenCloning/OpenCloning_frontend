@@ -1,5 +1,18 @@
 # opencloningdb
 
+## 0.3.5
+
+### Patch Changes
+
+- [#729](https://github.com/OpenCloning/OpenCloning_frontend/pull/729) [`d47f48c`](https://github.com/OpenCloning/OpenCloning_frontend/commit/d47f48cf974c245c1b1c0fffd8c43f9d8ad6d5e5) Thanks [@manulera](https://github.com/manulera)! - \* Enable plannotate and assembler by default
+
+  - Improve wording of bulk submission buttons
+  - Disable submit sequence, line and primer UIDs while waiting for server validation
+  - Enable submission of .dna files to bulk cloning strategy + warning on normal se
+    quence submission recommending submit to history.
+
+- [#731](https://github.com/OpenCloning/OpenCloning_frontend/pull/731) [`9933ce5`](https://github.com/OpenCloning/OpenCloning_frontend/commit/9933ce53894894f805ff1ab03c570107227eee0e) Thanks [@manulera](https://github.com/manulera)! - when tagging multiple sequences, send requests in batches to not overwhelm db
+
 ## 0.3.4
 
 ### Patch Changes
