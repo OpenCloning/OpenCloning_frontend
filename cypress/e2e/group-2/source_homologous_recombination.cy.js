@@ -30,7 +30,7 @@ describe('Tests homologous recombination and CRISPR functionality', () => {
   it('works with multiple options', () => {
     manuallyTypeSequence(`aaaaaa${homology1}aattggaa${homology1}tttttttt`);
     cy.get('svg[data-testid="AddCircleIcon"]', { timeout: 20000 }).last().click();
-    manuallyTypeSequence(`${homology1}acaa${homology1}`);
+    manuallyTypeSequence(`${homology1}acaa${homology1}`, true);
     // Add gRNA
     addPrimer('gRNA-1', guideRNASeq);
 
@@ -52,7 +52,7 @@ describe('Tests homologous recombination and CRISPR functionality', () => {
   it('allows resubmission changing options, and gives error if not enough homology', () => {
     manuallyTypeSequence(`aaaaaa${homology1}aattggaa${homology1}tttttttt`);
     cy.get('svg[data-testid="AddCircleIcon"]', { timeout: 20000 }).last().click();
-    manuallyTypeSequence(`${homology1}acaa${homology1}`);
+    manuallyTypeSequence(`${homology1}acaa${homology1}`, true);
     // Add gRNA
     addPrimer('gRNA-1', guideRNASeq);
 

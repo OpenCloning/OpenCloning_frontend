@@ -86,13 +86,13 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
       cy.get('button').contains('Submit').should('be.enabled');
 
       // Same plasmid and allele, cannot submit
-      cy.setAutocompleteValue('Alleles', '3xHA-ase1', 'div');
+      cy.setAutocompleteValue('Alleles', '3xHA-ase1', 'div', false);
       cy.get('button').contains('Submit').should('be.enabled');
-      cy.setAutocompleteValue('Plasmids', 'pFA6a-3HA-kanMX6', 'div');
+      cy.setAutocompleteValue('Plasmids', 'pFA6a-3HA-kanMX6', 'div', false);
       cy.get('button').contains('Submit').should('be.disabled');
 
       // Add an extra allele, can submit
-      cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div');
+      cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div', false);
       cy.intercept('POST', Cypress.getDbURL(endpoints.postLine)).as('postLine');
       cy.get('button').contains('Submit').click();
       cy.wait('@postLine').then(({ response }) => {
