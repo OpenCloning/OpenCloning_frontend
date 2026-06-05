@@ -1,4 +1,4 @@
 export { default as OpenCloningDBInterface } from './OpenCloningDBInterface.js';
-export { openCloningDBHttpClient, setUnauthorizedHandler, setWorkspaceHeader, clearWorkspaceHeader, baseUrl } from './common.js';
+export { openCloningDBHttpClient, setUnauthorizedHandler, setWorkspaceHeader, clearWorkspaceHeader, baseUrl, formatSequenceName } from './common.js';
 export { default as endpoints } from './endpoints.js';
 export { default as SequenceSelect } from './SequenceSelect.jsx';

@@ -9,6 +9,7 @@ import {
   Alert,
   Typography,
   Button,
+  ButtonGroup,
 } from '@mui/material';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { parseLinesParams, applyLinesParamsToSearchParams } from '../utils/query_utils';
@@ -20,6 +21,7 @@ import TopButtonSection from '../components/TopButtonSection';
 import PageContainer from '../components/PageContainer';
 import LinesTable from '../components/LinesTable';
 import BulkUploadLinesButton from '../components/bulk_upload/BulkUploadLinesButton';
+import CreateLineDialog from '../components/CreateLineDialog';
 import useRowSelection from '../hooks/useRowSelection';
 
 const MIN_WIDTH = 150;
@@ -71,6 +73,7 @@ function LinesQueryFields({ pendingParams, setPendingParams }) {
 function LinesPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [createLineOpen, setCreateLineOpen] = useState(false);
   const [searchParams] = useSearchParams();
 
   const filters = useMemo(
@@ -113,9 +116,15 @@ function LinesPage() {
         component={LinesQueryFields}
       />
       <TopButtonSection>
-        <BulkUploadLinesButton />
+        <ButtonGroup type="outline" color="primary">
+          <Button color="primary" onClick={() => setCreateLineOpen(true)}>
+          Create line
+          </Button>
+          <BulkUploadLinesButton />
+        </ButtonGroup>
         <TagEntitiesButton onSuccess={clearSelection} selectedEntities={selectedEntities} entityType="lines" label="Lines" />
       </TopButtonSection>
+      <CreateLineDialog open={createLineOpen} onClose={() => setCreateLineOpen(false)} />
       <TableContainer component={Paper}>
         <LinesTable lines={items} showCreatedBy showCreatedAt withCheckbox={true} selectedIds={selectedIds} toggleRow={toggleRow} />
         <TablePagination
