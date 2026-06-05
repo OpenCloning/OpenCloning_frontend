@@ -1,29 +1,29 @@
-import React from 'react'
+import React from 'react';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { TextFieldQueryValidated } from '@opencloning/ui';
 
-const getLineUIDExistsErrorQuery = (value, excludeUid) => ({
-  queryKey: ['lines', { uid: value, excludeUid: excludeUid ?? '' }],
+const getPrimerUIDExistsErrorQuery = (value, excludeUid) => ({
+  queryKey: ['primers', { uid: value, excludeUid: excludeUid ?? '' }],
   queryFn: async () => {
-    const { data } = await openCloningDBHttpClient.get(endpoints.lines, {
+    const { data } = await openCloningDBHttpClient.get(endpoints.primers, {
       params: { uid: value },
     });
     if (data.items.find((item) => item.uid === value && item.uid !== excludeUid)) {
-      return 'Line UID already exists';
+      return 'UID already exists';
     }
     return '';
   },
 });
 
-function NewLineUID({
+function NewPrimerUID({
   onChange,
   onValidationStateChange,
-  label = 'New Line UID',
-  placeholder = 'Enter a new line UID',
+  label = 'New Primer UID',
+  placeholder = 'Enter a new primer UID',
   excludeUid = null,
   ...rest
 }) {
-  const getQuery = React.useCallback((value) => getLineUIDExistsErrorQuery(value, excludeUid), [excludeUid]);
+  const getQuery = React.useCallback((value) => getPrimerUIDExistsErrorQuery(value, excludeUid), [excludeUid]);
   return (
     <TextFieldQueryValidated
       label={label}
@@ -33,7 +33,7 @@ function NewLineUID({
       getQuery={getQuery}
       {...rest}
     />
-  )
+  );
 }
 
-export default NewLineUID
+export default NewPrimerUID;

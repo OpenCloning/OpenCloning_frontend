@@ -22,9 +22,8 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
       cy.contains('Name must be at least 2 characters').should('exist');
       cy.setInputValue('Name', 'new_name', 'div');
       cy.setInputValue('UID', 'ML7', 'div'); // Existing UID
-      cy.get('button').contains('Save').click();
-      cy.dbAlertExists("Primer UID 'ML7' already exists");
-      cy.closeDbAlerts();
+      cy.contains('UID already exists').should('exist');
+      cy.get('button').contains('Save').should('be.disabled');
       cy.setInputValue('UID', 'new_uid', 'div');
       cy.get('button').contains('Save').click();
       cy.dbAlertExists('Primer updated successfully');
@@ -32,6 +31,12 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
       cy.get('button').contains('Save').should('not.exist');
       cy.contains('new_name').should('exist');
       cy.contains('new_uid').should('exist');
+      cy.get('[aria-label="Edit name and UID"]').click();
+      cy.clearInputValue('UID', 'div');
+      cy.get('button').contains('Save').click();
+      cy.dbAlertExists('Primer updated successfully');
+      cy.closeDbAlerts();
+      cy.contains('No UID').should('exist');
     });
   });
   it('can add primers from the design tab', () => {

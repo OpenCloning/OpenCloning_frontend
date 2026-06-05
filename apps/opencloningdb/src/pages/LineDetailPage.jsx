@@ -35,6 +35,7 @@ export function TransformationDialog({ line, open, onClose }) {
   const originalPlasmids = React.useMemo(() => getPlasmidSequencesInLine(line), [line]);
   const originalAlleles = React.useMemo(() => getAlleleSequencesInLine(line), [line]);
   const [lineUID, setLineUID] = React.useState('');
+  const [lineUidChecking, setLineUidChecking] = React.useState(false);
   const [alleles, setAlleles] = React.useState(originalAlleles);
   const [plasmids, setPlasmids] = React.useState(originalPlasmids);
   const navigate = useNavigate();
@@ -69,7 +70,10 @@ export function TransformationDialog({ line, open, onClose }) {
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ mt: 1 }}>
-            <NewLineUID onChange={setLineUID} />
+            <NewLineUID
+              onChange={setLineUID}
+              onValidationStateChange={({ isChecking }) => setLineUidChecking(isChecking)}
+            />
           </FormControl>
           <FormControl fullWidth sx={{ mt: 1 }}>
             <SequenceSelect multiple value={alleles} label="Alleles" onChange={setAlleles} sequenceTypes={['allele']} />
@@ -84,7 +88,7 @@ export function TransformationDialog({ line, open, onClose }) {
           )}
           <FormControl fullWidth sx={{ mt: 2 }}>
             <Button
-              disabled={!lineUID || !anyTransformedSequence || createLineMutation.isPending}
+              disabled={!lineUID || !anyTransformedSequence || lineUidChecking || createLineMutation.isPending}
               type="submit"
               variant="contained"
               color="primary"
@@ -114,8 +118,9 @@ function EditLineUID({ line, onSave }) {
   const queryClient = useQueryClient();
   const { addAlert } = useAppAlerts();
   const [nextUid, setNextUid] = React.useState(line.uid ?? '');
+  const [uidChecking, setUidChecking] = React.useState(false);
   const sanitizedUid = nextUid.trim();
-  const canSubmit = sanitizedUid.length > 0 && sanitizedUid !== line.uid;
+  const canSubmit = sanitizedUid.length > 0 && sanitizedUid !== line.uid && !uidChecking;
 
   const patchMutation = useMutation({
     mutationFn: async () => openCloningDBHttpClient.patch(endpoints.line(line.id), { uid: sanitizedUid }),
@@ -144,6 +149,7 @@ function EditLineUID({ line, onSave }) {
     <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
       <NewLineUID
         onChange={setNextUid}
+        onValidationStateChange={({ isChecking }) => setUidChecking(isChecking)}
         label="Line UID"
         placeholder="Edit line UID"
         excludeUid={line.uid}

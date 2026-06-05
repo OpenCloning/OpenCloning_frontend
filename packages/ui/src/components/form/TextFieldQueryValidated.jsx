@@ -10,7 +10,7 @@ import { TextField } from '@mui/material';
  * @param {string} placeholder - Placeholder text
  * @param {Function} getQuery - (value) => ({ queryKey, queryFn, ... }) — returns a query config for the given value (use value in queryKey so each input has its own cache).
  * @param {Function} onChange - Callback when validation succeeds; receives (queryData). Called with null when value is empty or validation fails.
- * @param {Function} onValidationStateChange - Optional callback with ({ isChecking, isValid }) when validation lifecycle changes.
+ * @param {Function} onValidationStateChange - Optional callback with ({ isChecking, isValid, hasValue }) when validation lifecycle changes.
  * @param {string} value - Controlled value (optional)
  * @param {number} debounceDelay - Delay in ms before running the query (default: 500)
  * @param {string} successMessage - Optional message to show when validation succeeds (default: ' ')
@@ -62,9 +62,11 @@ export default function TextFieldQueryValidated({
     !validationError &&
     !error;
 
+  const hasValue = localValue.length > 0;
+
   useEffect(() => {
-    onValidationStateChange?.({ isChecking, isValid });
-  }, [isChecking, isValid, onValidationStateChange]);
+    onValidationStateChange?.({ isChecking, isValid, hasValue });
+  }, [isChecking, isValid, hasValue, onValidationStateChange]);
 
   useEffect(() => {
     if (debouncedValue.length === 0) {
