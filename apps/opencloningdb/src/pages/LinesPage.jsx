@@ -116,7 +116,7 @@ function LinesPage() {
         component={LinesQueryFields}
       />
       <TopButtonSection>
-        <ButtonGroup type="outline" color="primary">
+        <ButtonGroup variant="outlined" color="primary">
           <Button color="primary" onClick={() => setCreateLineOpen(true)}>
           Create line
           </Button>

@@ -137,7 +137,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
       cy.get('label').contains('Plasmids').siblings('div').contains('pFA6a-3HA-kanMX6').should('exist');
       cy.get('label').contains('Plasmids').siblings('div').contains('pFA6a-5FLAG').should('exist');
       cy.setInputValue('Line UID', 'mating-line', 'div');
-      cy.get('button').should('be.enabled');
+      cy.get('button').contains('Submit').should('be.enabled');
       // We verify that only the parent alleles are available for selection
       cy.clearChip('3xHA-ase1');
       cy.clearChip('ase1delta::hphMX6');
@@ -160,7 +160,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
       cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div', false);
       cy.setAutocompleteValue('Plasmids', 'pFA6a-3HA-kanMX6', 'div', false);
       cy.setAutocompleteValue('Plasmids', 'pFA6a-5FLAG', 'div', false);
-      cy.get('button').should('be.enabled');
+      cy.get('button').contains('Submit').should('be.enabled');
       cy.get('button').contains('Submit').click();
     });
     // We should be in the line page now

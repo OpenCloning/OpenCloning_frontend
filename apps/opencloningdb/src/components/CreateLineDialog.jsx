@@ -25,8 +25,12 @@ function getUniqueIds(sequences) {
 }
 
 function mergeSequences(existing, incoming) {
-  const existingIds = getUniqueIds(existing);
-  return [...existing, ...incoming.filter((s) => !existingIds.has(s.id))];
+  const seenIds = new Set();
+  return [...existing, ...incoming].filter((s) => {
+    if (seenIds.has(s.id)) return false;
+    seenIds.add(s.id);
+    return true;
+  });
 }
 
 function getSequencesFromParents(parents) {
