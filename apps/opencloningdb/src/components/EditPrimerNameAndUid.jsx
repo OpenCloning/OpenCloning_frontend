@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 
 import useAppAlerts from '../hooks/useAppAlerts';
+import NewPrimerUID from './NewPrimerUID';
 
 function EditPrimerNameAndUid({ primer, onSave }) {
   const queryClient = useQueryClient();
@@ -12,19 +13,23 @@ function EditPrimerNameAndUid({ primer, onSave }) {
   const primerId = primer.id;
 
   const [name, setName] = React.useState(primer.name ?? '');
-  const [uid, setUid] = React.useState(primer.uid ?? '');
+  const [validatedUid, setValidatedUid] = React.useState(primer.uid ?? '');
+  const [uidValidation, setUidValidation] = React.useState({ isChecking: false, isValid: false, hasValue: false });
 
   React.useEffect(() => {
     setName(primer.name ?? '');
-    setUid(primer.uid ?? '');
+    setValidatedUid(primer.uid ?? '');
   }, [primer]);
 
   const nameTrimmed = name.trim();
-  const uidTrimmed = uid.trim();
+  const uidTrimmed = validatedUid.trim();
   const prevUid = primer.uid ?? '';
 
   const nameValid = nameTrimmed.length >= 2;
-  const submissionAllowed = nameValid;
+  const uidReady = !uidValidation.isChecking && (uidValidation.isValid || !uidValidation.hasValue);
+  const nameChanged = nameTrimmed !== (primer.name ?? '');
+  const uidChanged = uidTrimmed !== prevUid
+  const submissionAllowed = nameValid && uidReady && (nameChanged || uidChanged);
 
   const patchMutation = useMutation({
     mutationFn: async (payload) => openCloningDBHttpClient.patch(endpoints.primer(primerId), payload),
@@ -80,13 +85,14 @@ function EditPrimerNameAndUid({ primer, onSave }) {
         sx={{ minWidth: 220 }}
       />
 
-      <TextField
+      <NewPrimerUID
         size="small"
         label="UID"
-        value={uid}
-        onChange={(e) => setUid(e.target.value)}
         placeholder="Optional"
-        helperText="Leave empty to clear"
+        onChange={setValidatedUid}
+        onValidationStateChange={setUidValidation}
+        excludeUid={primer.uid}
+        defaultValue={primer.uid ?? ''}
         sx={{ minWidth: 200, '& .MuiInputBase-input': { fontFamily: 'monospace' } }}
       />
 

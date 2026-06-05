@@ -8,19 +8,33 @@ const messages = {
   errorMessage: 'Could not retrieve sequences from OpenCloningDB',
 };
 
+function formatSequenceName({id, name, sample_uids}) {
+  if (!name) return `Sequence ${id}`;
+  let out = name;
+  if (sample_uids && sample_uids.length > 0) {
+    out += ` (${sample_uids.join(', ')})`;
+  }
+  return out;
+}
+
 const getGetQuery = (sequenceTypes) => {
-  return (name) => ({
-    queryKey: ['sequences', { sequence_types: sequenceTypes, name }],
+  return (query) => ({
+    queryKey: ['sequences', { sequence_types: sequenceTypes, query }],
     queryFn: async () => {
-      const { data } = await openCloningDBHttpClient.get(endpoints.sequences, {
-        params: { sequence_types: sequenceTypes, name },
-      });
-      return data.items;
+      const results = await Promise.all([
+        openCloningDBHttpClient.get(endpoints.sequences, {
+          params: { sequence_types: sequenceTypes, uid: query },
+        }),
+        openCloningDBHttpClient.get(endpoints.sequences, {
+          params: { sequence_types: sequenceTypes, name: query },
+        }),
+      ]);
+      return [...results[0].data.items, ...results[1].data.items];
     },
   })};
 
 function SequenceSelect({ value, onChange, label, multiple = true, sequenceTypes = undefined, ...rest }) {
-  const { query, autocompleteProps, clearInput } = useDebouncedSearchQuery(getGetQuery(sequenceTypes));
+  const { query, autocompleteProps, clearInput } = useDebouncedSearchQuery(getGetQuery(sequenceTypes), {minChars: 1});
 
   return (
     <QuerySelect
@@ -29,7 +43,7 @@ function SequenceSelect({ value, onChange, label, multiple = true, sequenceTypes
       loadingMessage={messages.loadingMessage}
       errorMessage={messages.errorMessage}
       multiple={multiple}
-      getOptionLabel={(seq) => seq.name ?? `Sequence ${seq.id}`}
+      getOptionLabel={formatSequenceName}
       getOptionKey={(seq) => seq.id}
       value={value}
       onChange={onChange}

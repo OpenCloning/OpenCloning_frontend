@@ -79,6 +79,7 @@ Cypress.Commands.add('interceptOpenCloningDBStub', (stubOrName, options = {}) =>
       {
         method: stub.method,
         pathname: stub.endpoint,
+        query: { ...stub.params, ...extraParams },
       },
       (req) => {
         const actualHeaders = normalizeHeaders(req.headers);

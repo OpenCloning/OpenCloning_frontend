@@ -26,6 +26,7 @@ export function BulkUploadPreviewTableWrapper({
       ? 'Errors are shown first, then warnings, informational rows, and clear rows.'
       : 'Errors are shown first, then warnings, then clear rows.';
 
+  const clearButtonText = warningRowsCount === 0 ? 'Import' : 'Import entries without warnings';
   return (
     <>
       {onBulkTagsChange && (
@@ -79,16 +80,18 @@ export function BulkUploadPreviewTableWrapper({
               onClick={() => handleSubmit(clearRows, 'clear')}
               disabled={clearRows.length < 1 || isSubmitting}
             >
-              {isSubmitting ? <CircularProgress size={24} /> : 'Import Clear'}
+              {isSubmitting ? <CircularProgress size={24} /> : clearButtonText}
             </Button>
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={() => handleSubmit(clearAndWarningRows, 'clear and warning')}
-              disabled={clearAndWarningRows.length < 1 || isSubmitting}
-            >
-              {isSubmitting ? <CircularProgress size={24} /> : 'Import Clear + Warnings'}
-            </Button>
+            {warningRowsCount > 0 && (
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={() => handleSubmit(clearAndWarningRows, 'with warnings')}
+                disabled={clearAndWarningRows.length < 1 || isSubmitting}
+              >
+                {isSubmitting ? <CircularProgress size={24} /> : 'Import entries with warnings too'}
+              </Button>
+            )}
           </>
         )}
       </Box>

@@ -17,12 +17,19 @@ const getSampleUIDExistsErrorQuery = (value) => ({
   },
 });
 
-function NewSampleUID({ onChange, label = 'New Sample UID', placeholder = 'Enter a new sample UID', ...rest }) {
+function NewSampleUID({
+  onChange,
+  onValidationStateChange,
+  label = 'New Sample UID',
+  placeholder = 'Enter a new sample UID',
+  ...rest
+}) {
   return (
     <TextFieldQueryValidated
       label={label}
       placeholder={placeholder}
       onChange={onChange}
+      onValidationStateChange={onValidationStateChange}
       getQuery={getSampleUIDExistsErrorQuery}
       {...rest}
     />

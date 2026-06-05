@@ -29,6 +29,7 @@ describe('<GetSequenceFileAndDatabaseIdComponent />', () => {
     cy.setupOpenCloningDBTestAuth();
 
     cy.interceptOpenCloningDBStub('get_sequences_search_by_name', { alias: 'getSequences' });
+    cy.interceptOpenCloningDBStub('get_sequences_search_by_name_uid_query', { alias: 'getSequencesByNameUidQuery' });
     cy.interceptOpenCloningDBStub('get_text_file_sequence', { alias: 'getSequenceFile' });
 
     cy.mount(
@@ -57,6 +58,7 @@ describe('<GetSequenceFileAndDatabaseIdComponent />', () => {
 
     cy.setupOpenCloningDBTestAuth();
     cy.interceptOpenCloningDBStub('get_sequences_search_by_name', { alias: 'getSequences' });
+    cy.interceptOpenCloningDBStub('get_sequences_search_by_name_uid_query', { alias: 'getSequencesByNameUidQuery' });
 
     cy.getStub('get_text_file_sequence').then((textFileSequenceStub) => {
       let callCount = 0;

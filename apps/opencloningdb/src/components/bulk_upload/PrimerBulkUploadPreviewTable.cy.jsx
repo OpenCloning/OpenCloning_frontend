@@ -104,7 +104,7 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       cy.contains('UID duplicated in uploaded file').should('exist');
     });
 
-    cy.contains('button', 'Import Clear').click();
+    cy.contains('button', 'Import entries without warnings').click();
     cy.get('@handleSubmitSpy').should('have.been.calledOnce');
     cy.get('@handleSubmitSpy').then((spy) => {
       const [submittedRows, mode] = spy.getCall(0).args;
@@ -113,11 +113,11 @@ describe('<PrimerBulkUploadPreviewTable />', () => {
       cy.wrap(submittedRows.map((r) => r.name)).should('deep.equal', ['clear-primer']);
     });
 
-    cy.contains('button', 'Import Clear + Warnings').click();
+    cy.contains('button', 'Import entries with warnings too').click();
     cy.get('@handleSubmitSpy').should('have.been.calledTwice');
     cy.get('@handleSubmitSpy').then((spy) => {
       const [submittedRows, mode] = spy.getCall(1).args;
-      cy.wrap(mode).should('equal', 'clear and warning');
+      cy.wrap(mode).should('equal', 'with warnings');
       cy.wrap(submittedRows).should('have.length', 5);
       const submittedNames = submittedRows.map((r) => r.name);
       cy.wrap(submittedNames).should('have.members', [

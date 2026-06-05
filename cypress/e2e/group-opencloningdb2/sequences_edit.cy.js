@@ -171,7 +171,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.dbAlertExists('Internal server error');
     cy.closeDbAlerts();
     cy.get('[data-testid="bulk-upload-sequences-modal"]').should('not.exist');
-    cy.get('button').contains('Bulk Upload').click();
+    cy.get('button').contains('Upload Sequences').click();
     cy.get('input[type="file"]').eq(0).selectFile(bulkSequenceFiles, { force: true });
     cy.wait('@bulkUploadSequences500');
     cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
@@ -210,7 +210,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.setAutocompleteValue('Tags to apply (optional)', 'templateless_PCR', 'div');
       cy.setAutocompleteValue('Tags to apply (optional)', 'restriction_ligation_assembly', 'div');
       cy.intercept('POST', Cypress.getDbURL(endpoints.sequencesBulk, '*')).as('bulkUploadSequences');
-      cy.get('button').contains('Import Clear').click();
+      cy.get('button').contains('Import entries without warnings').click();
       cy.wait('@bulkUploadSequences').then(({ response, request }) => {
         cy.wrap(response.body).should('have.length', 2);
         cy.wrap(response.body[0].name).should('equal', 'pPML1_(GB0045)');
@@ -222,15 +222,15 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       cy.dbAlertExists('Imported 2 sequences successfully');
       cy.closeDbAlerts();
     });
-    cy.get('button').contains('Bulk Upload').click();
+    cy.get('button').contains('Upload Sequences').click();
     cy.get('input[type="file"]').eq(0).selectFile(bulkSequenceFiles.slice(2), { force: true });
     cy.get('[data-testid="bulk-upload-sequences-modal"]').within(() => {
       cy.get('tr [data-testid="CheckCircleIcon"]').should('not.exist');
       cy.get('tr [data-testid="WarningIcon"]').should('exist');
       cy.get('tr [data-testid="CancelIcon"]').should('exist');
-      cy.get('button').contains(/^Import Clear$/).should('be.disabled');
+      cy.get('button').contains('Import entries without warnings').should('be.disabled');
       cy.intercept('POST', Cypress.getDbURL(endpoints.sequencesBulk, '*')).as('bulkUploadSequences2');
-      cy.get('button').contains('Import Clear + Warnings').click();
+      cy.get('button').contains('Import entries with warnings too').click();
       cy.wait('@bulkUploadSequences2').then(({ response, request }) => {
         cy.wrap(response.body).should('have.length', 3);
         cy.wrap(response.body[0].name).should('equal', 'pFA6a-3HA-kanMX6');
@@ -365,7 +365,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
       }, {
         statusCode: 500,
       }).as('bulkUploadCloningStrategies');
-      cy.get('button').contains('Import Clear + Warnings').click();
+      cy.get('button').contains('Import entries with warnings too').click();
       cy.wait('@bulkUploadCloningStrategies').then(({ request }) => {
         cy.wrap(request.body).should('have.length', 2);
         cy.wrap(request.body[0]).should('have.property', 'file_name', 'linearised_pFA6a-kanMX6_wrong_database_id.json');
@@ -379,7 +379,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
           url: Cypress.getDbURL(endpoints.sequencesCloningStrategyBulk, '*'),
           times: 1,
         }).as('bulkUploadCloningStrategies2');
-      cy.get('button').contains(/^Import Clear$/).click();
+      cy.get('button').contains('Import entries without warnings').click();
       cy.wait('@bulkUploadCloningStrategies2').then(({ request }) => {
         cy.wrap(request.body).should('have.length', 1);
         cy.wrap(request.body[0]).should('have.property', 'file_name', 'manually_typed.json');
@@ -403,7 +403,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
           { file_name: 'bla.json', parsing_errors: ['test parsing error'] }
         ],
       }).as('bulkUploadCloningStrategies3');
-      cy.get('button').contains('Import Clear + Warnings').click();
+      cy.get('button').contains('Import entries with warnings too').click();
       cy.wait('@bulkUploadCloningStrategies3')
       cy.get('tr').eq(1).within(() => {
         cy.contains('bla.json').should('exist');

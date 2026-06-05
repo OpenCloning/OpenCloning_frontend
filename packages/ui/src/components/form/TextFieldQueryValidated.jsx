@@ -10,6 +10,7 @@ import { TextField } from '@mui/material';
  * @param {string} placeholder - Placeholder text
  * @param {Function} getQuery - (value) => ({ queryKey, queryFn, ... }) — returns a query config for the given value (use value in queryKey so each input has its own cache).
  * @param {Function} onChange - Callback when validation succeeds; receives (queryData). Called with null when value is empty or validation fails.
+ * @param {Function} onValidationStateChange - Optional callback with ({ isChecking, isValid, hasValue }) when validation lifecycle changes.
  * @param {string} value - Controlled value (optional)
  * @param {number} debounceDelay - Delay in ms before running the query (default: 500)
  * @param {string} successMessage - Optional message to show when validation succeeds (default: ' ')
@@ -20,6 +21,7 @@ export default function TextFieldQueryValidated({
   placeholder,
   getQuery,
   onChange,
+  onValidationStateChange,
   debounceDelay = 500,
   successMessage = ' ',
   validatingMessage = 'Validating...',
@@ -44,24 +46,40 @@ export default function TextFieldQueryValidated({
     [getQuery, debouncedValue],
   );
 
-  const { data: validationError, isLoading, error, isSuccess } = useQuery({
+  const { data: validationError, isLoading, isFetching, error, isSuccess } = useQuery({
     ...queryConfig,
     enabled: debouncedValue.length > 0 && (queryConfig.enabled !== false),
   });
 
+  const isDebouncing = localValue !== debouncedValue;
+  const isChecking =
+    localValue.length > 0 &&
+    (isDebouncing || (debouncedValue.length > 0 && (isLoading || isFetching)));
+  const isValid =
+    localValue.length > 0 &&
+    localValue === debouncedValue &&
+    isSuccess &&
+    !validationError &&
+    !error;
+
+  const hasValue = localValue.length > 0;
+
+  useEffect(() => {
+    onValidationStateChange?.({ isChecking, isValid, hasValue });
+  }, [isChecking, isValid, hasValue, onValidationStateChange]);
 
   useEffect(() => {
     if (debouncedValue.length === 0) {
       onChange('');
       return;
     }
-    if (isSuccess && !validationError) {
+    if (localValue === debouncedValue && isSuccess && !validationError) {
       onChange(debouncedValue);
     }
     if (error || validationError) {
       onChange('');
     }
-  }, [debouncedValue, isSuccess, validationError, error, onChange]);
+  }, [localValue, debouncedValue, isSuccess, validationError, error, onChange]);
 
   const handleChange = (e) => {
     onChange('');
@@ -69,7 +87,7 @@ export default function TextFieldQueryValidated({
   };
 
   let helperText = ' ';
-  if (isLoading) {
+  if (isChecking) {
     helperText = validatingMessage;
   } else if (validationError) {
     helperText = validationError;

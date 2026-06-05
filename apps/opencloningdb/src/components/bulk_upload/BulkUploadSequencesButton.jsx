@@ -66,6 +66,14 @@ export default function BulkUploadSequencesButton() {
       return;
     }
 
+    const hasDnaFiles = uploadedFiles.some((file) => file.name.toLowerCase().endsWith('.dna'));
+    if (hasDnaFiles && !window.confirm(
+      'Your upload includes SnapGene (.dna) file(s). Only the sequence will be imported. If you want to import the history, use the "Upload sequences with history" button.',
+    )) {
+      event.target.value = null;
+      return;
+    }
+
     try {
       await validateSubmission(uploadedFiles, {
         mapRows: (rows) => rows.map((row, index) => ({ ...row, file: uploadedFiles[index] })),
@@ -81,12 +89,12 @@ export default function BulkUploadSequencesButton() {
         arrow
         title={(
           <span style={{ fontSize: '1.2em' }}>
-            Upload sequence files for bulk validation preview
+            Upload sequence files (.fasta, .gb, .dna, .gbk, .ape)
           </span>
         )}
       >
         <Button onClick={handleUploadClick} data-testid="bulk-upload-sequences-button">
-          Bulk Upload Sequences
+          Upload Sequences
         </Button>
       </Tooltip>
 

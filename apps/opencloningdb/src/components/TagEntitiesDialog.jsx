@@ -11,14 +11,14 @@ function TagEntitiesDialog({ selectedEntities, entityType, label, open, onClose,
   
   const attachTagsMutation = useMutation({
     mutationFn: async ({ entities, tagIds }) => {
-      const requests = [];
+      const attachTagRequests = [];
       entities.forEach((entity) => {
         tagIds.forEach((tagId) => {
           // Skip if entity already has tag
           if (entity.tags?.some((t) => t.id === tagId)) {
             return;
           }
-  
+
           let url;
           if (entityType === 'lines') {
             url = endpoints.lineTags(entity.id);
@@ -27,13 +27,17 @@ function TagEntitiesDialog({ selectedEntities, entityType, label, open, onClose,
           } else {
             throw new Error(`Tagging not implemented for entity type: ${entityType}`);
           }
-  
+
           const body = { tag_id: tagId };
-          requests.push(openCloningDBHttpClient.post(url, body));
+          attachTagRequests.push(() => openCloningDBHttpClient.post(url, body));
         });
       });
-  
-      await Promise.all(requests);
+
+      const BATCH_SIZE = 5;
+      for (let i = 0; i < attachTagRequests.length; i += BATCH_SIZE) {
+        const batch = attachTagRequests.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map((request) => request()));
+      }
     },
     onSuccess: (_data, variables) => {
       // Refresh queries depending on entity type
