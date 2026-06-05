@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Tooltip } from '@mui/material';
-import { error2String } from '@opencloning/utils';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import CloningStrategyBulkUploadPreviewTable from './CloningStrategyBulkUploadPreviewTable';
 import BulkUploadModal from './BulkUploadModal';
@@ -95,19 +94,19 @@ export default function BulkUploadCloningStrategiesButton() {
         arrow
         title={(
           <span style={{ fontSize: '1.2em' }}>
-            Upload OpenCloning JSON files (cloning strategy files)
+            Upload OpenCloning JSON files (cloning strategy files) or SnapGene (.dna) files
           </span>
         )}
       >
         <Button onClick={handleUploadClick} data-testid="bulk-upload-cloning-strategies-button">
-          Upload OpenCloning JSON files
+          Upload sequences with history
         </Button>
       </Tooltip>
 
       <input
         style={{ display: 'none' }}
         type="file"
-        accept=".json,application/json"
+        accept=".json,.dna"
         multiple
         ref={hiddenFileInput}
         onChange={handleFileUpload}
