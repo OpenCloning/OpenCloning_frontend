@@ -10,14 +10,18 @@ function CreateSampleDialog({ sequenceId, open, onClose }) {
   const { addAlert } = useAppAlerts();
   const queryClient = useQueryClient();
   const nextIdRef = React.useRef(1);
-  const [rows, setRows] = React.useState([{ id: 0, validatedUid: '' }]);
+  const [rows, setRows] = React.useState([{ id: 0, validatedUid: '', isChecking: false }]);
 
   const handleValidatedChange = React.useCallback((rowId, value) => {
     setRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, validatedUid: value } : r)));
   }, []);
 
+  const handleValidationStateChange = React.useCallback((rowId, { isChecking }) => {
+    setRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, isChecking } : r)));
+  }, []);
+
   const addRow = () => {
-    setRows((prev) => [...prev, { id: nextIdRef.current++, validatedUid: '' }]);
+    setRows((prev) => [...prev, { id: nextIdRef.current++, validatedUid: '', isChecking: false }]);
   };
 
   const removeRow = (rowId) => {
@@ -52,7 +56,8 @@ function CreateSampleDialog({ sequenceId, open, onClose }) {
     },
   });
 
-  const canSubmit = allValid && !hasDuplicates && !createMutation.isPending;
+  const anyChecking = rows.some((r) => r.isChecking);
+  const canSubmit = allValid && !hasDuplicates && !anyChecking && !createMutation.isPending;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -61,7 +66,7 @@ function CreateSampleDialog({ sequenceId, open, onClose }) {
   };
 
   const resetAndClose = () => {
-    setRows([{ id: 0, validatedUid: '' }]);
+    setRows([{ id: 0, validatedUid: '', isChecking: false }]);
     nextIdRef.current = 1;
     onClose();
   };
@@ -76,6 +81,7 @@ function CreateSampleDialog({ sequenceId, open, onClose }) {
               <FormControl fullWidth>
                 <NewSampleUID
                   onChange={(value) => handleValidatedChange(row.id, value)}
+                  onValidationStateChange={(state) => handleValidationStateChange(row.id, state)}
                   label={`Sample UID ${index + 1}`}
                 />
               </FormControl>
