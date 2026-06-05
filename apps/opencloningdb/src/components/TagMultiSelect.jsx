@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { QuerySelect } from '@opencloning/ui';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
@@ -20,6 +20,11 @@ function TagMultiSelect({ onChange, label = 'Tags', value, excludeTagIds = [], .
     () => (value || []).map((id) => options.find((o) => o.id === id)).filter(Boolean),
     [value, options],
   );
+  const handleCreateTag = useCallback(async (inputValue) => {
+    const createdTag = await createTagMutation.mutateAsync(inputValue);
+    const selectedTagIds = value || [];
+    onChange(selectedTagIds.includes(createdTag.id) ? selectedTagIds : [...selectedTagIds, createdTag.id]);
+  }, [createTagMutation, onChange, value]);
 
   return (
     <QuerySelect
@@ -31,7 +36,7 @@ function TagMultiSelect({ onChange, label = 'Tags', value, excludeTagIds = [], .
       onChange={(selectedTags) => onChange(selectedTags?.map((t) => t.id) ?? [])}
       inputProps={{ size: 'small' }}
       autoComplete={true}
-      noOptionsAction={{ label: 'Create tag', onClick: (inputValue) => createTagMutation.mutate(inputValue) }}
+      noOptionsAction={{ label: 'Create tag', onClick: handleCreateTag }}
       {...rest}
     />
   );

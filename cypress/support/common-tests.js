@@ -22,9 +22,8 @@ Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
   cy.get('button').contains(`Tag ${resourcePlural}`, { matchCase: false }).click();
   cy.setInputValue('Tags', 'test-tag', '[data-testid="tag-entities-dialog"]');
   cy.get('div[role="presentation"]').contains('Create tag').click();
-  cy.clickMultiSelectOption('Tags', 'test-tag', '[data-testid="tag-entities-dialog"]');
   cy.intercept('POST', Cypress.getDbURL(tagEndpoints[tagEndpointName]('*'))).as('addTag');
-  cy.get('[data-testid="tag-entities-dialog"] button').contains('Tag').click();
+  cy.get('[data-testid="tag-entities-dialog"] button').contains('Tag').click({ force: true });
   cy.wait('@addTag');
   cy.get('tbody tr').eq(0).contains('test-tag').should('exist');
   cy.get('tbody tr').eq(1).contains('test-tag').should('exist');

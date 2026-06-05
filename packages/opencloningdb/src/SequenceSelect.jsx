@@ -1,6 +1,6 @@
 import React from 'react';
 import { QuerySelect, useDebouncedSearchQuery } from '@opencloning/ui';
-import { openCloningDBHttpClient } from './common';
+import { formatSequenceName, openCloningDBHttpClient } from './common';
 import endpoints from './endpoints';
 
 const messages = {
@@ -8,14 +8,6 @@ const messages = {
   errorMessage: 'Could not retrieve sequences from OpenCloningDB',
 };
 
-function formatSequenceName({id, name, sample_uids}) {
-  if (!name) return `Sequence ${id}`;
-  let out = name;
-  if (sample_uids && sample_uids.length > 0) {
-    out += ` (${sample_uids.join(', ')})`;
-  }
-  return out;
-}
 
 const getGetQuery = (sequenceTypes) => {
   return (query) => ({

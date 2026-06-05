@@ -40,3 +40,12 @@ export const openCloningDBHttpClient = axios.create({
 });
 
 attachAuthInterceptors(openCloningDBHttpClient);
+
+export function formatSequenceName({ id, name, sample_uids: sampleUids }) {
+  if (!name) return `Sequence ${id}`;
+  let out = name;
+  if (sampleUids && sampleUids.length > 0) {
+    out += ` (${sampleUids.join(', ')})`;
+  }
+  return out;
+}

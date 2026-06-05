@@ -499,9 +499,9 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.get('ul[aria-labelledby="sequence-type-label"] li').should('have.length', 2);
     cy.get('ul[aria-labelledby="sequence-type-label"] li').contains('Allele').click();
     cy.get('[data-testid="create-template-sequence-dialog"]').within(() => {
-      cy.get('button').should('be.disabled');
+      cy.get('button').contains('Create').should('be.disabled');
       cy.get('input').first().type('new_template_sequence_allele', { delay: 0 });
-      cy.get('button').should('be.enabled');
+      cy.get('button').contains('Create').should('be.enabled');
       cy.get('button').contains('Create').click();
     });
     cy.dbAlertExists('Template sequence created successfully');

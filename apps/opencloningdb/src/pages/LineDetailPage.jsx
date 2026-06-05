@@ -1,5 +1,4 @@
 import React from 'react';
-import { isEqual } from 'lodash-es';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -8,14 +7,12 @@ import {
   CircularProgress,
   Alert,
   Box,
-  DialogContent,
-  FormControl,
   TableContainer,
   Paper,
 } from '@mui/material';
-import { openCloningDBHttpClient, endpoints, SequenceSelect } from '@opencloning/opencloningdb';
-import { Dialog, DialogTitle } from '@mui/material';
+import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import NewLineUID from '../components/NewLineUID';
+import CreateLineDialog from '../components/CreateLineDialog';
 import ResourceDetailHeader from '../components/ResourceDetailHeader';
 import SequenceTable from '../components/SequenceTable';
 import LinesTable from '../components/LinesTable';
@@ -25,82 +22,6 @@ import TopButtonSection from '../components/TopButtonSection';
 import useAppAlerts from '../hooks/useAppAlerts';
 import DeleteResourceButton from '../components/DeleteResourceButton';
 import { getPlasmidSequencesInLine, getAlleleSequencesInLine } from '../utils/models_utils';
-import useCreateLineMutation from '../hooks/useCreateLineMutation';
-
-function getUniqueIds(sequences) {
-  return new Set(sequences.map((s) => s.id));
-}
-
-export function TransformationDialog({ line, open, onClose }) {
-  const originalPlasmids = React.useMemo(() => getPlasmidSequencesInLine(line), [line]);
-  const originalAlleles = React.useMemo(() => getAlleleSequencesInLine(line), [line]);
-  const [lineUID, setLineUID] = React.useState('');
-  const [lineUidChecking, setLineUidChecking] = React.useState(false);
-  const [alleles, setAlleles] = React.useState(originalAlleles);
-  const [plasmids, setPlasmids] = React.useState(originalPlasmids);
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    setAlleles(originalAlleles);
-    setPlasmids(originalPlasmids);
-  }, [originalAlleles, originalPlasmids, open]);
-
-  const anyTransformedSequence = !isEqual(getUniqueIds(alleles), getUniqueIds(originalAlleles)) || !isEqual(getUniqueIds(plasmids), getUniqueIds(originalPlasmids));
-
-  const createLineMutation = useCreateLineMutation();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!lineUID || !anyTransformedSequence) return;
-    const resp = await createLineMutation.mutateAsync({
-      uid: lineUID,
-      allele_ids: alleles.map((a) => a.id),
-      plasmid_ids: plasmids.map((p) => p.id),
-      parent_ids: [line.id],
-    });
-    navigate(`/lines/${resp.id}`);
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} data-testid="transformation-dialog">
-      <DialogTitle>Select sequences transformed into {line.uid ?? `Line ${line.id}`}</DialogTitle>
-      <Alert severity="info">
-        You can also remove existing plasmids or alleles, for instance to represent the further modification of an allele that was already there.
-      </Alert>
-      <DialogContent>
-        <form onSubmit={handleSubmit}>
-          <FormControl fullWidth sx={{ mt: 1 }}>
-            <NewLineUID
-              onChange={setLineUID}
-              onValidationStateChange={({ isChecking }) => setLineUidChecking(isChecking)}
-            />
-          </FormControl>
-          <FormControl fullWidth sx={{ mt: 1 }}>
-            <SequenceSelect multiple value={alleles} label="Alleles" onChange={setAlleles} sequenceTypes={['allele']} />
-          </FormControl>
-          <FormControl fullWidth sx={{ mt: 1 }}>
-            <SequenceSelect multiple value={plasmids} label="Plasmids" onChange={setPlasmids} sequenceTypes={['plasmid']} />
-          </FormControl>
-          {createLineMutation.isError && (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              {createLineMutation.error?.response?.data?.detail || createLineMutation.error?.message || 'Failed to create line'}
-            </Alert>
-          )}
-          <FormControl fullWidth sx={{ mt: 2 }}>
-            <Button
-              disabled={!lineUID || !anyTransformedSequence || lineUidChecking || createLineMutation.isPending}
-              type="submit"
-              variant="contained"
-              color="primary"
-            >
-              {createLineMutation.isPending ? 'Creating…' : 'Submit'}
-            </Button>
-          </FormControl>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 function TransformButton({ line }) {
   const [open, setOpen] = React.useState(false);
@@ -109,7 +30,7 @@ function TransformButton({ line }) {
       <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
         Transformation
       </Button>
-      <TransformationDialog line={line} open={open} onClose={() => setOpen(false)} />
+      <CreateLineDialog fixedParents={[line]} open={open} onClose={() => setOpen(false)} />
     </>
   );
 }

@@ -63,50 +63,127 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
-    cy.get('button').contains('Transformation').click();
-    cy.get('[data-testid="transformation-dialog"]').within(() => {
-      cy.get('label').contains('Alleles').siblings('div').contains('3xHA-ase1').should('exist');
-      cy.get('label').contains('Plasmids').siblings('div').contains('pFA6a-3HA-kanMX6').should('exist');
-      cy.get('button').contains('Submit').should('be.disabled');
+    for (const mode of ['from_parent', 'from_list']) {
 
-      // Remove allele
-      cy.clearChip('3xHA-ase1');
-      // Remove plasmid
-      cy.clearChip('pFA6a-3HA-kanMX6');
-      // Still cannot submit
-      cy.get('button').contains('Submit').should('be.disabled');
+      if (mode === 'from_parent') {
+        cy.get('button').contains('Transformation').click();
+      } else {
+        cy.get('button').contains('Create line').click();
+      }
 
-      // Use existing UID, cannot submit
-      cy.setInputValue('Line UID', 'crispr_hdr-line', 'div');
-      cy.contains('Line UID already exists').should('exist');
-      cy.get('button').contains('Submit').should('be.disabled');
+      cy.get('[data-testid="create-line-dialog"]').within(() => {
+        if (mode === 'from_parent') {
+          cy.get('label').contains('Parent lines').siblings('div').find('input').should('be.disabled');
+        } else {
+          cy.setAutocompleteValue('Parent lines', 'crispr_hdr-line', 'div');
+        }
+        cy.get('label').contains('Alleles').siblings('div').contains('3xHA-ase1').should('exist');
+        cy.get('label').contains('Plasmids').siblings('div').contains('pFA6a-3HA-kanMX6').should('exist');
+        cy.get('button').contains('Submit').should('be.disabled');
 
-      // Change ID with alleles removed, can submit
-      cy.setInputValue('Line UID', 'crispr_hdr-line-new', 'div');
-      cy.get('button').contains('Submit').should('be.enabled');
+        // Remove allele
+        cy.clearChip('3xHA-ase1');
+        // Remove plasmid
+        cy.clearChip('pFA6a-3HA-kanMX6');
+        // Still cannot submit
+        cy.get('button').contains('Submit').should('be.disabled');
 
-      // Same plasmid and allele, cannot submit
-      cy.setAutocompleteValue('Alleles', '3xHA-ase1', 'div', false);
-      cy.get('button').contains('Submit').should('be.enabled');
-      cy.setAutocompleteValue('Plasmids', 'pFA6a-3HA-kanMX6', 'div', false);
-      cy.get('button').contains('Submit').should('be.disabled');
+        // Use existing UID, cannot submit
+        cy.setInputValue('Line UID', 'crispr_hdr-line', 'div');
+        cy.contains('Line UID already exists').should('exist');
+        cy.get('button').contains('Submit').should('be.disabled');
 
-      // Add an extra allele, can submit
-      cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div', false);
-      cy.intercept('POST', Cypress.getDbURL(endpoints.postLine)).as('postLine');
-      cy.get('button').contains('Submit').click();
-      cy.wait('@postLine').then(({ response }) => {
-        cy.url().should('match', new RegExp(`/lines/${response.body.id}$`));  
+        // Change ID with alleles removed, can submit
+        cy.setInputValue('Line UID', mode, 'div');
+        cy.get('button').contains('Submit').should('be.enabled');
+
+        // Same plasmid and allele, cannot submit
+        cy.setAutocompleteValue('Alleles', '3xHA-ase1', 'div', false);
+        cy.get('button').contains('Submit').should('be.enabled');
+        cy.setAutocompleteValue('Plasmids', 'pFA6a-3HA-kanMX6', 'div', false);
+        cy.get('button').contains('Submit').should('be.disabled');
+
+        // Add an extra allele, can submit
+        cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div', false);
+        cy.intercept('POST', Cypress.getDbURL(endpoints.postLine)).as('postLine');
+        cy.get('button').contains('Submit').click();
+        cy.wait('@postLine').then(({ response }) => {
+          cy.url().should('match', new RegExp(`/lines/${response.body.id}$`));  
+        });
       });
-    });
 
-    // Alleles are shown
-    cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line-new').should('exist');
+      // Alleles are shown
+      cy.get('[data-testid="resource-detail-header-title"]').contains(mode).should('exist');
+      cy.get('[data-testid="line-genotype"]').contains('3xHA-ase1').should('exist');
+      cy.get('[data-testid="line-genotype"]').contains('ase1delta::hphMX6').should('exist');
+      cy.get('[data-testid="line-plasmids"]').contains('pFA6a-3HA-kanMX6').should('exist');
+      cy.get('[data-testid="line-parent-lines"]').contains('crispr_hdr-line').should('exist');
+      cy.get('button').contains('Back to Lines').click();
+    }
+
+  });
+  it('can create a line by mating', () => {
+    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.get('button').contains('Create line').click();
+    cy.get('[data-testid="create-line-dialog"]').within(() => {
+      cy.get('button').contains('Submit').should('be.disabled');
+
+      // Adding two lines as parents adds their alleles and plasmids
+      cy.setAutocompleteValue('Parent lines', 'crispr_hdr-line', 'div');
+      cy.setAutocompleteValue('Parent lines', 'homologous_recombination-line', 'div');
+      cy.get('.MuiAlert-root').contains('2 parents selected').should('exist');
+      cy.get('label').contains('Alleles').siblings('div').contains('3xHA-ase1').should('exist');
+      cy.get('label').contains('Alleles').siblings('div').contains('ase1delta::hphMX6').should('exist');
+      cy.get('label').contains('Plasmids').siblings('div').contains('pFA6a-3HA-kanMX6').should('exist');
+      cy.get('label').contains('Plasmids').siblings('div').contains('pFA6a-5FLAG').should('exist');
+      cy.setInputValue('Line UID', 'mating-line', 'div');
+      cy.get('button').contains('Submit').should('be.enabled');
+      // We verify that only the parent alleles are available for selection
+      cy.clearChip('3xHA-ase1');
+      cy.clearChip('ase1delta::hphMX6');
+      cy.clearChip('pFA6a-3HA-kanMX6');
+      cy.clearChip('pFA6a-5FLAG');
+      cy.contains('Alleles').siblings('div').first().children('input').click();
+      cy.document().its('body').find('div[role="presentation"]').then((presentation) => {
+        cy.wrap(presentation).find('li').should('have.length', 2);
+        cy.wrap(presentation).find('li').eq(0).contains('3xHA-ase1').should('exist');
+        cy.wrap(presentation).find('li').eq(1).contains('ase1delta::hphMX6').should('exist');
+      });
+      // Force because it will be covered by the alleles autocomplete
+      cy.contains('Plasmids').siblings('div').first().children('input').click( { force: true });
+      cy.document().its('body').find('div[role="presentation"]').then((presentation) => {
+        cy.wrap(presentation).find('li').should('have.length', 2);
+        cy.wrap(presentation).find('li').eq(0).contains('pFA6a-3HA-kanMX6').should('exist');
+        cy.wrap(presentation).find('li').eq(1).contains('pFA6a-5FLAG').should('exist');
+      });
+      cy.setAutocompleteValue('Alleles', '3xHA-ase1', 'div', false);
+      cy.setAutocompleteValue('Alleles', 'ase1delta::hphMX6', 'div', false);
+      cy.setAutocompleteValue('Plasmids', 'pFA6a-3HA-kanMX6', 'div', false);
+      cy.setAutocompleteValue('Plasmids', 'pFA6a-5FLAG', 'div', false);
+      cy.get('button').contains('Submit').should('be.enabled');
+      cy.get('button').contains('Submit').click();
+    });
+    // We should be in the line page now
+    cy.get('[data-testid="resource-detail-header-title"]').contains('mating-line').should('exist');
     cy.get('[data-testid="line-genotype"]').contains('3xHA-ase1').should('exist');
     cy.get('[data-testid="line-genotype"]').contains('ase1delta::hphMX6').should('exist');
     cy.get('[data-testid="line-plasmids"]').contains('pFA6a-3HA-kanMX6').should('exist');
+    cy.get('[data-testid="line-plasmids"]').contains('pFA6a-5FLAG').should('exist');
     cy.get('[data-testid="line-parent-lines"]').contains('crispr_hdr-line').should('exist');
-
+    cy.get('[data-testid="line-parent-lines"]').contains('homologous_recombination-line').should('exist');
+  });
+  it('can create a line without parents nor alleles nor plasmids', () => {
+    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.get('button').contains('Create line').click();
+    cy.get('[data-testid="create-line-dialog"]').within(() => {
+      cy.setInputValue('Line UID', 'reference-line', 'div');
+      cy.get('button').contains('Submit').click();
+    });
+    cy.get('[data-testid="resource-detail-header-title"]').contains('reference-line').should('exist');
+    cy.get('[data-testid="line-genotype"]').should('not.exist');
+    cy.get('[data-testid="line-plasmids"]').should('not.exist');
+    cy.get('[data-testid="line-parent-lines"]').should('not.exist');
+    cy.contains('No genotype or plasmids in this line.').should('exist');
   });
   it('can bulk upload lines', () => {
     cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
@@ -224,7 +301,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
     cy.get('button').contains('Transformation').click();
-    cy.get('[data-testid="transformation-dialog"]').within(() => {
+    cy.get('[data-testid="create-line-dialog"]').within(() => {
       cy.setInputValue('Line UID', 'crispr_hdr-line-new', 'div');
       cy.clearChip('3xHA-ase1');
       cy.clearChip('pFA6a-3HA-kanMX6');
