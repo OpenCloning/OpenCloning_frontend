@@ -47,6 +47,7 @@ const endpoints = {
   templateSequences: '/template_sequences',
   templateSequencesValidateUpload: '/template_sequences/validate-upload',
   templateSequencesBulk: '/template_sequences/bulk',
+  export: '/export',
 };
 
 export default endpoints;
