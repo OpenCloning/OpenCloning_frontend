@@ -70,7 +70,7 @@
         "vite": "^7.3.3",
         "vite-plugin-ejs": "^1.7.0",
         "vite-plugin-istanbul": "^7.2.1",
-        "vitest": "^3.2.4"
+        "vitest": "^3.2.6"
     },
     "packageManager": "yarn@4.9.1"
 }
