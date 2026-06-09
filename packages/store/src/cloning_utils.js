@@ -3,6 +3,13 @@ import { flipContainedRange, getRangeLength } from '@teselagen/range-utils';
 
 export const isSequenceInputOfAnySource = (id, sources) => (sources.find((source) => source.input.some(({sequence}) => sequence === id))) !== undefined;
 
+export function getEmptyPlaceholderSource(sources) {
+  if (sources.length === 1 && sources[0].type === null) {
+    return sources[0];
+  }
+  return null;
+}
+
 export function getSourcesTakingSequenceAsInput(sources, sequenceId) {
   return sources.filter((s) => s.input.some(({sequence}) => sequence === sequenceId));
 }

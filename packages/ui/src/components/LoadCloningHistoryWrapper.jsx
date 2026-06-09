@@ -3,10 +3,10 @@ import { batch, useDispatch, useStore } from 'react-redux';
 import useCloningAlerts from '../hooks/useCloningAlerts';
 import useBackendRoute from '../hooks/useBackendRoute';
 import useCloningHistoryLoader from '../hooks/useCloningHistoryLoader';
+import { getEmptyPlaceholderSource } from '@opencloning/store/cloning_utils';
 import { cloningActions } from '@opencloning/store/cloning';
 import HistoryLoadedDialog from './HistoryLoadedDialog';
 import useHttpClient from '../hooks/useHttpClient';
-import useSnapgeneHistoryEndpoint from '../hooks/useSnapgeneHistoryEndpoint';
 
 const { deleteSourceAndItsChildren, addSourceAndItsOutputSequence } = cloningActions;
 
@@ -60,8 +60,7 @@ function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
   const backendRoute = useBackendRoute();
   const store = useStore();
   const httpClient = useHttpClient();
-  const { loadHistoryFromFile } = useCloningHistoryLoader();
-  const { loadSnapgeneHistory } = useSnapgeneHistoryEndpoint();
+  const { loadHistoryFromFile, loadSnapgeneHistory } = useCloningHistoryLoader();
   const [fileLoaderFunctions, setFileLoaderFunctions] = React.useState(null);
 
   React.useEffect(() => {
@@ -121,8 +120,9 @@ function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
         const { sources, sequences, warnings } = await processSequenceFiles(files, backendRoute, httpClient);
         batch(() => {
           // If there is only one source and it is empty, delete it
-          if (cloningState.sources.length === 1 && cloningState.sources[0].type === null) {
-            dispatch(deleteSourceAndItsChildren(cloningState.sources[0].id));
+          const emptyPlaceholder = getEmptyPlaceholderSource(cloningState.sources);
+          if (emptyPlaceholder) {
+            dispatch(deleteSourceAndItsChildren(emptyPlaceholder.id));
           }
           for (let i = 0; i < sources.length; i += 1) {
             dispatch(addSourceAndItsOutputSequence({ source: sources[i], sequence: sequences[i] }));

@@ -46,7 +46,7 @@ const initialState = {
 const reducer = {
 
   reset(state) {
-    return { ...initialState };
+    return { ...initialState, appInfo: { ...state.appInfo } };
   },
 
   setCurrentTab(state, action) {

@@ -22,6 +22,7 @@ import LineDetailPage from './pages/LineDetailPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import WorkspacePage from './pages/WorkspacePage';
+import useAppStartup from './hooks/useAppStartup';
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,7 @@ function AppLayout() {
 
 function AppRoutes() {
   useAuthBootstrap();
+  useAppStartup();
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

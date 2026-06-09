@@ -1,6 +1,7 @@
 import React from 'react';
 import { batch, useDispatch, useStore } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
+import { getEmptyPlaceholderSource } from '@opencloning/store/cloning_utils';
 import { graftState, getGraftSequenceId, mergeStates } from '@opencloning/utils/network';
 import {
   loadFilesToSessionStorage,
@@ -149,7 +150,7 @@ export default function useCloningHistoryLoader() {
       const resp = await httpClient.post(snapgeneUrl, formData, config);
       const { data: cloningStrategy } = resp;
 
-      const isEmptyState = cloningState.sources.length === 1 && cloningState.sources[0].type === null;
+      const isEmptyState = getEmptyPlaceholderSource(cloningState.sources) !== null;
       const mode = isEmptyState ? 'replace' : 'merge';
 
       if (resp.headers['x-warning']) {
