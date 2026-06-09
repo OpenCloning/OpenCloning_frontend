@@ -2,17 +2,13 @@ import React from 'react';
 import { batch, useDispatch, useStore } from 'react-redux';
 import useCloningAlerts from '../hooks/useCloningAlerts';
 import useBackendRoute from '../hooks/useBackendRoute';
-import useValidateState from '../hooks/useValidateState';
+import useCloningHistoryLoader from '../hooks/useCloningHistoryLoader';
 import { cloningActions } from '@opencloning/store/cloning';
-import { mergeStates } from '@opencloning/utils/network';
-import { loadFilesToSessionStorage, loadHistoryFile, updateVerificationFileNames } from '@opencloning/utils/readNwrite';
 import HistoryLoadedDialog from './HistoryLoadedDialog';
 import useHttpClient from '../hooks/useHttpClient';
-import { getVerificationFileName } from '@opencloning/utils/readNwrite';
-import { isEqual } from 'lodash-es';
 import useSnapgeneHistoryEndpoint from '../hooks/useSnapgeneHistoryEndpoint';
 
-const { setState: setCloningState, deleteSourceAndItsChildren, addSourceAndItsOutputSequence } = cloningActions;
+const { deleteSourceAndItsChildren, addSourceAndItsOutputSequence } = cloningActions;
 
 async function processSequenceFiles(files, backendRoute, httpClient) {
   const allSources = [];
@@ -63,8 +59,8 @@ function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
   const dispatch = useDispatch();
   const backendRoute = useBackendRoute();
   const store = useStore();
-  const validateState = useValidateState();
   const httpClient = useHttpClient();
+  const { loadHistoryFromFile } = useCloningHistoryLoader();
   const { loadSnapgeneHistory } = useSnapgeneHistoryEndpoint();
   const [fileLoaderFunctions, setFileLoaderFunctions] = React.useState(null);
 
@@ -81,33 +77,10 @@ function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
       const isJsonFile = files.length === 1 && files[0].name.endsWith('.json');
       // If the file is a zip or json file, load the history file
       if (isZipFile || isJsonFile) {
-        let cloningStrategy;
-        let verificationFiles;
-        try {
-          ({ cloningStrategy, verificationFiles } = await loadHistoryFile(files[0]));
-        } catch (e) {
-          console.error(e);
-          addAlert({ message: e.message, severity: 'error' });
+        const prepared = await loadHistoryFromFile(files[0]);
+        if (!prepared) {
           return;
         }
-
-        const validatedState = await validateState(cloningStrategy);
-        // Update the verificationFiles names if needed
-        const updatedVerificationFiles = updateVerificationFileNames(verificationFiles, cloningStrategy.files, validatedState.files);
-
-        const updateState = async (newState, idShift) => {
-          dispatch(setCloningState(newState));
-          await loadFilesToSessionStorage(updatedVerificationFiles, idShift);
-        };
-
-        const replaceState = async () => {
-          await updateState(validatedState, 0);
-        };
-
-        const addState = async () => {
-          const { mergedState, idShift } = mergeStates(validatedState, cloningState);
-          await updateState(mergedState, idShift);
-        };
 
         const errorWrapper = (fn) => async () => {
           try {
@@ -117,11 +90,15 @@ function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
             addAlert({ message: e.message, severity: 'error' });
           }
         };
-          // If there are no sequences in the cloning state, load the history file
+        // If there are no sequences in the cloning state, load the history file
         if (cloningState.sequences.length === 0) {
-          errorWrapper(replaceState)();
+          errorWrapper(prepared.replace)();
         } else {
-          setFileLoaderFunctions({ addState: errorWrapper(addState), replaceState: errorWrapper(replaceState), clear: () => setFileLoaderFunctions(null) });
+          setFileLoaderFunctions({
+            addState: errorWrapper(prepared.merge),
+            replaceState: errorWrapper(prepared.replace),
+            clear: () => setFileLoaderFunctions(null),
+          });
         }
         // If there are sequences in the cloning state, give the option to merge or replace
 

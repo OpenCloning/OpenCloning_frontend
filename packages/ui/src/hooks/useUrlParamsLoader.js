@@ -6,10 +6,11 @@ import useLoadDatabaseFile from './useLoadDatabaseFile';
 import useCloningAlerts from './useCloningAlerts';
 import useHttpClient from './useHttpClient';
 import useValidateState from './useValidateState';
+import useCloningHistoryLoader from './useCloningHistoryLoader';
 import { formatSequenceLocationString, getUrlParameters } from '@opencloning/utils/other';
-import { formatTemplate, loadHistoryFile, loadFilesToSessionStorage } from '@opencloning/utils/readNwrite';
+import { formatTemplate, loadHistoryFile } from '@opencloning/utils/readNwrite';
 
-const { setState: setCloningState, updateSource } = cloningActions;
+const { updateSource } = cloningActions;
 
 /**
  * Hook to load sequences from URL parameters
@@ -23,6 +24,7 @@ export default function useUrlParamsLoader() {
   const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendPostRequest: null, setHistoryFileError });
   const validateState = useValidateState();
   const httpClient = useHttpClient();
+  const { applyCloningStrategy } = useCloningHistoryLoader();
 
   useEffect(() => {
     async function loadSequenceFromUrlParams() {
@@ -45,7 +47,6 @@ export default function useUrlParamsLoader() {
       } else if (urlParams.source === 'example' && urlParams.example) {
         try {
           const url = `${import.meta.env.BASE_URL}examples/${urlParams.example}`;
-          let data;
           if (urlParams.example.endsWith('.zip')) {
             // For zip files, get as blob and process with loadHistoryFile
             const { data: blob } = await httpClient.get(url, { responseType: 'blob' });
@@ -53,14 +54,18 @@ export default function useUrlParamsLoader() {
             // eslint-disable-next-line no-undef
             const file = new File([blob], fileName);
             const { cloningStrategy, verificationFiles } = await loadHistoryFile(file);
-            data = await validateState(cloningStrategy);
-            await loadFilesToSessionStorage(verificationFiles, 0);
+            const validatedStrategy = await validateState(cloningStrategy);
+            await applyCloningStrategy(validatedStrategy, {
+              verificationFiles,
+              mode: 'replace',
+              validate: false,
+            });
           } else {
             // For JSON files, get as JSON
             const { data: jsonData } = await httpClient.get(url);
-            data = await validateState(jsonData);
+            const validatedStrategy = await validateState(jsonData);
+            await applyCloningStrategy(validatedStrategy, { mode: 'replace', validate: false });
           }
-          dispatch(setCloningState(data));
         } catch (error) {
           addAlert({
             message: 'Error loading example',
@@ -76,7 +81,7 @@ export default function useUrlParamsLoader() {
           const validatedData = await validateState(data);
           const newState = formatTemplate(validatedData, url);
 
-          dispatch(setCloningState(newState));
+          await applyCloningStrategy(newState, { mode: 'replace', validate: false });
         } catch (error) {
           addAlert({
             message: 'Error loading template',
@@ -146,4 +151,3 @@ export default function useUrlParamsLoader() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
-

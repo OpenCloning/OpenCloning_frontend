@@ -1,19 +1,16 @@
-import { batch, useDispatch, useStore } from 'react-redux';
 import { jsonToGenbank } from '@teselagen/bio-parsers';
 import useValidateState from './useValidateState';
 import { convertToTeselaJson, loadHistoryFile } from '@opencloning/utils/readNwrite';
 import { getIdsOfSequencesWithoutChildSource } from '@opencloning/store/cloning_utils';
-import { mergeStates, graftState } from '@opencloning/utils/network';
-import { cloningActions } from '@opencloning/store/cloning';
+import useCloningHistoryLoader from './useCloningHistoryLoader';
 import useDatabase from './useDatabase';
-
-const { deleteSourceAndItsChildren, setState: setCloningState } = cloningActions;
+import { useStore } from 'react-redux';
 
 export default function useLoadDatabaseFile({ source, sendPostRequest, setHistoryFileError }) {
-  const dispatch = useDispatch();
   const validateState = useValidateState();
   const store = useStore();
   const database = useDatabase();
+  const { applyCloningStrategy } = useCloningHistoryLoader();
 
   const loadDatabaseFile = async (file, databaseId, ancestors = false) => {
     if (file.name.endsWith('.json')) {
@@ -29,7 +26,7 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
         // When importing sources that had inputs that we don't want to load, we turn them into database sources
         const allSequenceIds = [...cloningStrategy.sequences.map((e) => e.id), ...cloningStrategy.primers.map((e) => e.id)];
         cloningStrategy.sources = cloningStrategy.sources.map((s) => {
-          if (s.input.some(({sequence}) => !allSequenceIds.includes(sequence))) {
+          if (s.input.some(({ sequence }) => !allSequenceIds.includes(sequence))) {
             return { id: s.id, type: 'DatabaseSource', input: [], database_id: s.database_id };
           }
           return s;
@@ -66,7 +63,6 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
         setHistoryFileError(e.message);
         return;
       }
-      // This one won't have the source.id deleted
       const prevState = store.getState().cloning;
       const { backendVersion, schemaVersion, frontendVersion } = prevState.appInfo;
       cloningStrategy.backend_version = backendVersion;
@@ -74,28 +70,18 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
       cloningStrategy.frontend_version = frontendVersion;
       cloningStrategy = await validateState(cloningStrategy);
 
-      batch(() => {
-        // Replace the source with the new one if called from a source
-        if (!ancestors && source) {
-          dispatch(deleteSourceAndItsChildren(source.id));
-        }
-        const cloningState = store.getState().cloning;
-        try {
-          let mergedState;
-          if (ancestors) {
-            ({ mergedState } = graftState(cloningStrategy, cloningState, source.id));
-          } else {
-            ({ mergedState } = mergeStates(cloningStrategy, cloningState));
-          }
-          dispatch(setCloningState(mergedState));
-        } catch (e) {
-          setHistoryFileError(e.message);
-          console.error(e);
-          if (!ancestors) {
-            dispatch(setCloningState(prevState));
-          }
-        }
-      });
+      try {
+        await applyCloningStrategy(cloningStrategy, {
+          mode: ancestors ? 'graft' : 'merge',
+          graftSourceId: source?.id,
+          sourceIdToDelete: !ancestors && source ? source.id : null,
+          validate: false,
+          restorePrevStateOnError: !ancestors,
+          onError: setHistoryFileError,
+        });
+      } catch {
+        // Error already reported via onError; state restored in applyCloningStrategy when applicable
+      }
     } else {
       const requestData = new FormData();
       requestData.append('file', file);

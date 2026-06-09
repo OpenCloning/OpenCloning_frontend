@@ -1,0 +1,188 @@
+import React from 'react';
+import { batch, useDispatch, useStore } from 'react-redux';
+import { cloningActions } from '@opencloning/store/cloning';
+import { graftState, getGraftSequenceId, mergeStates } from '@opencloning/utils/network';
+import {
+  loadFilesToSessionStorage,
+  loadHistoryFile,
+  updateVerificationFileNames,
+} from '@opencloning/utils/readNwrite';
+import useBackendRoute from './useBackendRoute';
+import useCloningAlerts from './useCloningAlerts';
+import useHttpClient from './useHttpClient';
+import useValidateState from './useValidateState';
+
+const {
+  setState: setCloningState,
+  deleteSourceAndItsChildren,
+  restoreSource,
+} = cloningActions;
+
+function makeAlertHandler(addAlert, onError, severity = 'error') {
+  return onError || ((message) => addAlert({ message, severity }));
+}
+
+export default function useCloningHistoryLoader() {
+  const dispatch = useDispatch();
+  const store = useStore();
+  const validateState = useValidateState();
+  const { addAlert } = useCloningAlerts();
+  const backendRoute = useBackendRoute();
+  const httpClient = useHttpClient();
+  const snapgeneUrl = backendRoute('read_snapgene_history');
+
+  const applyCloningStrategy = React.useCallback(async (cloningStrategy, options = {}) => {
+    const {
+      verificationFiles = [],
+      mode,
+      graftSourceId,
+      sourceIdToDelete = null,
+      deleteSourceAfter = false,
+      validate = true,
+      sourceToRestore = null,
+      restorePrevStateOnError = false,
+      onError,
+    } = options;
+
+    const reportError = makeAlertHandler(addAlert, onError);
+
+    const prevState = store.getState().cloning;
+    const originalFiles = cloningStrategy.files;
+
+    let validatedStrategy = cloningStrategy;
+    let updatedVerificationFiles = verificationFiles;
+
+    if (validate) {
+      validatedStrategy = await validateState(cloningStrategy);
+      updatedVerificationFiles = updateVerificationFileNames(
+        verificationFiles,
+        originalFiles,
+        validatedStrategy.files,
+      );
+    }
+
+    try {
+      if (sourceIdToDelete !== null && !deleteSourceAfter) {
+        dispatch(deleteSourceAndItsChildren(sourceIdToDelete));
+      }
+
+      const cloningState = store.getState().cloning;
+      let newState;
+      let idShift = 0;
+
+      if (mode === 'replace') {
+        newState = validatedStrategy;
+      } else if (mode === 'merge') {
+        ({ mergedState: newState, idShift } = mergeStates(validatedStrategy, cloningState));
+      } else if (mode === 'graft') {
+        ({ mergedState: newState, idShift } = graftState(validatedStrategy, cloningState, graftSourceId));
+      } else {
+        throw new Error(`Unknown apply mode: ${mode}`);
+      }
+
+      batch(() => {
+        dispatch(setCloningState(newState));
+        if (sourceIdToDelete !== null && deleteSourceAfter) {
+          dispatch(deleteSourceAndItsChildren(sourceIdToDelete));
+        }
+      });
+
+      await loadFilesToSessionStorage(updatedVerificationFiles, idShift);
+    } catch (e) {
+      console.error(e);
+      if (sourceToRestore) {
+        dispatch(restoreSource({ ...sourceToRestore, type: 'UploadedFileSource' }));
+      } else if (restorePrevStateOnError) {
+        dispatch(setCloningState(prevState));
+      }
+      reportError(e.message);
+      throw e;
+    }
+  }, [addAlert, dispatch, store, validateState]);
+
+  const loadHistoryFromFile = React.useCallback(async (file, options = {}) => {
+    const { onError } = options;
+    const reportError = makeAlertHandler(addAlert, onError);
+
+    let cloningStrategy;
+    let verificationFiles;
+    try {
+      ({ cloningStrategy, verificationFiles } = await loadHistoryFile(file));
+    } catch (e) {
+      console.error(e);
+      reportError(e.message);
+      return null;
+    }
+
+    const validatedState = await validateState(cloningStrategy);
+    const updatedVerificationFiles = updateVerificationFileNames(
+      verificationFiles,
+      cloningStrategy.files,
+      validatedState.files,
+    );
+    const canGraft = getGraftSequenceId(validatedState) !== null;
+
+    const apply = (applyOptions) => applyCloningStrategy(validatedState, {
+      verificationFiles: updatedVerificationFiles,
+      validate: false,
+      ...applyOptions,
+    });
+
+    return {
+      cloningStrategy: validatedState,
+      verificationFiles: updatedVerificationFiles,
+      canGraft,
+      replace: () => apply({ mode: 'replace' }),
+      merge: (applyOptions = {}) => apply({ mode: 'merge', ...applyOptions }),
+      graft: (applyOptions = {}) => apply({
+        mode: 'graft',
+        graftSourceId: applyOptions.graftSourceId ?? applyOptions.source?.id,
+        ...applyOptions,
+      }),
+    };
+  }, [addAlert, applyCloningStrategy, validateState]);
+
+  const loadSnapgeneHistory = React.useCallback(async (file, options = {}) => {
+    const { sourceIdToDelete = null, onError, onWarning } = options;
+    const reportWarning = makeAlertHandler(addAlert, onWarning, 'warning');
+
+    const cloningState = store.getState().cloning;
+    const formData = new FormData();
+    formData.append('file', file);
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data',
+      },
+    };
+
+    try {
+      const resp = await httpClient.post(snapgeneUrl, formData, config);
+      const { data: cloningStrategy } = resp;
+
+      const isEmptyState = cloningState.sources.length === 1 && cloningState.sources[0].type === null;
+      const mode = isEmptyState ? 'replace' : 'merge';
+
+      if (resp.headers['x-warning']) {
+        reportWarning(`Not all SnapGene history was parsed: ${resp.headers['x-warning']}`);
+      }
+
+      await applyCloningStrategy(cloningStrategy, {
+        mode,
+        validate: false,
+        sourceIdToDelete,
+        deleteSourceAfter: sourceIdToDelete !== null,
+        onError,
+      });
+      return true;
+    } catch {
+      reportWarning('Failed to parse the history from the SnapGene file, will only read the sequence.');
+      return false;
+    }
+  }, [addAlert, applyCloningStrategy, httpClient, snapgeneUrl, store]);
+
+  return {
+    applyCloningStrategy,
+    loadHistoryFromFile,
+    loadSnapgeneHistory,
+  };
+}
