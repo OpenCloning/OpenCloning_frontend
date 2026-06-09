@@ -73,10 +73,8 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
       try {
         await applyCloningStrategy(cloningStrategy, {
           mode: ancestors ? 'graft' : 'merge',
-          graftSourceId: source?.id,
-          sourceIdToDelete: !ancestors && source ? source.id : null,
+          source,
           validate: false,
-          restorePrevStateOnError: !ancestors,
           onError: setHistoryFileError,
         });
       } catch {

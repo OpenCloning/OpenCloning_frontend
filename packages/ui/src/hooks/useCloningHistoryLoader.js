@@ -15,11 +15,14 @@ import useValidateState from './useValidateState';
 const {
   setState: setCloningState,
   deleteSourceAndItsChildren,
-  restoreSource,
 } = cloningActions;
 
 function makeAlertHandler(addAlert, onError, severity = 'error') {
   return onError || ((message) => addAlert({ message, severity }));
+}
+
+function shouldDeleteSourceBeforeApply(mode, source) {
+  return source != null && mode === 'merge';
 }
 
 export default function useCloningHistoryLoader() {
@@ -35,16 +38,14 @@ export default function useCloningHistoryLoader() {
     const {
       verificationFiles = [],
       mode,
-      graftSourceId,
-      sourceIdToDelete = null,
-      deleteSourceAfter = false,
+      source = null,
       validate = true,
-      sourceToRestore = null,
-      restorePrevStateOnError = false,
       onError,
     } = options;
 
     const reportError = makeAlertHandler(addAlert, onError);
+    const deleteSourceBeforeApply = shouldDeleteSourceBeforeApply(mode, source);
+    const sourceId = source?.id ?? null;
 
     const prevState = store.getState().cloning;
     const originalFiles = cloningStrategy.files;
@@ -62,8 +63,8 @@ export default function useCloningHistoryLoader() {
     }
 
     try {
-      if (sourceIdToDelete !== null && !deleteSourceAfter) {
-        dispatch(deleteSourceAndItsChildren(sourceIdToDelete));
+      if (deleteSourceBeforeApply) {
+        dispatch(deleteSourceAndItsChildren(sourceId));
       }
 
       const cloningState = store.getState().cloning;
@@ -75,26 +76,19 @@ export default function useCloningHistoryLoader() {
       } else if (mode === 'merge') {
         ({ mergedState: newState, idShift } = mergeStates(validatedStrategy, cloningState));
       } else if (mode === 'graft') {
-        ({ mergedState: newState, idShift } = graftState(validatedStrategy, cloningState, graftSourceId));
+        ({ mergedState: newState, idShift } = graftState(validatedStrategy, cloningState, sourceId));
       } else {
         throw new Error(`Unknown apply mode: ${mode}`);
       }
 
       batch(() => {
         dispatch(setCloningState(newState));
-        if (sourceIdToDelete !== null && deleteSourceAfter) {
-          dispatch(deleteSourceAndItsChildren(sourceIdToDelete));
-        }
       });
 
       await loadFilesToSessionStorage(updatedVerificationFiles, idShift);
     } catch (e) {
       console.error(e);
-      if (sourceToRestore) {
-        dispatch(restoreSource({ ...sourceToRestore, type: 'UploadedFileSource' }));
-      } else if (restorePrevStateOnError) {
-        dispatch(setCloningState(prevState));
-      }
+      dispatch(setCloningState(prevState));
       reportError(e.message);
       throw e;
     }
@@ -132,18 +126,14 @@ export default function useCloningHistoryLoader() {
       cloningStrategy: validatedState,
       verificationFiles: updatedVerificationFiles,
       canGraft,
-      replace: () => apply({ mode: 'replace' }),
+      replace: (applyOptions = {}) => apply({ mode: 'replace', ...applyOptions }),
       merge: (applyOptions = {}) => apply({ mode: 'merge', ...applyOptions }),
-      graft: (applyOptions = {}) => apply({
-        mode: 'graft',
-        graftSourceId: applyOptions.graftSourceId ?? applyOptions.source?.id,
-        ...applyOptions,
-      }),
+      graft: (applyOptions = {}) => apply({ mode: 'graft', ...applyOptions }),
     };
   }, [addAlert, applyCloningStrategy, validateState]);
 
   const loadSnapgeneHistory = React.useCallback(async (file, options = {}) => {
-    const { sourceIdToDelete = null, onError, onWarning } = options;
+    const { source = null, onError, onWarning } = options;
     const reportWarning = makeAlertHandler(addAlert, onWarning, 'warning');
 
     const cloningState = store.getState().cloning;
@@ -168,9 +158,8 @@ export default function useCloningHistoryLoader() {
 
       await applyCloningStrategy(cloningStrategy, {
         mode,
+        source,
         validate: false,
-        sourceIdToDelete,
-        deleteSourceAfter: sourceIdToDelete !== null,
         onError,
       });
       return true;

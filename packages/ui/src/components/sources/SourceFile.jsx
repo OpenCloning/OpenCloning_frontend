@@ -55,19 +55,19 @@ function SourceFile({ source, requestStatus, sendPostRequest }) {
 
       const graft = hasOutput && prepared.canGraft;
       try {
-        const applyOptions = { sourceToRestore: source, onError: reportError };
+        const applyOptions = { source, onError: reportError };
         if (graft) {
-          await prepared.graft({ ...applyOptions, graftSourceId: source.id });
+          await prepared.graft(applyOptions);
         } else {
-          await prepared.merge({ ...applyOptions, sourceIdToDelete: source.id });
+          await prepared.merge(applyOptions);
         }
       } catch {
-        // Error already reported via onError; source restored in applyCloningStrategy
+        // Error already reported via onError; state restored in applyCloningStrategy
       }
       return;
     }
     if (fileFormat === 'snapgene' || (fileFormat === '' && files[0].name.endsWith('.dna'))) {
-      const success = await loadSnapgeneHistory(files[0], { sourceIdToDelete: source.id });
+      const success = await loadSnapgeneHistory(files[0], { source });
       if (success) {
         return;
       }

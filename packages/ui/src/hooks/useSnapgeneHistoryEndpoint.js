@@ -14,7 +14,9 @@ export default function useSnapgeneHistoryEndpoint() {
   const { loadSnapgeneHistory: loadSnapgeneHistoryCore } = useCloningHistoryLoader();
 
   const loadSnapgeneHistory = React.useCallback(async (file, sourceIdToDelete = null) => (
-    loadSnapgeneHistoryCore(file, { sourceIdToDelete })
+    loadSnapgeneHistoryCore(file, {
+      source: sourceIdToDelete !== null ? { id: sourceIdToDelete } : null,
+    })
   ), [loadSnapgeneHistoryCore]);
 
   return { loadSnapgeneHistory };
