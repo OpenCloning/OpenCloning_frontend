@@ -49,13 +49,19 @@ export default function useUrlParamsLoader() {
           const url = `${import.meta.env.BASE_URL}examples/${urlParams.example}`;
           const fileName = urlParams.example;
           if (fileName.endsWith('.zip')) {
-            const { data: blob } = await httpClient.get(url, { responseType: 'blob' });
-            const file = new File([blob], fileName);
+            const resp = await httpClient.get(url, { responseType: 'blob' });
+            if (resp.headers['content-type'] !== 'application/zip') {
+              throw new Error('Not found');
+            }
+            const file = new File([resp.data], fileName);
             const prepared = await loadHistoryFromFile(file, { onError: setHistoryFileError });
             await prepared?.replace();
           } else {
-            const { data: jsonData } = await httpClient.get(url);
-            const file = new File([JSON.stringify(jsonData)], fileName);
+            const resp = await httpClient.get(url);
+            if (resp.headers.contentType !== 'application/json') {
+              throw new Error('Not found');
+            }
+            const file = new File([JSON.stringify(resp.data)], fileName);
             const prepared = await loadHistoryFromFile(file, { onError: setHistoryFileError });
             await prepared?.replace();
           }
