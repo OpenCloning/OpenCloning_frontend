@@ -276,6 +276,9 @@ function WorkspaceMembersSection({ workspaceId }) {
             ))}
           </Select>
         </FormControl>
+        <Alert severity="info" sx={{ my: 2 }}>
+          To update a member role (e.g. change from viewer to editor), just add them again with the new role, and it will be updated.
+        </Alert>
         <Button
           type="submit"
           variant="contained"
