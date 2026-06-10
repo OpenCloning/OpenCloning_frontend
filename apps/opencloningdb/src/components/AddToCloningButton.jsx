@@ -41,7 +41,7 @@ function AddToCloningButton({ selectedEntities, children, entityType, ...rest })
     const emptySource = getEmptyPlaceholderSource(prevState.sources)
     const promises = selectedEntities.filter((entity) => entity.type !== 'template_sequence').map((entity) => handleAddEntity(entity.id));
     await Promise.all(promises);
-    if (emptySource) {
+    if (entityType === 'sequence' && emptySource) {
       dispatch(deleteSourceAndItsChildren(emptySource.id));
     }
   };

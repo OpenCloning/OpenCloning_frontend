@@ -1,9 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
-import useBackendRoute from '../../../../packages/ui/src/hooks/useBackendRoute';
+import { useBackendRoute, useHttpClient } from '@opencloning/ui/hooks';
 import { useQuery } from '@tanstack/react-query';
-import useHttpClient from '../../../../packages/ui/src/hooks/useHttpClient';
 
 const { updateAppInfo } = cloningActions;
 

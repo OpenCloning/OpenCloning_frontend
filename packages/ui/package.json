@@ -25,6 +25,8 @@
         "./hooks/useAlerts": "./src/hooks/useAlerts.js",
         "./hooks/useCloningAlerts": "./src/hooks/useCloningAlerts.js",
         "./hooks/useSequencingAlignment": "./src/hooks/useSequencingAlignment.js",
+        "./hooks/useBackendRoute": "./src/hooks/useBackendRoute.js",
+        "./hooks/useHttpClient": "./src/hooks/useHttpClient.js",
         "./components/SequenceViewer": "./src/components/SequenceViewer.jsx",
         "./standalone": "./src/StandAloneOpenCloning.js"
     },
