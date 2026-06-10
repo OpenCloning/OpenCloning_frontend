@@ -1,5 +1,12 @@
 # @opencloning/utils
 
+## 1.9.2
+
+### Patch Changes
+
+- Updated dependencies [[`bc045f9`](https://github.com/OpenCloning/OpenCloning_frontend/commit/bc045f9e74b4d5b84250dcb5a77b93de99e4d684)]:
+  - @opencloning/store@1.9.2
+
 ## 1.9.1
 
 ### Patch Changes
