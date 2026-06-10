@@ -51,20 +51,15 @@ export default function useUrlParamsLoader() {
             // For zip files, get as blob and process with loadHistoryFile
             const { data: blob } = await httpClient.get(url, { responseType: 'blob' });
             const fileName = urlParams.example;
-            // eslint-disable-next-line no-undef
             const file = new File([blob], fileName);
             const { cloningStrategy, verificationFiles } = await loadHistoryFile(file);
             const validatedStrategy = await validateState(cloningStrategy);
-            await applyCloningStrategy(validatedStrategy, {
-              verificationFiles,
-              mode: 'replace',
-              validate: false,
-            });
+            await applyCloningStrategy(validatedStrategy, {verificationFiles,mode: 'replace'});
           } else {
             // For JSON files, get as JSON
             const { data: jsonData } = await httpClient.get(url);
             const validatedStrategy = await validateState(jsonData);
-            await applyCloningStrategy(validatedStrategy, { mode: 'replace', validate: false });
+            await applyCloningStrategy(validatedStrategy, { mode: 'replace' });
           }
         } catch (error) {
           addAlert({
@@ -81,7 +76,7 @@ export default function useUrlParamsLoader() {
           const validatedData = await validateState(data);
           const newState = formatTemplate(validatedData, url);
 
-          await applyCloningStrategy(newState, { mode: 'replace', validate: false });
+          await applyCloningStrategy(newState, { mode: 'replace' });
         } catch (error) {
           addAlert({
             message: 'Error loading template',

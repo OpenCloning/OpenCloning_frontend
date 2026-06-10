@@ -40,7 +40,6 @@ export default function useCloningHistoryLoader() {
       verificationFiles = [],
       mode,
       source = null,
-      validate = true,
       onError,
     } = options;
 
@@ -49,19 +48,6 @@ export default function useCloningHistoryLoader() {
     const sourceId = source?.id ?? null;
 
     const prevState = store.getState().cloning;
-    const originalFiles = cloningStrategy.files;
-
-    let validatedStrategy = cloningStrategy;
-    let updatedVerificationFiles = verificationFiles;
-
-    if (validate) {
-      validatedStrategy = await validateState(cloningStrategy);
-      updatedVerificationFiles = updateVerificationFileNames(
-        verificationFiles,
-        originalFiles,
-        validatedStrategy.files,
-      );
-    }
 
     try {
       if (deleteSourceBeforeApply) {
@@ -73,11 +59,11 @@ export default function useCloningHistoryLoader() {
       let idShift = 0;
 
       if (mode === 'replace') {
-        newState = validatedStrategy;
+        newState = cloningStrategy;
       } else if (mode === 'merge') {
-        ({ mergedState: newState, idShift } = mergeStates(validatedStrategy, cloningState));
+        ({ mergedState: newState, idShift } = mergeStates(cloningStrategy, cloningState));
       } else if (mode === 'graft') {
-        ({ mergedState: newState, idShift } = graftState(validatedStrategy, cloningState, sourceId));
+        ({ mergedState: newState, idShift } = graftState(cloningStrategy, cloningState, sourceId));
       } else {
         throw new Error(`Unknown apply mode: ${mode}`);
       }
@@ -86,14 +72,14 @@ export default function useCloningHistoryLoader() {
         dispatch(setCloningState(newState));
       });
 
-      await loadFilesToSessionStorage(updatedVerificationFiles, idShift);
+      await loadFilesToSessionStorage(verificationFiles, idShift);
     } catch (e) {
       console.error(e);
       dispatch(setCloningState(prevState));
       reportError(e.message);
       throw e;
     }
-  }, [addAlert, dispatch, store, validateState]);
+  }, [addAlert, dispatch, store]);
 
   const loadHistoryFromFile = React.useCallback(async (file, options = {}) => {
     const { onError } = options;
@@ -160,7 +146,6 @@ export default function useCloningHistoryLoader() {
       await applyCloningStrategy(cloningStrategy, {
         mode,
         source,
-        validate: false,
         onError,
       });
       return true;
