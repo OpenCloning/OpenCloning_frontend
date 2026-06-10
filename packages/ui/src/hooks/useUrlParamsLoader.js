@@ -58,7 +58,7 @@ export default function useUrlParamsLoader() {
             await prepared?.replace();
           } else {
             const resp = await httpClient.get(url);
-            if (resp.headers.contentType !== 'application/json') {
+            if (resp.headers['content-type'] !== 'application/json') {
               throw new Error('Not found');
             }
             const file = new File([JSON.stringify(resp.data)], fileName);
