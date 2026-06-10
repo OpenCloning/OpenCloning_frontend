@@ -1,5 +1,23 @@
 # opencloningdb
 
+## 0.3.6
+
+### Patch Changes
+
+- [#732](https://github.com/OpenCloning/OpenCloning_frontend/pull/732) [`cb5ddf4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/cb5ddf4502a288357f8f853242fb35e5ad2a2207) Thanks [@manulera](https://github.com/manulera)! - Create lines from button in list, enables reference strain + transformation + mating
+
+- [#732](https://github.com/OpenCloning/OpenCloning_frontend/pull/732) [`cb5ddf4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/cb5ddf4502a288357f8f853242fb35e5ad2a2207) Thanks [@manulera](https://github.com/manulera)! - Auto-select new tag when creating it
+
+- [#737](https://github.com/OpenCloning/OpenCloning_frontend/pull/737) [`b40f86f`](https://github.com/OpenCloning/OpenCloning_frontend/commit/b40f86fc3219d6016d8d5c8390b171affc8987f8) Thanks [@manulera](https://github.com/manulera)! - Add button for bulk-download to text files
+
+- [#736](https://github.com/OpenCloning/OpenCloning_frontend/pull/736) [`bc045f9`](https://github.com/OpenCloning/OpenCloning_frontend/commit/bc045f9e74b4d5b84250dcb5a77b93de99e4d684) Thanks [@manulera](https://github.com/manulera)! - \* Unify load paths under single hook
+  - Remove warnings when adding db files to design tab
+- Updated dependencies [[`06bb1a5`](https://github.com/OpenCloning/OpenCloning_frontend/commit/06bb1a513519f598e9ec3b5eec73544e2ed3958e), [`cb5ddf4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/cb5ddf4502a288357f8f853242fb35e5ad2a2207), [`cb5ddf4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/cb5ddf4502a288357f8f853242fb35e5ad2a2207), [`b40f86f`](https://github.com/OpenCloning/OpenCloning_frontend/commit/b40f86fc3219d6016d8d5c8390b171affc8987f8), [`bc045f9`](https://github.com/OpenCloning/OpenCloning_frontend/commit/bc045f9e74b4d5b84250dcb5a77b93de99e4d684)]:
+  - @opencloning/ui@1.9.2
+  - @opencloning/opencloningdb@1.8.3
+  - @opencloning/store@1.9.2
+  - @opencloning/utils@1.9.2
+
 ## 0.3.5
 
 ### Patch Changes

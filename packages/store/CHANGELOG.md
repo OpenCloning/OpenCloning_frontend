@@ -1,5 +1,12 @@
 # @opencloning/store
 
+## 1.9.2
+
+### Patch Changes
+
+- [#736](https://github.com/OpenCloning/OpenCloning_frontend/pull/736) [`bc045f9`](https://github.com/OpenCloning/OpenCloning_frontend/commit/bc045f9e74b4d5b84250dcb5a77b93de99e4d684) Thanks [@manulera](https://github.com/manulera)! - \* Unify load paths under single hook
+  - Remove warnings when adding db files to design tab
+
 ## 1.9.1
 
 ## 1.9.0
