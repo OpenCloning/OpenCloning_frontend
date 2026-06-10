@@ -80,6 +80,48 @@ describe('workspace and account (edit)', () => {
     });
   });
 
+  it('shows workspace members section for owners only', () => {
+    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.contains('h6', 'Workspace members').should('be.visible');
+
+    openAccountMenu();
+    cy.contains('Sign out').click();
+    cy.e2eLogin('/workspace', 'view-only-user@example.com', 'password');
+    cy.contains('h6', 'Workspace members').should('not.exist');
+  });
+
+  it('lists, adds, and removes workspace members', () => {
+    cy.intercept('GET', Cypress.getDbURL('/workspaces/', '*/users')).as('getWorkspaceUsers');
+    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.wait('@getWorkspaceUsers').then(({ response: { body: members } }) => {
+      cy.get('h6').contains('Workspace members').should('exist');
+      cy.get('[data-testid="workspace-members-list"]').within(() => {
+        cy.contains('Bootstrap User').should('exist');
+        cy.contains('View Only User').should('exist');
+      });
+      const viewOnlyMember = members.find((member) => member.display_name === 'View Only User');
+      expect(viewOnlyMember).to.exist;
+
+      cy.intercept('POST', Cypress.getDbURL('/workspaces/', '*/users')).as('addWorkspaceUser');
+      cy.contains('h6', 'Workspace members').closest('.MuiPaper-root').within(() => {
+        cy.setInputValue('Email', 'other-workspace-user@example.com', 'div');
+        cy.get('button').contains('Add').click();
+      });
+      cy.wait('@addWorkspaceUser').its('response.statusCode').should('eq', 201);
+      cy.dbAlertExists('Member added');
+      cy.closeDbAlerts();
+      cy.get('[data-testid="workspace-members-list"]').contains('Other Workspace User').should('exist');
+
+      cy.intercept('DELETE', Cypress.getDbURL('/workspaces/', `*/users/${viewOnlyMember.id}`)).as('removeWorkspaceUser');
+      cy.get(`[data-testid="remove-member-${viewOnlyMember.id}"]`).click();
+      cy.contains('.MuiDialog-root', 'Remove member').contains('button', 'Remove').click();
+      cy.wait('@removeWorkspaceUser').its('response.statusCode').should('eq', 200);
+      cy.dbAlertExists('View Only User removed from workspace');
+      cy.closeDbAlerts();
+      cy.contains('View Only User').should('not.exist');
+    });
+  });
+
   it('changing workspace clears the design tab', () => {
     cy.e2eLogin('/design', 'bootstrap@example.com', 'password');
     cy.get('.open-cloning', { timeout: 20000 }).should('exist');

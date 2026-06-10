@@ -44,6 +44,8 @@ const endpoints = {
   workspaces: '/workspaces',
   postWorkspace: '/workspaces',
   workspace: (id) => `/workspaces/${id}`,
+  workspaceUsers: (id) => `/workspaces/${id}/users`,
+  workspaceUser: (workspaceId, userId) => `/workspaces/${workspaceId}/users/${userId}`,
   templateSequences: '/template_sequences',
   templateSequencesValidateUpload: '/template_sequences/validate-upload',
   templateSequencesBulk: '/template_sequences/bulk',
