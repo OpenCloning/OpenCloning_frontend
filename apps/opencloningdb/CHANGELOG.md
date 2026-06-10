@@ -1,5 +1,14 @@
 # opencloningdb
 
+## 0.3.7
+
+### Patch Changes
+
+- [#741](https://github.com/OpenCloning/OpenCloning_frontend/pull/741) [`c65f24a`](https://github.com/OpenCloning/OpenCloning_frontend/commit/c65f24ae853b45005e9a7f429236b8b8d7ea84fa) Thanks [@manulera](https://github.com/manulera)! - Add workspace functionality to add and remove users by owners
+
+- Updated dependencies [[`c65f24a`](https://github.com/OpenCloning/OpenCloning_frontend/commit/c65f24ae853b45005e9a7f429236b8b8d7ea84fa)]:
+  - @opencloning/opencloningdb@1.8.4
+
 ## 0.3.6
 
 ### Patch Changes
