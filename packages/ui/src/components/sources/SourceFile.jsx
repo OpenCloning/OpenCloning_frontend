@@ -1,15 +1,9 @@
 import React from 'react';
 import { FormHelperText, Alert, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { useDispatch, batch, useStore, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 import LabelWithTooltip from '../form/LabelWithTooltip';
-import { cloningActions } from '@opencloning/store/cloning';
-import { loadFilesToSessionStorage, loadHistoryFile, updateVerificationFileNames } from '@opencloning/utils/readNwrite';
-import useValidateState from '../../hooks/useValidateState';
-import { mergeStates, getGraftSequenceId, graftState } from '@opencloning/utils/network';
-import useSnapgeneHistoryEndpoint from '../../hooks/useSnapgeneHistoryEndpoint';
-
-const { deleteSourceAndItsChildren, restoreSource, setState: setCloningState } = cloningActions;
+import useCloningHistoryLoader from '../../hooks/useCloningHistoryLoader';
 
 const fileFormatToExtension = {
   genbank: 'gb',
@@ -28,10 +22,7 @@ function SourceFile({ source, requestStatus, sendPostRequest }) {
   const hasOutput = useSelector((state) => state.cloning.sequences.some((s) => s.id === source.id));
   // Error message for json only
   const [alert, setAlert] = React.useState(null);
-  const dispatch = useDispatch();
-  const validateState = useValidateState();
-  const store = useStore();
-  const { loadSnapgeneHistory } = useSnapgeneHistoryEndpoint();
+  const { loadHistoryFromFile, loadSnapgeneHistory } = useCloningHistoryLoader();
   const onChange = async (event) => {
     setAlert(null);
     const files = Array.from(event.target.files);
@@ -39,6 +30,7 @@ function SourceFile({ source, requestStatus, sendPostRequest }) {
       return;
     }
     event.target.value = null;
+    const reportError = (message) => setAlert({ message, severity: 'error' });
     // If the file is a history file, we load it
     if (
       fileFormat === 'json' || fileFormat === 'zip'
@@ -50,54 +42,32 @@ function SourceFile({ source, requestStatus, sendPostRequest }) {
           type: fileFormat === 'json' ? 'application/json' : files[0].type,
         });
       }
-      let cloningStrategy;
-      let verificationFiles;
-      try {
-        ({ cloningStrategy, verificationFiles } = await loadHistoryFile(files[0]));
-      } catch (e) {
-        console.error(e);
-        setAlert({ message: e.message, severity: 'error' });
+
+      const prepared = await loadHistoryFromFile(files[0], { onError: reportError });
+      if (!prepared) {
         return;
       }
 
-      const validatedCloningStrategy = await validateState(cloningStrategy);
-      // Update the verificationFiles names if needed
-      const updatedVerificationFiles = updateVerificationFileNames(verificationFiles, cloningStrategy.files, validatedCloningStrategy.files);
-
-      const canGraft = getGraftSequenceId(validatedCloningStrategy) !== null;
-      const graft = hasOutput && canGraft;
-
-      if (hasOutput && !canGraft) {
+      if (hasOutput && !prepared.canGraft) {
         setAlert({ message: 'Cannot graft cloning strategy as it does not converge on a single sequence, you can load it on a source without outputs', severity: 'error' });
         return;
       }
 
-      batch(async () => {
-        if (!graft) {
-          // Replace the source with the new one
-          dispatch(deleteSourceAndItsChildren(source.id));
+      const graft = hasOutput && prepared.canGraft;
+      try {
+        const applyOptions = { source, onError: reportError };
+        if (graft) {
+          await prepared.graft(applyOptions);
+        } else {
+          await prepared.merge(applyOptions);
         }
-        try {
-          const cloningState = store.getState().cloning;
-          let mergedState;
-          let idShift;
-          if (graft) {
-            ({ mergedState, idShift } = graftState(validatedCloningStrategy, cloningState, source.id));
-          } else {
-            ({ mergedState, idShift } = mergeStates(validatedCloningStrategy, cloningState));
-          }
-          dispatch(setCloningState(mergedState));
-          await loadFilesToSessionStorage(updatedVerificationFiles, idShift);
-        } catch (e) {
-          setAlert({ message: e.message, severity: 'error' });
-          dispatch(restoreSource({ ...source, type: 'UploadedFileSource' }));
-        }
-      });
+      } catch {
+        // Error already reported via onError; state restored in applyCloningStrategy
+      }
       return;
     }
     if (fileFormat === 'snapgene' || (fileFormat === '' && files[0].name.endsWith('.dna'))) {
-      console.log('loading snapgene history');
-      const success = await loadSnapgeneHistory(files[0], source.id);
+      const success = await loadSnapgeneHistory(files[0], { source });
       if (success) {
         return;
       }

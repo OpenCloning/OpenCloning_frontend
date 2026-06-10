@@ -21,6 +21,7 @@ declare namespace Cypress {
         loadExample(name: any): Chainable<any>;
         changeTab(tabName: any, extraSelector?: string): Chainable<any>;
         closeAlerts(): Chainable<any>;
+        openCloningAlertsAreEmpty(): Chainable<any>;
         openCloningAlertExists(message: any): Chainable<any>;
         dbAlertExists(message: any): Chainable<any>;
         closeDbAlerts(): Chainable<any>;

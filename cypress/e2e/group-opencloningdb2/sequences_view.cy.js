@@ -213,6 +213,10 @@ describe('SequencesPage', () => {
     cy.get('tbody button').contains('pREX0008').click();
     cy.get('button').contains('Add to Design Tab', { timeout: 20000 }).click();
     cy.changeTab('Design');
+    // There should be no warnings
+    cy.openCloningAlertsAreEmpty();
+    // Empty source should have been removed
+    cy.get('li.source-node').should('have.length', 1);
     cy.get('.open-cloning', { timeout: 20000 }).contains('pREX0008').should('exist');
   });
 

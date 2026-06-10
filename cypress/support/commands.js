@@ -188,6 +188,10 @@ Cypress.Commands.add('closeAlerts', () => {
   });
 });
 
+Cypress.Commands.add('openCloningAlertsAreEmpty', () => {
+  cy.get('div#global-error-message-wrapper [role="alert"]').should('not.exist');
+});
+
 Cypress.Commands.add('openCloningAlertExists', (message) => {
   cy.get(`div#global-error-message-wrapper [role="alert"]`).contains(message).should('exist');
 });

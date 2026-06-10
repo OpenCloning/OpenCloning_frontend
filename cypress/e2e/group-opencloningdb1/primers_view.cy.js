@@ -100,6 +100,10 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
       // TODO: Eventually this should be disabled after adding to design tab
       // cy.get('button').contains('Add to Design Tab').should('not.exist');
       cy.changeTab('Design');
+      // Empty source should still exist
+      cy.get('li#source-1').should('exist');
+      // There should be no warnings
+      cy.openCloningAlertsAreEmpty();
       cy.changeTab('Primers', '#opencloning-app-tabs')
       cy.get('.primer-table-container').contains(primer.name).should('exist');
 
