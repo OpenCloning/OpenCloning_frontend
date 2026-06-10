@@ -154,7 +154,7 @@ export const downloadCloningStrategyAsSvg = async (fileName) => {
   downloadTextFile(svgString, fileName);
 };
 
-export async function loadHistoryFile(file) {
+export async function parseHistoryFile(file) {
   const isZipFile = file.name.endsWith('.zip');
   const isJsonFile = file.name.endsWith('.json');
 
@@ -275,7 +275,7 @@ export function formatTemplate(data, url) {
   const segments = url.split('/');
   const kitUrl = segments[segments.length - 3];
   const rootGithubUrl = 'https://assets.opencloning.org/OpenCloning-submission/submissions';
-  newData.sources = newData.sources.map((s) => ((!Boolean(s.image) || s.image[0] === null) ? s : {
+  newData.sources = newData.sources.map((s) => ((!s.image || s.image[0] === null) ? s : {
     ...s, image: [`${rootGithubUrl}/${kitUrl}/${s.image[0]}`, s.image[1]],
   }));
   return newData;

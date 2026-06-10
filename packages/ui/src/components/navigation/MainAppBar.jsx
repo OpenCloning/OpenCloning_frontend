@@ -4,7 +4,7 @@ import { Menu as MenuIcon } from '@mui/icons-material';
 import './MainAppBar.css';
 import { useDispatch } from 'react-redux';
 import ButtonWithMenu from './ButtonWithMenu';
-import { downloadCloningStrategyAsSvg, formatTemplate, loadHistoryFile, loadFilesToSessionStorage } from '@opencloning/utils/readNwrite';
+import { downloadCloningStrategyAsSvg, formatTemplate } from '@opencloning/utils/readNwrite';
 import SelectExampleDialog from './SelectExampleDialog';
 import SelectTemplateDialog from './SelectTemplateDialog';
 import FeedbackDialog from './FeedbackDialog';
@@ -13,11 +13,11 @@ import VersionDialog from './VersionDialog';
 import useCloningAlerts from '../../hooks/useCloningAlerts';
 import DownloadCloningStrategyDialog from '../DownloadCloningStrategyDialog';
 import LoadCloningHistoryWrapper from '../LoadCloningHistoryWrapper';
-import useValidateState from '../../hooks/useValidateState';
+import useCloningHistoryLoader from '../../hooks/useCloningHistoryLoader';
 import GithubCornerRight from './GithubCornerRight';
 import useHttpClient from '../../hooks/useHttpClient';
 
-const { setCurrentTab, setState: setCloningState } = cloningActions;
+const { setCurrentTab } = cloningActions;
 
 function MainAppBar() {
   const [openExampleDialog, setOpenExampleDialog] = React.useState(false);
@@ -32,7 +32,7 @@ function MainAppBar() {
 
   const dispatch = useDispatch();
   const { addAlert } = useCloningAlerts();
-  const validateState = useValidateState();
+  const { applyCloningStrategy, loadHistoryFromFile } = useCloningHistoryLoader();
 
   // Hidden input field, used to load files.
   const fileInputRef = React.useRef(null);
@@ -52,26 +52,30 @@ function MainAppBar() {
     setOpenExampleDialog(false);
     setOpenTemplateDialog(false);
     if (url) {
-      let data;
+      const fileName = url.split('/').pop();
+      let file;
       if (url.endsWith('.zip')) {
-        // For zip files, get as blob and process with loadHistoryFile
         const { data: blob } = await httpClient.get(url, { responseType: 'blob' });
-        const fileName = url.split('/').pop();
-        // eslint-disable-next-line no-undef
-        const file = new File([blob], fileName);
-        const { cloningStrategy, verificationFiles } = await loadHistoryFile(file);
-        data = await validateState(cloningStrategy);
-        await loadFilesToSessionStorage(verificationFiles, 0);
+        file = new File([blob], fileName);
       } else {
-        // For JSON files, get as JSON
-        let { data: jsonData } = await httpClient.get(url);
-        data = await validateState(jsonData);
+        const { data: jsonData } = await httpClient.get(url);
+        file = new File([JSON.stringify(jsonData)], fileName);
       }
+      const prepared = await loadHistoryFromFile(file, {
+        onError: (message) => addAlert({ message, severity: 'error' }),
+      });
+      if (!prepared) {
+        return;
+      }
+      let strategy = prepared.cloningStrategy;
       if (isTemplate) {
-        data = formatTemplate(data, url);
+        strategy = formatTemplate(strategy, url);
       }
-      dispatch(setCloningState(data));
-      dispatch(setCurrentTab(0))
+      await applyCloningStrategy(strategy, {
+        verificationFiles: prepared.verificationFiles,
+        mode: 'replace',
+      });
+      dispatch(setCurrentTab(0));
     }
   };
 

@@ -1,6 +1,6 @@
 import { jsonToGenbank } from '@teselagen/bio-parsers';
 import useValidateState from './useValidateState';
-import { convertToTeselaJson, loadHistoryFile } from '@opencloning/utils/readNwrite';
+import { convertToTeselaJson, parseHistoryFile } from '@opencloning/utils/readNwrite';
 import { getIdsOfSequencesWithoutChildSource } from '@opencloning/store/cloning_utils';
 import useCloningHistoryLoader from './useCloningHistoryLoader';
 import useDatabase from './useDatabase';
@@ -16,7 +16,7 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
     if (file.name.endsWith('.json')) {
       let cloningStrategy;
       try {
-        ({ cloningStrategy } = await loadHistoryFile(file));
+        ({ cloningStrategy } = await parseHistoryFile(file));
         // If the cloning strategy should end on a single sequence, set the databaseId for the right source
         const terminalSequences = getIdsOfSequencesWithoutChildSource(cloningStrategy.sources, cloningStrategy.sequences);
         if (terminalSequences.length === 1) {

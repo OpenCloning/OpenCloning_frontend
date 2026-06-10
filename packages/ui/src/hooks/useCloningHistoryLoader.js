@@ -5,7 +5,7 @@ import { getEmptyPlaceholderSource } from '@opencloning/store/cloning_utils';
 import { graftState, getGraftSequenceId, mergeStates } from '@opencloning/utils/network';
 import {
   loadFilesToSessionStorage,
-  loadHistoryFile,
+  parseHistoryFile,
   updateVerificationFileNames,
 } from '@opencloning/utils/readNwrite';
 import useBackendRoute from './useBackendRoute';
@@ -88,7 +88,7 @@ export default function useCloningHistoryLoader() {
     let cloningStrategy;
     let verificationFiles;
     try {
-      ({ cloningStrategy, verificationFiles } = await loadHistoryFile(file));
+      ({ cloningStrategy, verificationFiles } = await parseHistoryFile(file));
     } catch (e) {
       console.error(e);
       reportError(e.message);

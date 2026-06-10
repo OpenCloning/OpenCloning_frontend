@@ -8,7 +8,7 @@ import useHttpClient from './useHttpClient';
 import useValidateState from './useValidateState';
 import useCloningHistoryLoader from './useCloningHistoryLoader';
 import { formatSequenceLocationString, getUrlParameters } from '@opencloning/utils/other';
-import { formatTemplate, loadHistoryFile } from '@opencloning/utils/readNwrite';
+import { formatTemplate } from '@opencloning/utils/readNwrite';
 
 const { updateSource } = cloningActions;
 
@@ -24,7 +24,7 @@ export default function useUrlParamsLoader() {
   const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendPostRequest: null, setHistoryFileError });
   const validateState = useValidateState();
   const httpClient = useHttpClient();
-  const { applyCloningStrategy } = useCloningHistoryLoader();
+  const { applyCloningStrategy, loadHistoryFromFile } = useCloningHistoryLoader();
 
   useEffect(() => {
     async function loadSequenceFromUrlParams() {
@@ -47,19 +47,17 @@ export default function useUrlParamsLoader() {
       } else if (urlParams.source === 'example' && urlParams.example) {
         try {
           const url = `${import.meta.env.BASE_URL}examples/${urlParams.example}`;
-          if (urlParams.example.endsWith('.zip')) {
-            // For zip files, get as blob and process with loadHistoryFile
+          const fileName = urlParams.example;
+          if (fileName.endsWith('.zip')) {
             const { data: blob } = await httpClient.get(url, { responseType: 'blob' });
-            const fileName = urlParams.example;
             const file = new File([blob], fileName);
-            const { cloningStrategy, verificationFiles } = await loadHistoryFile(file);
-            const validatedStrategy = await validateState(cloningStrategy);
-            await applyCloningStrategy(validatedStrategy, {verificationFiles,mode: 'replace'});
+            const prepared = await loadHistoryFromFile(file, { onError: setHistoryFileError });
+            await prepared?.replace();
           } else {
-            // For JSON files, get as JSON
             const { data: jsonData } = await httpClient.get(url);
-            const validatedStrategy = await validateState(jsonData);
-            await applyCloningStrategy(validatedStrategy, { mode: 'replace' });
+            const file = new File([JSON.stringify(jsonData)], fileName);
+            const prepared = await loadHistoryFromFile(file, { onError: setHistoryFileError });
+            await prepared?.replace();
           }
         } catch (error) {
           addAlert({
