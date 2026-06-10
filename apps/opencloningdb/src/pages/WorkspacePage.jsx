@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@tanstack/react-query';
 import { Box, Button, TextField, Typography, Paper, Divider } from '@mui/material';
+import { downloadTextFile, prettyPrintJson } from '@opencloning/utils/readNwrite';
 import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
 import { setWorkspace } from '../store/authSlice';
 import useChangeWorkspace from '../hooks/useChangeWorkspace';
@@ -130,6 +131,48 @@ function InviteSection() {
   );
 }
 
+function formatDumpTimestamp(date) {
+  return date.toISOString().slice(0, 19);
+}
+
+function exportDumpFileName(workspaceName) {
+  const safeName = workspaceName.replaceAll('/', '_').replaceAll(' ', '_');
+  return `opencloning_db_${safeName}_dump_${formatDumpTimestamp(new Date())}.json`;
+}
+
+function ExportWorkspaceSection({workspaceName}) {
+  const { addAlert } = useAppAlerts();
+
+  const exportMutation = useMutation({
+    mutationFn: async () => {
+      const { data } = await openCloningDBHttpClient.get(endpoints.export);
+      return data;
+    },
+    onSuccess: (data) => {
+      downloadTextFile(prettyPrintJson(data), exportDumpFileName(workspaceName ?? 'workspace'), 'application/json');
+      addAlert({ message: 'Workspace exported successfully', severity: 'success' });
+    },
+    onError: () => {
+      addAlert({ message: 'Failed to export workspace', severity: 'error' });
+    },
+  });
+
+  return (
+    <SectionBox title="Export workspace">
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Download a JSON dump of all lines, primers, sequences, tags, and workspace members.
+      </Typography>
+      <Button
+        variant="outlined"
+        onClick={() => exportMutation.mutate()}
+        disabled={exportMutation.isPending}
+      >
+        {exportMutation.isPending ? 'Exporting…' : 'Export workspace'}
+      </Button>
+    </SectionBox>
+  );
+}
+
 export default function WorkspacePage() {
   const workspace = useSelector((state) => state.auth.workspace);
   const workspaceId = workspace?.id;
@@ -143,6 +186,7 @@ export default function WorkspacePage() {
       </Typography>
       <CreateWorkspaceSection />
       {isOwner && <RenameWorkspaceSection key={workspaceId ?? 'none'} />}
+      {workspaceId && <ExportWorkspaceSection key={`export-${workspaceId}`} workspaceName={workspace?.name} />}
       {isOwner && <InviteSection />}
     </PageContainer>
   );
