@@ -8,6 +8,9 @@ import { useConfig } from '../../hooks/useConfig';
 
 const { replaceSource } = cloningActions;
 
+// Not a source type of its own: it is an AnnotationSource with the primer_binding_sites tool
+const MAP_PRIMERS_OPTION = 'MapPrimers';
+
 function SourceTypeSelector({ source }) {
   const { id: sourceId, type: sourceType } = source;
   const dispatch = useDispatch();
@@ -15,13 +18,22 @@ function SourceTypeSelector({ source }) {
   const sourceIsPrimerDesign = useSelector((state) => Boolean(state.cloning.sequences.find((e) => e.id === source.id)?.primer_design));
   const { noExternalRequests, enablePlannotate, staticContentPath } = useConfig();
 
+  // Both annotation tools are AnnotationSource, but they are listed separately because they
+  // do unrelated things. The tool is picked here rather than inside the source form.
+  const isMapPrimers = sourceType === 'AnnotationSource' && source.annotation_tool === 'primer_binding_sites';
+  const selectValue = isMapPrimers ? MAP_PRIMERS_OPTION : (sourceType || '');
+
   const onChange = (event) => {
+    const { value } = event.target;
     // Clear the source other than these fields
-    dispatch(replaceSource({
-      id: sourceId,
-      type: event.target.value,
-      input: source.input
-    }));
+    const newSource = { id: sourceId, type: value, input: source.input };
+    if (value === MAP_PRIMERS_OPTION) {
+      newSource.type = 'AnnotationSource';
+      newSource.annotation_tool = 'primer_binding_sites';
+    } else if (value === 'AnnotationSource') {
+      newSource.annotation_tool = 'plannotate';
+    }
+    dispatch(replaceSource(newSource));
   };
   const inputSequences = useSelector((state) => getInputSequencesFromSourceId(state, sourceId), shallowEqual);
   const sequencesExist = useSelector((state) => state.cloning.sequences.length > 0, shallowEqual);
@@ -50,6 +62,8 @@ function SourceTypeSelector({ source }) {
       options.push(<MenuItem key="PCRSource" value="PCRSource">PCR</MenuItem>);
       options.push(<MenuItem key="PolymeraseExtensionSource" value="PolymeraseExtensionSource">Polymerase extension</MenuItem>);
       options.push(<MenuItem key="ReverseComplementSource" value="ReverseComplementSource">Reverse complement</MenuItem>);
+      // Mapping primers needs no external service, so unlike pLannotate it is always available
+      options.push(<MenuItem key={MAP_PRIMERS_OPTION} value={MAP_PRIMERS_OPTION}>Map all primers</MenuItem>);
       if (enablePlannotate) {
         options.push(<MenuItem key="AnnotationSource" value="AnnotationSource">Annotate features</MenuItem>);
       }
@@ -76,7 +90,7 @@ function SourceTypeSelector({ source }) {
       <FormControl fullWidth>
         <InputLabel id={`select-source-${sourceId}-label`}>Source type</InputLabel>
         <Select
-          value={sourceType || ''}
+          value={selectValue}
           onChange={onChange}
           labelId={`select-source-${sourceId}-label`}
           // Note how you have to set the label in two places

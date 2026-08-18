@@ -18,6 +18,12 @@ export function isCompletePCRSource(source) {
   return source.type === 'PCRSource' && source.input.length === 3 && source.input[0].type === 'AssemblyFragment';
 }
 
+export function isCompletePrimerBindingAnnotationSource(source) {
+  // The input is the annotated sequence followed by the primers that bind to it,
+  // so a source where nothing bound has a single input
+  return source.type === 'AnnotationSource' && source.annotation_tool === 'primer_binding_sites' && source.input.length > 1;
+}
+
 export function isCompleteOligoHybridizationSource(source) {
   return source.type === 'OligoHybridizationSource' && source.input.length === 2 && source.overhang_crick_3prime !== undefined && source.overhang_crick_3prime !== null;
 }
@@ -222,6 +228,14 @@ export function mergePrimersInSource(source, keepId, removeId) {
       }
       return { ...sourceInput };
     });
+  } else if (isCompletePrimerBindingAnnotationSource(newSource)) {
+    // Only the inputs after the first one are primers, the first one is the annotated sequence
+    newSource.input = newSource.input.map((sourceInput, index) => {
+      if (index > 0 && sourceInput.sequence === removeId) {
+        return { ...sourceInput, sequence: keepId };
+      }
+      return { ...sourceInput };
+    });
   }
 
   return newSource;
@@ -272,6 +286,10 @@ export function primersInSource(source) {
   }
   if (source.type === 'CRISPRSource') {
     return source.input.filter(({type}) => type === 'SourceInput').map(({sequence}) => sequence);
+  }
+  if (isCompletePrimerBindingAnnotationSource(source)) {
+    // The first input is the annotated sequence, the rest are the primers that bind to it
+    return source.input.slice(1).map(({sequence}) => sequence);
   }
   return [];
 }

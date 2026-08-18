@@ -106,7 +106,7 @@ function GlobalPrimerSettingsSection() {
                             endAdornment: <InputAdornment position="end">nM</InputAdornment>,
                         }}
                         error={!fieldsValid.primer_dna_conc}
-                        helperText={!fieldsValid.primer_dna_conc ? 'Must be greater than 0' : ''}
+                        helperText={!fieldsValid.primer_dna_conc ? 'Must be greater than 0' : 'Also used for the Tm in the primer mapping report'}
                     />
                     <TextField
                         label="Monovalent ions"

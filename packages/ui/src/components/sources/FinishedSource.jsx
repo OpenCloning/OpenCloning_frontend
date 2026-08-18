@@ -4,6 +4,7 @@ import { Alert, Box, Button, Dialog, DialogContent, DialogTitle, Divider, Typogr
 import { isEqual } from 'lodash-es';
 import { enzymesInRestrictionEnzymeDigestionSource } from '@opencloning/utils/sourceFunctions';
 import PlannotateAnnotationReport from '../annotation/PlannotateAnnotationReport';
+import PrimerBindingAnnotationReport from '../annotation/PrimerBindingAnnotationReport';
 import useDatabase from '../../hooks/useDatabase';
 import useLoadDatabaseFile from '../../hooks/useLoadDatabaseFile';
 import { usePCRDetails } from '../primers/primer_details/usePCRDetails';
@@ -226,6 +227,30 @@ function PlannotateAnnotationMessage({ source }) {
   );
 }
 
+function PrimerBindingAnnotationMessage({ source }) {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const report = source.annotation_report || [];
+  const sites = report.filter((row) => row.start_location !== null && row.start_location !== undefined);
+  return (
+    <>
+      <div>
+        {`Annotated ${sites.length} primer binding site${sites.length === 1 ? '' : 's'}`}
+      </div>
+      <Button onClick={() => setDialogOpen(true)}>
+        See report
+      </Button>
+      <PrimerBindingAnnotationReport dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} report={report} />
+    </>
+  );
+}
+
+function AnnotationMessage({ source }) {
+  if (source.annotation_tool === 'primer_binding_sites') {
+    return <PrimerBindingAnnotationMessage source={source} />;
+  }
+  return <PlannotateAnnotationMessage source={source} />;
+}
+
 function IGEMMessage({ source }) {
   // Split repository_id by the first -, the first part is the part name, the rest is the backbone,
   // but there may be more than one -
@@ -427,7 +452,7 @@ function FinishedSource({ sourceId }) {
     case 'GenomeCoordinatesSource': message = <GenomeCoordinatesMessage source={source} />;
       break;
     case 'PolymeraseExtensionSource': message = 'Polymerase extension'; break;
-    case 'AnnotationSource': message = <PlannotateAnnotationMessage source={source} />; break;
+    case 'AnnotationSource': message = <AnnotationMessage source={source} />; break;
     case 'IGEMSource': message = <IGEMMessage source={source} />; break;
     case 'ReverseComplementSource': message = 'Reverse complement'; break;
     case 'SEVASource': message = <SEVAPlasmidMessage source={source} />; break;

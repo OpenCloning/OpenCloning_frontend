@@ -5,6 +5,7 @@ const singleInputOptions = [
   'PCRSource',
   'PolymeraseExtensionSource',
   'AnnotationSource',
+  'MapPrimers',
   'ReverseComplementSource',
 ];
 
