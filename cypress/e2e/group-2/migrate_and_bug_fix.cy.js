@@ -61,17 +61,17 @@ describe('Test that when files are loaded, old versions are migrated and bug fix
     cy.get('table').contains('BZO902_13409020_13409020.ab1');
     cy.get('table').contains('BZO903_13409037_13409037.ab1');
     cy.get('table').contains('BZO904_13409044_13409044.ab1');
-    // Check that the files are in the session storage
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-1-BZO904_13409044_13409044.ab1')
+    // Check that the files are in the verification file store
+    cy.window().its('verificationFileStore')
+      .invoke('get', 'verification-1-BZO904_13409044_13409044.ab1')
       .should('not.be.null')
       .and('have.length.gt', 1000); // Ensure it's not just a tiny value
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-1-BZO903_13409037_13409037.ab1')
+    cy.window().its('verificationFileStore')
+      .invoke('get', 'verification-1-BZO903_13409037_13409037.ab1')
       .should('not.be.null')
       .and('have.length.gt', 1000);
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-1-BZO902_13409020_13409020.ab1')
+    cy.window().its('verificationFileStore')
+      .invoke('get', 'verification-1-BZO902_13409020_13409020.ab1')
       .should('not.be.null')
       .and('have.length.gt', 1000);
   });

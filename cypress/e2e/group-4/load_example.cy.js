@@ -52,9 +52,9 @@ describe('Test load example functionality', () => {
 
     // Can load zip files as well
     loadExample('Arabidopsis');
-    // Check that files are in the session storage
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-4-mock_sequencing.fasta')
+    // Check that files are in the verification file store
+    cy.window().its('verificationFileStore')
+      .invoke('get', 'verification-4-mock_sequencing.fasta')
       .should('not.be.null')
       .and('have.length.gt', 1000); // Ensure it's not just a tiny value
 

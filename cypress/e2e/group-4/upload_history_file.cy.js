@@ -15,7 +15,7 @@ describe('Test upload history from file', () => {
     cy.get('.history-loaded-dialog').contains('Replace existing').click();
     cy.get('.history-loaded-dialog button').contains('Select').click();
     cy.get('div.cloning-tab-pannel').contains('final_product.gb').then(() => {
-      cy.window().its('sessionStorage').its('length').should('eq', 0);
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 0);
     });
     // No verification files are listed either
     cy.get('li#sequence-1 [data-testid="RuleIcon"]').click();
@@ -57,17 +57,17 @@ describe('Test upload history from file', () => {
   it('Zip: Can upload a correct zip file', () => {
     cy.get('.MuiToolbar-root .MuiButtonBase-root').contains('File').siblings('input').selectFile('apps/opencloning/public/examples/cloning_strategy_with_sequencing.zip', { force: true });
     cy.get('div.cloning-tab-pannel').contains('final_product.gb').then(() => {
-    // Check that the files are in the session storage
-      cy.window().its('sessionStorage')
-        .invoke('getItem', 'verification-1-BZO904_13409044_13409044.ab1')
+    // Check that the files are in the verification file store
+      cy.window().its('verificationFileStore')
+        .invoke('get', 'verification-1-BZO904_13409044_13409044.ab1')
         .should('not.be.null')
         .and('have.length.gt', 1000); // Ensure it's not just a tiny value
-      cy.window().its('sessionStorage')
-        .invoke('getItem', 'verification-1-BZO903_13409037_13409037.ab1')
+      cy.window().its('verificationFileStore')
+        .invoke('get', 'verification-1-BZO903_13409037_13409037.ab1')
         .should('not.be.null')
         .and('have.length.gt', 1000);
-      cy.window().its('sessionStorage')
-        .invoke('getItem', 'verification-1-BZO902_13409020_13409020.ab1')
+      cy.window().its('verificationFileStore')
+        .invoke('get', 'verification-1-BZO902_13409020_13409020.ab1')
         .should('not.be.null')
         .and('have.length.gt', 1000);
     });
@@ -111,17 +111,17 @@ describe('Test upload history from file', () => {
   it('Zip: error handling', () => {
     cy.get('.MuiToolbar-root .MuiButtonBase-root').contains('File').siblings('input').selectFile('cypress/test_files/wrong_json_in_zip.zip', { force: true });
     cy.get('.MuiAlert-message').contains('should contain at least').then(() => {
-      // Check that nothing was added to session storage
-      cy.window().its('sessionStorage').its('length').should('eq', 0);
+      // Check that nothing was added to the verification file store
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 0);
     });
     closeAlerts();
-    // If something was in session storage, it remains there
+    // If something was in the verification file store, it remains there
     cy.get('.MuiToolbar-root .MuiButtonBase-root').contains('File').siblings('input').selectFile('cypress/test_files/zip_with_same_primer.zip', { force: true });
     cy.get('div.cloning-tab-pannel').contains('final_product.gb').should('exist');
     cy.get('.MuiToolbar-root .MuiButtonBase-root').contains('File').siblings('input').selectFile('cypress/test_files/wrong_json_in_zip.zip', { force: true });
     cy.get('.MuiAlert-message').contains('should contain at least').then(() => {
-      // Check that nothing was removed from session storage
-      cy.window().its('sessionStorage').its('length').should('eq', 3);
+      // Check that nothing was removed from the verification file store
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 3);
     });
     closeAlerts();
     // Missing files in zip

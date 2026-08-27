@@ -1,15 +1,14 @@
 import { useEffect } from 'react';
+import { clearVerificationFileContents } from '@opencloning/utils/verificationFileStore';
 
 /**
  * Hook to initialize application-level concerns
- * - Clears session storage
+ * - Clears the in-memory verification file store
  */
 export default function useInitializeApp() {
 
   useEffect(() => {
-    // Clear session storage
-    // eslint-disable-next-line no-undef
-    sessionStorage.clear();
+    clearVerificationFileContents();
   }, []);
 }
 

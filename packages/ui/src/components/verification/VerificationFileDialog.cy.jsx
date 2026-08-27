@@ -4,6 +4,11 @@ import store from '@opencloning/store';
 import { cloningActions } from '@opencloning/store/cloning';
 import { loadDataAndMount } from '../../../../../cypress/e2e/common_funcions_store';
 import { getVerificationFileName } from '@opencloning/utils/readNwrite';
+import {
+  clearVerificationFileContents,
+  getVerificationFileContent,
+  setVerificationFileContent,
+} from '@opencloning/utils/verificationFileStore';
 import { ConfigProvider } from '@opencloning/ui/providers/ConfigProvider';
 import { Provider } from 'react-redux';
 
@@ -23,7 +28,7 @@ const base64str = 'aGVsbG8=';
 
 describe('<VerificationFileDialog />', () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    clearVerificationFileContents();
   });
   it('renders and calls setDialogOpen with false when clicking close button', () => {
     // see: https://on.cypress.io/mounting-react
@@ -51,7 +56,7 @@ describe('<VerificationFileDialog />', () => {
   it('displays existing files and can download and delete them', () => {
     store.dispatch(setFiles(dummyFiles));
     dummyFiles.forEach((file) => {
-      sessionStorage.setItem(getVerificationFileName(file), base64str);
+      setVerificationFileContent(getVerificationFileName(file), base64str);
     });
     cy.mount(
       <Provider store={store}>
@@ -71,14 +76,10 @@ describe('<VerificationFileDialog />', () => {
     cy.get('table').contains('file2.txt');
     cy.get('table').contains('file1.txt').should('not.exist');
 
-    // Check that the file is not in sessionStorage
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-1-file1.txt')
-      .should('be.null');
+    // Check that the file is not in the verification file store
+    expect(getVerificationFileContent('verification-1-file1.txt')).to.be.null;
 
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-1-file2.txt')
-      .should('not.be.null');
+    expect(getVerificationFileContent('verification-1-file2.txt')).to.not.be.null;
   });
 
   it('can submit files and aligns them', () => {
@@ -105,9 +106,8 @@ describe('<VerificationFileDialog />', () => {
       cy.expect(file.file_type).to.equal('Sequencing file');
       cy.expect(file.sequence_id).to.equal(2);
       cy.expect(file.alignment).to.have.length(2);
-      // The file content is stored in sessionStorage
-      cy.window().its('sessionStorage')
-        .invoke('getItem', getVerificationFileName(file))
+      // The file content is stored in the verification file store
+      cy.wrap(getVerificationFileContent(getVerificationFileName(file)))
         .should('not.be.null', { timeout: 10000 });
 
       cy.intercept('POST', 'http://127.0.0.1:8000/align_sanger*', {
@@ -133,9 +133,8 @@ describe('<VerificationFileDialog />', () => {
         cy.expect(file.file_type).to.equal('Sequencing file');
         cy.expect(file.sequence_id).to.equal(2);
         cy.expect(file.alignment).to.deep.equal(['A', 'C']);
-        // The file content is stored in sessionStorage
-        cy.window().its('sessionStorage')
-          .invoke('getItem', getVerificationFileName(file))
+        // The file content is stored in the verification file store
+        cy.wrap(getVerificationFileContent(getVerificationFileName(file)))
           .should('not.be.null', { timeout: 10000 });
       });
   });
@@ -187,9 +186,7 @@ describe('<VerificationFileDialog />', () => {
       cy.contains('Request failed');
       // It has not been added
       cy.get('table').contains('BZO902-13409020-13409020.ab1').should('not.exist');
-      cy.window().its('sessionStorage')
-        .invoke('getItem', 'verification-2-BZO902-13409020-13409020.ab1')
-        .should('be.null');
+      expect(getVerificationFileContent('verification-2-BZO902-13409020-13409020.ab1')).to.be.null;
 
       // Connection error
       cy.intercept('POST', 'http://127.0.0.1:8000/align_sanger*', {

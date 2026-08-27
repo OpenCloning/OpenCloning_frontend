@@ -27,6 +27,11 @@ import LoadFromDatabaseButton from './LoadFromDatabaseButton';
 import { sequencingFileExtensions } from '@opencloning/utils/sequencingFileExtensions';
 import useHttpClient from '../../hooks/useHttpClient';
 import { getVerificationFileName } from '@opencloning/utils/readNwrite';
+import {
+  getVerificationFileContent,
+  setVerificationFileContent,
+  removeVerificationFileContent,
+} from '@opencloning/utils/verificationFileStore';
 import ImportSequencingFilesInput from './ImportSequencingFilesInput';
 
 const { addFile, removeFile: removeFileAction, removeFilesAssociatedToSequence, setMainSequenceId, setCurrentTab } = cloningActions;
@@ -78,7 +83,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
     const existingSequencingFilesInState = await Promise.all(store.getState().cloning.files
       .filter((f) => f.sequence_id === id && f.file_type === 'Sequencing file')
       .map(async (f) => {
-        const base64str = sessionStorage.getItem(getVerificationFileName(f));
+        const base64str = getVerificationFileContent(getVerificationFileName(f));
         const trace = (await getTeselaJsonFromBase64(base64str, f.file_name)).sequence;
         return { ...f, base64str, trace };
       }));
@@ -107,7 +112,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
         const { trace, base64str, ...rest } = alignment;
         dispatch(addFile(rest));
       });
-      alignments.forEach(({ base64str, file_name }) => { sessionStorage.setItem(`verification-${id}-${file_name}`, base64str); });
+      alignments.forEach(({ base64str, file_name }) => { setVerificationFileContent(`verification-${id}-${file_name}`, base64str); });
     });
     setLoadingMessage('');
   }, [id, dispatch, httpClient, backendRoute, store, sequence]);
@@ -126,7 +131,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
 
   const removeFile = useCallback((fileName) => {
     dispatch(removeFileAction({ fileName, sequenceId: id }));
-    sessionStorage.removeItem(`verification-${id}-${fileName}`);
+    removeVerificationFileContent(`verification-${id}-${fileName}`);
   }, [id, dispatch]);
 
   const handleClickUpload = useCallback(() => {
@@ -134,9 +139,9 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
   }, [fileInputRef]);
 
   const downloadFile = useCallback((fileName) => {
-    const base64Content = sessionStorage.getItem(`verification-${id}-${fileName}`);
+    const base64Content = getVerificationFileContent(`verification-${id}-${fileName}`);
     if (!base64Content) {
-      setError(`File ${fileName} not found in session storage`);
+      setError(`File ${fileName} not found in the verification file store`);
       return;
     }
     const binaryString = atob(base64Content);
