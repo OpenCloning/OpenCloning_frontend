@@ -2,6 +2,7 @@ import { useStore } from 'react-redux';
 import { updateEditor, addAlignment } from '@teselagen/ove';
 import { getPCRPrimers } from '@opencloning/store/cloning_utils';
 import { getTeselaJsonFromBase64 } from '@opencloning/utils/readNwrite';
+import { getVerificationFileContent } from '@opencloning/utils/verificationFileStore';
 import { buildAlignmentTrack, buildReferenceTrack, buildAlignmentConfig, removePanelFromShown, updatePanelsShownWithAlignment } from '@opencloning/utils/alignmentUtils';
 
 export default function useStoreEditor() {
@@ -31,7 +32,7 @@ export default function useStoreEditor() {
       if (alignmentFiles.length > 0) {
         const referenceTrack = buildReferenceTrack(sequenceData, alignmentFiles[0].alignment[0]);
         const otherTracks = await Promise.all(alignmentFiles.map(async (aln) => {
-          const fileContent = await getTeselaJsonFromBase64(sessionStorage.getItem(`verification-${id}-${aln.file_name}`), aln.file_name);
+          const fileContent = await getTeselaJsonFromBase64(getVerificationFileContent(`verification-${id}-${aln.file_name}`), aln.file_name);
           return buildAlignmentTrack(fileContent, aln);
         }));
         const alignmentConfig = buildAlignmentConfig(id, sequenceData, [referenceTrack, ...otherTracks]);

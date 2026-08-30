@@ -53,7 +53,7 @@ describe('File Source', () => {
     addSource('UploadedFileSource', true);
     cy.get('form.submit-sequence-file input').last().selectFile('cypress/test_files/cloning_strategy_with_sequencing.json', { force: true });
     cy.get('li#source-23').contains('final_product.gb').then(() => {
-      cy.window().its('sessionStorage').its('length').should('eq', 0);
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 0);
     });
     // No verification files are listed either
     cy.get('li#sequence-23 [data-testid="RuleIcon"]').click();
@@ -80,7 +80,7 @@ describe('File Source', () => {
     // Load normal zip file
     cy.get('li#source-1 form.submit-sequence-file input').last().selectFile('cypress/test_files/zip_with_same_primer.zip', { force: true });
     cy.get('li#source-1').contains('final_product.gb').then(() => {
-      cy.window().its('sessionStorage').its('length').should('eq', 3);
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 3);
     });
     cy.get('li#sequence-1 [data-testid="RuleIcon"]').click();
     cy.get('.verification-file-dialog table tr').should('have.length', 4);
@@ -92,7 +92,7 @@ describe('File Source', () => {
     cy.get('form.submit-sequence-file input').last().selectFile('apps/opencloning/public/examples/cloning_strategy_with_sequencing.zip', { force: true });
     cy.get('li#source-1').contains('final_product.gb');
     cy.get('li#source-3').contains('final_product.gb').then(() => {
-      cy.window().its('sessionStorage').its('length').should('eq', 6);
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 6);
     });
     cy.get('li#sequence-3 [data-testid="RuleIcon"]').click();
     cy.get('.verification-file-dialog table tr').should('have.length', 4);

@@ -6,8 +6,8 @@ describe('Test load from URL', () => {
   it('can load example from zip file', () => {
     cy.visit('/?source=example&example=arabidopsis_CRISPR_HDR.zip');
     cy.contains('Read from file hm_repair.gb', { timeout: 10000 }).should('exist');
-    cy.window().its('sessionStorage')
-      .invoke('getItem', 'verification-4-mock_sequencing.fasta')
+    cy.window().its('verificationFileStore')
+      .invoke('get', 'verification-4-mock_sequencing.fasta')
       .should('not.be.null')
       .and('have.length.gt', 1000); // Ensure it's not just a tiny value
   });
