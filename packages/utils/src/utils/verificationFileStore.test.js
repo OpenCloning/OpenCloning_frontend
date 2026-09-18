@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import {
   setVerificationFileContent,
   getVerificationFileContent,
@@ -45,11 +44,12 @@ describe('verificationFileStore (in-memory verification file storage)', () => {
   it('removes all file contents for a sequence', () => {
     setVerificationFileContent('verification-1-file.ab1', 'a');
     setVerificationFileContent('verification-1-other.ab1', 'b');
-    setVerificationFileContent('verification-2-file.ab1', 'c');
+    // We use 10 because of the startswith deletion logic in removeVerificationFileContents
+    setVerificationFileContent('verification-10-file.ab1', 'c');
     removeVerificationFileContents(1);
     expect(getVerificationFileContent('verification-1-file.ab1')).toBeNull();
     expect(getVerificationFileContent('verification-1-other.ab1')).toBeNull();
-    expect(getVerificationFileContent('verification-2-file.ab1')).toBe('c');
+    expect(getVerificationFileContent('verification-10-file.ab1')).toBe('c');
   });
 
   it('removes a specific file within a sequence when fileName is given', () => {
