@@ -10,6 +10,10 @@ import {
 } from '@zip.js/zip.js';
 import { tidyUpSequenceData } from '@teselagen/sequence-utils';
 import { isEqual } from 'lodash-es';
+import {
+  getVerificationFileContent,
+  setVerificationFileContent,
+} from './verificationFileStore';
 
 configure({
   useWebWorkers: false,
@@ -95,10 +99,10 @@ export const downloadStateAsZip = async (cloningState, zipFileName = 'cloning_st
   const files2write = [
     { name: 'cloning_strategy.json', reader: new TextReader(prettyPrintJson(output)) },
     ...fileNames.map((fileName) => {
-      const base64Content = sessionStorage.getItem(fileName);
+      const base64Content = getVerificationFileContent(fileName);
       if (!base64Content) {
         const nameOnly = fileName.replace(/verification-\d+-/, '');
-        throw new Error(`File ${nameOnly} not found in session storage`);
+        throw new Error(`File ${nameOnly} not found in the verification file store`);
       }
       return { name: fileName, reader: new BlobReader(base64ToBlob(base64Content)) };
     }),
@@ -233,13 +237,18 @@ export async function parseHistoryFile(file) {
   return { cloningStrategy: newCloningStrategy, verificationFiles };
 }
 
-export const loadFilesToSessionStorage = async (files, idShift = 0) => {
+export const loadFilesToVerificationStore = async (files, idShift = 0) => {
   await Promise.all(files.map(async (file) => {
     const fileContent = await file2base64(file);
     const filename = file.name.replace(/verification-(\d+)-/, (match, num) => `verification-${parseInt(num, 10) + idShift}-`);
-    sessionStorage.setItem(filename, fileContent);
+    setVerificationFileContent(filename, fileContent);
   }));
 };
+
+// Deprecated alias kept for backwards compatibility with the published
+// @opencloning/utils package. The contents are now kept in an in-memory store
+// instead of sessionStorage (see verificationFileStore.js).
+export const loadFilesToSessionStorage = loadFilesToVerificationStore;
 
 export function getVerificationFileName({ sequence_id, file_name }) {
   return `verification-${sequence_id}-${file_name}`;
