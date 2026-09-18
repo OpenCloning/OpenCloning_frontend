@@ -74,12 +74,11 @@ describe('<VerificationFileDialog />', () => {
 
     cy.get('[data-testid="DeleteIcon"]').first().click();
     cy.get('table').contains('file2.txt');
-    cy.get('table').contains('file1.txt').should('not.exist');
-
-    // Check that the file is not in the verification file store
-    expect(getVerificationFileContent('verification-1-file1.txt')).to.be.null;
-
-    expect(getVerificationFileContent('verification-1-file2.txt')).to.not.be.null;
+    cy.get('table').contains('file1.txt').should('not.exist').then(() => {
+      // Check that the file is not in the verification file store
+      expect(getVerificationFileContent('verification-1-file1.txt')).to.be.null;
+      expect(getVerificationFileContent('verification-1-file2.txt')).to.not.be.null;
+    });
   });
 
   it('can submit files and aligns them', () => {

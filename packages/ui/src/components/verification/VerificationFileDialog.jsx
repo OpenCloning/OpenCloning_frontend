@@ -30,7 +30,6 @@ import { getVerificationFileName } from '@opencloning/utils/readNwrite';
 import {
   getVerificationFileContent,
   setVerificationFileContent,
-  removeVerificationFileContent,
 } from '@opencloning/utils/verificationFileStore';
 import ImportSequencingFilesInput from './ImportSequencingFilesInput';
 
@@ -131,7 +130,6 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
 
   const removeFile = useCallback((fileName) => {
     dispatch(removeFileAction({ fileName, sequenceId: id }));
-    removeVerificationFileContent(`verification-${id}-${fileName}`);
   }, [id, dispatch]);
 
   const handleClickUpload = useCallback(() => {
