@@ -1815,7 +1815,7 @@ __metadata:
     "@mui/material": "npm:^5.18.0"
     "@opencloning/ui": "workspace:*"
     "@opencloning/utils": "workspace:*"
-    axios: "npm:^1.16.0"
+    axios: "npm:^1.18.0"
   peerDependencies:
     react: ^18.3.1
     react-dom: ^18.3.1
@@ -1831,7 +1831,7 @@ __metadata:
     "@mui/material": "npm:^5.18.0"
     "@opencloning/ui": "workspace:*"
     "@opencloning/utils": "workspace:*"
-    axios: "npm:^1.16.0"
+    axios: "npm:^1.18.0"
   peerDependencies:
     react: ^18.3.1
     react-dom: ^18.3.1
@@ -1871,7 +1871,7 @@ __metadata:
     "@teselagen/range-utils": "npm:^0.3.20"
     "@teselagen/sequence-utils": "npm:^0.3.42"
     "@zip.js/zip.js": "npm:^2.8.26"
-    axios: "npm:^1.16.0"
+    axios: "npm:^1.18.0"
     lodash-es: "npm:^4.18.1"
     react-draggable: "npm:^4.5.0"
   peerDependencies:
@@ -3426,14 +3426,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.16.0":
-  version: 1.16.0
-  resolution: "axios@npm:1.16.0"
+"axios@npm:^1.18.0":
+  version: 1.18.0
+  resolution: "axios@npm:1.18.0"
   dependencies:
     follow-redirects: "npm:^1.16.0"
     form-data: "npm:^4.0.5"
+    https-proxy-agent: "npm:^5.0.1"
     proxy-from-env: "npm:^2.1.0"
-  checksum: 10/cf8b521ff732c21550b38c8739aef556ea5e14b268468bb89e4307416ab262b462e582474e810963a3d61c2392ab47ad35c11d05eff027de7c97113bc7411623
+  checksum: 10/586a1a9534531c6ec4ee8fbab07a536ecaa8d29bd16b40ab0f9fce361fcd24da1538a54aadde0562f08f30b55bf80f9b7ededf1987e6506f722e1fb338b09d5d
   languageName: node
   linkType: hard
 
