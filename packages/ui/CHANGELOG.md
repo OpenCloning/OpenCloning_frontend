@@ -1,5 +1,15 @@
 # @opencloning/ui
 
+## 1.9.3
+
+### Patch Changes
+
+- [#762](https://github.com/OpenCloning/OpenCloning_frontend/pull/762) [`df69a1b`](https://github.com/OpenCloning/OpenCloning_frontend/commit/df69a1bfb3b3128e93d89eef48a29f81a54ebb82) Thanks [@manulera](https://github.com/manulera)! - Fix QuotaExceededError when adding more than ~10 AB1/sequencing files (OpenCloning/OpenCloning#82). The raw contents of the verification files used to be persisted in Web Storage (localStorage, later sessionStorage), which has a quota of ~5 MB, so submitting around 10+ AB1 files failed with `QuotaExceededError` and the files/alignments disappeared. The contents are now kept in an in-memory store for the duration of the tab session, which has no quota.
+
+- Updated dependencies [[`df69a1b`](https://github.com/OpenCloning/OpenCloning_frontend/commit/df69a1bfb3b3128e93d89eef48a29f81a54ebb82)]:
+  - @opencloning/utils@1.9.3
+  - @opencloning/store@1.9.3
+
 ## 1.9.2
 
 ### Patch Changes
