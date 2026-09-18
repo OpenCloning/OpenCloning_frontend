@@ -29,10 +29,10 @@ describe('Test copy existing sequence functionality', () => {
     cy.get('button').contains('Copy sequence').click();
     cy.get('li#sequence-1').should('exist');
     cy.get('li#sequence-2').should('exist').then(() => {
-      cy.window().its('sessionStorage')
-        .invoke('getItem', 'verification-2-BZO904_13409044_13409044.ab1')
+      cy.window().its('verificationFileStore')
+        .invoke('get', 'verification-2-BZO904_13409044_13409044.ab1')
         .should('not.be.null');
-      cy.window().its('sessionStorage').its('length').should('eq', 6);
+      cy.window().its('verificationFileStore').invoke('size').should('eq', 6);
     });
     cy.get('li#sequence-2 [data-testid="RuleIcon"]').click();
     cy.get('table').contains('BZO904_13409044_13409044.ab1');

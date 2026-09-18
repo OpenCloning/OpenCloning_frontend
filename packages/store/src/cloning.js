@@ -1,17 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { doesSourceHaveOutput, getNextUniqueId } from './cloning_utils';
 import { convertToTeselaJson } from '@opencloning/utils/readNwrite';
-
-function deleteFilesFromSessionStorage(sequenceId, fileName = null) {
-  Object.keys(sessionStorage)
-    .filter((key) => {
-      let query = `verification-${sequenceId}-`;
-      if (fileName) {
-        query += fileName;
-      }
-      return key.startsWith(query);
-    }).forEach((key) => sessionStorage.removeItem(key));
-}
+import { removeVerificationFileContents } from '@opencloning/utils/verificationFileStore';
 
 const initialState = {
   mainSequenceId: null,
@@ -269,7 +259,7 @@ const reducer = {
     state.files = state.files.filter((f) => !sequences2delete.includes(f.sequence_id));
     sequences2delete.forEach((e) => {
       delete state.teselaJsonCache[e];
-      deleteFilesFromSessionStorage(e);
+      removeVerificationFileContents(e, null);
     });
   },
 
@@ -395,12 +385,13 @@ const reducer = {
   removeFile(state, action) {
     const { fileName, sequenceId } = action.payload;
     state.files = state.files.filter((f) => f.file_name !== fileName || f.sequence_id !== sequenceId);
+    removeVerificationFileContents(sequenceId, fileName);
   },
 
   removeFilesAssociatedToSequence(state, action) {
     const sequenceId = action.payload;
     state.files = state.files.filter((f) => f.sequence_id !== sequenceId);
-    deleteFilesFromSessionStorage(sequenceId);
+    removeVerificationFileContents(sequenceId, null);
   },
 
   addDatabaseIdToSequence(state, action) {

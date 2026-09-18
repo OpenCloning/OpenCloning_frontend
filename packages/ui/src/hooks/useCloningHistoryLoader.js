@@ -4,7 +4,7 @@ import { cloningActions } from '@opencloning/store/cloning';
 import { getEmptyPlaceholderSource } from '@opencloning/store/cloning_utils';
 import { graftState, getGraftSequenceId, mergeStates } from '@opencloning/utils/network';
 import {
-  loadFilesToSessionStorage,
+  loadFilesToVerificationStore,
   parseHistoryFile,
   updateVerificationFileNames,
 } from '@opencloning/utils/readNwrite';
@@ -72,7 +72,7 @@ export default function useCloningHistoryLoader() {
         dispatch(setCloningState(newState));
       });
 
-      await loadFilesToSessionStorage(verificationFiles, idShift);
+      await loadFilesToVerificationStore(verificationFiles, idShift);
     } catch (e) {
       console.error(e);
       dispatch(setCloningState(prevState));

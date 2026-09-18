@@ -7,6 +7,7 @@
     "exports": {
         ".": "./src/utils/index.js",
         "./readNwrite": "./src/utils/readNwrite.js",
+        "./verificationFileStore": "./src/utils/verificationFileStore.js",
         "./network": "./src/utils/network.js",
         "./getHttpClient": "./src/utils/getHttpClient.js",
         "./httpClientAuth": "./src/utils/httpClientAuth.js",
