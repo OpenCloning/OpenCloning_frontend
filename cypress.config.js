@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress';
 import fs from 'fs';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
-import registerCodeCoverageTasks from '@cypress/code-coverage/task.js';
+import registerCodeCoverageTasks from '@cypress/code-coverage/task';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
