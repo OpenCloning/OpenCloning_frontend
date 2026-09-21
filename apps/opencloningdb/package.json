@@ -5,10 +5,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "yarn run -T vite",
+    "start": "yarn run -T vite",
+    "build": "yarn run -T vite build",
+    "preview": "yarn run -T vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

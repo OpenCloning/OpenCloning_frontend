@@ -5,9 +5,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "yarn run -T vite",
+    "build": "yarn run -T vite build",
+    "preview": "yarn run -T vite preview"
   },
   "dependencies": {
     "@opencloning/store": "workspace:*",
