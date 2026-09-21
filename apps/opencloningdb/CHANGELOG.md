@@ -1,5 +1,11 @@
 # opencloningdb
 
+## 0.3.8
+
+### Patch Changes
+
+- [#764](https://github.com/OpenCloning/OpenCloning_frontend/pull/764) [`49afc87`](https://github.com/OpenCloning/OpenCloning_frontend/commit/49afc8706ec67b6fcfd71be081371b66a07e42db) Thanks [@manulera](https://github.com/manulera)! - Change dependency resolution, remove vulns.
+
 ## 0.3.7
 
 ### Patch Changes
