@@ -33,5 +33,6 @@ export default () => ({
   },
   build: {
     outDir: 'build',
+    cssMinify: 'esbuild',
   },
 });

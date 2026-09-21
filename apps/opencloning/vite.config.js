@@ -108,6 +108,7 @@ export default ({ mode }) => {
     },
     build: {
       outDir: 'build',
+      cssMinify: 'esbuild',
     },
   };
 };
