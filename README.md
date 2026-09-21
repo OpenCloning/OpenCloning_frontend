@@ -1,7 +1,6 @@
 [![Python tests](https://github.com/OpenCloning/OpenCloning_frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenCloning/OpenCloning_frontend/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/OpenCloning/OpenCloning_frontend/graph/badge.svg?token=CFIB2H6WMO)](https://codecov.io/gh/OpenCloning/OpenCloning_frontend)
 
-
 # OpenCloning frontend
 
 This repository contains the OpenCloning frontend monorepo, which includes the main React application and shared packages. Before going further, please go to the [main project README](https://github.com/OpenCloning/OpenCloning?tab=readme-ov-file#readme), where you can find an introduction.
@@ -11,6 +10,7 @@ A hosted version of this application can be found at [https://opencloning.org/](
 ## Repository structure
 
 This is a monorepo managed with Yarn workspaces:
+
 - `apps/opencloning/` - The main OpenCloning application
 - `packages/` - Shared packages:
   - `@opencloning/store` - Redux store and cloning logic
@@ -61,10 +61,10 @@ See also [connecting to the frontend section](https://github.com/OpenCloning/Ope
 
 The configuration of the frontend is done in the file that will be served from `/config.json`. In the dev server, this file is served from `apps/opencloning/public/config.json`. That file is not included in the repository, and is generated from `apps/opencloning/public/config.dev.json` when you run `yarn start`. For the production site, `config.prod.json` is used. The things you can configure are:
 
-* `backendUrl`: The URL of the backend. By default, it is `http://localhost:8000/`.
-* `showAppBar`: Whether to show the top app bar (blue with buttons for examples, etc.). By default, it is `true`.
-* `noExternalRequests`: Whether to block requests to external services. By default, it is `false`.
-* `database`: For integrations, provide the database name. This is not documented, but for an example see `packages/ui/src/components/eLabFTW`.
+- `backendUrl`: The URL of the backend. By default, it is `http://localhost:8000/`.
+- `showAppBar`: Whether to show the top app bar (blue with buttons for examples, etc.). By default, it is `true`.
+- `noExternalRequests`: Whether to block requests to external services. By default, it is `false`.
+- `database`: For integrations, provide the database name. This is not documented, but for an example see `packages/ui/src/components/eLabFTW`.
 
 For production: when building the site with `yarn build`, simply replace `apps/opencloning/build/config.json` with your settings. This is what is done in [this docker-compose file](https://github.com/OpenCloning/OpenCloning).
 
@@ -156,17 +156,6 @@ You can configure website analytics using umami by setting the env var `VITE_UMA
 
 ### Recording video with cypress
 
-Settings (they can also be set as env vars or passed with flags).
-
-```javascript
-module.exports = defineConfig({
-  video: true,
-  viewportWidth: 1000,
-  viewportHeight: 1000,
-  ...
-```
-
-Then, when running the video.
 ```
 CYPRESS_NO_COMMAND_LOG=1 yarn cypress run --spec cypress/e2e/source_genome_region.cy.js
 ```
@@ -195,17 +184,17 @@ docker build -t manulera/opencloningfrontend:local --build-arg BASE_URL=/openclo
 
 It can be useful to run scripts to test a few things without running the whole frontend. The only way I have found to do this is running the script as a test.
 
-* Create file with pattern `script.test.js`
-* Run `yarn vitest run script.test.js`
+- Create file with pattern `script.test.js`
+- Run `yarn vitest run script.test.js`
 
 The file content should be something like this:
 
 ```javascript
-import { ab1ToJson } from '@teselagen/bio-parsers';
-import fs from 'fs';
+import { ab1ToJson } from "@teselagen/bio-parsers";
+import fs from "fs";
 
-describe('ab1ToJson', () => {
-  it('should convert an AB1 file to JSON', () => {
+describe("ab1ToJson", () => {
+  it("should convert an AB1 file to JSON", () => {
     const a = 1;
     console.log(a);
   });
@@ -231,6 +220,7 @@ yarn changeset
 ```
 
 This will prompt you to:
+
 1. Select which packages are affected (`@opencloning/store`, `@opencloning/ui`, `@opencloning/utils`, or apps)
 2. Choose the type of change (patch, minor, or major)
 3. Write a description of the changes

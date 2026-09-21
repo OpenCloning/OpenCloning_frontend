@@ -55,10 +55,10 @@ export default defineConfig({
           mode: 'test',
           resolve: {
             alias: {
-              '@opencloning/ui': resolve(__dirname, 'packages/ui/src'),
-              '@opencloning/store': resolve(__dirname, 'packages/store/src'),
-              '@opencloning/utils': resolve(__dirname, 'packages/utils/src/utils'),
-              '@opencloning/opencloning-elabftw': resolve(__dirname, 'packages/opencloning-elabftw/src'),
+              '@opencloning/ui': resolve(import.meta.dirname, 'packages/ui/src'),
+              '@opencloning/store': resolve(import.meta.dirname, 'packages/store/src'),
+              '@opencloning/utils': resolve(import.meta.dirname, 'packages/utils/src/utils'),
+              '@opencloning/opencloning-elabftw': resolve(import.meta.dirname, 'packages/opencloning-elabftw/src'),
             },
           },
           plugins: [
