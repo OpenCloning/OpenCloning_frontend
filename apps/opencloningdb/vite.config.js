@@ -11,7 +11,7 @@ export default () => ({
         'apps/*/src/**/*'
       ],
       extension: ['.js', '.jsx'],
-      cwd: resolve(__dirname, '../..'),
+      cwd: resolve(import.meta.dirname, '../..'),
     }),
   ],
   server: {
@@ -25,13 +25,14 @@ export default () => ({
       '@mui/material',
 
     ],
-    esbuildOptions: {
-      loader: {
+    rolldownOptions: {
+      moduleTypes: {
         '.js': 'jsx',
       },
     },
   },
   build: {
     outDir: 'build',
+    cssMinify: 'esbuild',
   },
 });

@@ -26,10 +26,10 @@ export default ({ mode }) => {
     logLevel: env.VITE_LOG_LEVEL,
     resolve: {
       alias: {
-        '@opencloning/ui': resolve(__dirname, '../../packages/ui/src'),
-        '@opencloning/store': resolve(__dirname, '../../packages/store/src'),
-        '@opencloning/utils': resolve(__dirname, '../../packages/utils/src/utils'),
-        '@opencloning/opencloning-elabftw': resolve(__dirname, '../../packages/opencloning-elabftw/src'),
+        '@opencloning/ui': resolve(import.meta.dirname, '../../packages/ui/src'),
+        '@opencloning/store': resolve(import.meta.dirname, '../../packages/store/src'),
+        '@opencloning/utils': resolve(import.meta.dirname, '../../packages/utils/src/utils'),
+        '@opencloning/opencloning-elabftw': resolve(import.meta.dirname, '../../packages/opencloning-elabftw/src'),
       },
     },
     plugins: [
@@ -40,7 +40,7 @@ export default ({ mode }) => {
           'apps/*/src/**/*'
         ],
         extension: ['.js', '.jsx'],
-        cwd: resolve(__dirname, '../..'),
+        cwd: resolve(import.meta.dirname, '../..'),
       }),
       ViteEjsPlugin({
         umami_website_id: env.VITE_UMAMI_WEBSITE_ID,
@@ -50,8 +50,8 @@ export default ({ mode }) => {
         configResolved() {
           // Copy config file immediately when plugin loads
           try {
-            const configPath = resolve(__dirname, 'public', configFileName);
-            const destPath = resolve(__dirname, 'public', 'config.json');
+            const configPath = resolve(import.meta.dirname, 'public', configFileName);
+            const destPath = resolve(import.meta.dirname, 'public', 'config.json');
 
             if (fs.existsSync(configPath)) {
               fs.copyFileSync(configPath, destPath);
@@ -67,8 +67,8 @@ export default ({ mode }) => {
         // When building the project, copy the config file to the build folder
         writeBundle() {
           try {
-            const configPath = resolve(__dirname, 'public', configFileName);
-            const destPath = resolve(__dirname, 'build', 'config.json');
+            const configPath = resolve(import.meta.dirname, 'public', configFileName);
+            const destPath = resolve(import.meta.dirname, 'build', 'config.json');
 
             if (fs.existsSync(configPath)) {
               fs.copyFileSync(configPath, destPath);
@@ -84,9 +84,9 @@ export default ({ mode }) => {
         configResolved() {
           if (process.env.NODE_ENV === 'development') {
             console.log('Copying example collection folder to public folder');
-            const exampleCollectionPath = resolve(__dirname, 'local_files_example', 'collection');
+            const exampleCollectionPath = resolve(import.meta.dirname, 'local_files_example', 'collection');
             if (fs.existsSync(exampleCollectionPath)) {
-              fs.cpSync(exampleCollectionPath, resolve(__dirname, 'public', 'collection'), { recursive: true });
+              fs.cpSync(exampleCollectionPath, resolve(import.meta.dirname, 'public', 'collection'), { recursive: true });
             }
           }
         },
@@ -100,14 +100,15 @@ export default ({ mode }) => {
         '@mui/material',
 
       ],
-      esbuildOptions: {
-        loader: {
+      rolldownOptions: {
+        moduleTypes: {
           '.js': 'jsx',
         },
       },
     },
     build: {
       outDir: 'build',
+      cssMinify: 'esbuild',
     },
   };
 };
