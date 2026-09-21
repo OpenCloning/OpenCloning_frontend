@@ -1,4 +1,4 @@
-import { addLane, addSource, changeTab, checkInputValue, clearAutocompleteValue, clearInputValue, clickMultiSelectOption, deleteSourceByContent, loadExample, manuallyTypeSequence, setAutocompleteValue, setInputValue } from '../common_functions';
+import { addLane, addSource, changeTab, checkInputValue, clearAutocompleteValue, clearInputValue, clickMultiSelectOption, deleteSourceByContent, manuallyTypeSequence, setAutocompleteValue, setInputValue } from '../common_functions';
 
 function getStepButton(label) {
   return cy.get('button.MuiStepButton-root').contains(label).parents('button');
@@ -32,7 +32,7 @@ describe('Test primer designer functionality', () => {
   });
 
   it('Homologous recombination primer design', () => {
-    loadExample('Integration of cassette by homologous recombination');
+    cy.loadExample('Integration of cassette by homologous recombination');
 
     // Delete the source that says "PCR with primers"
     deleteSourceByContent('PCR with primers');
@@ -128,18 +128,22 @@ describe('Test primer designer functionality', () => {
     setInputValue('Target hybridization Tm', '3', '.primer-design');
     setInputValue('Min. hybridization length', '1', '.primer-design');
 
-    // Verify that the right values are being submitted
-    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/homologous_recombination*', times: 2 }, (req) => {
+    // Verify that the right values are being submitted (it tries twice)
+    cy.intercept({
+      method: 'POST',
+      pathname: '/primer_design/homologous_recombination*',
+      query: {homology_length: '20'},
+    }, (req) => {
       req.reply({
         forceNetworkError: true,
       });
     }).as('primerDesign');
     cy.get('button').contains('Design primers').click();
-    cy.wait('@primerDesign').then((interception) => {
-      expect(interception.request.query.homology_length).to.equal('20');
-      expect(interception.request.query.target_tm).to.equal('30');
-      expect(interception.request.query.minimal_hybridization_length).to.equal('10');
-      expect(interception.request.body.settings).to.deep.equal(defaultPrimerDesignSettings);
+    cy.wait('@primerDesign').then(({ request }) => {
+      cy.wrap(request.query).should('have.property', 'homology_length', '20');
+      cy.wrap(request.query).should('have.property', 'target_tm', '30');
+      cy.wrap(request.query).should('have.property', 'minimal_hybridization_length', '10');
+      cy.wrap(request.body.settings).should('deep.equal', defaultPrimerDesignSettings);
     });
 
     // Back to default values
@@ -181,7 +185,7 @@ describe('Test primer designer functionality', () => {
   });
 
   it('Gibson assembly primer design', () => {
-    loadExample('Gibson assembly');
+    cy.loadExample('Gibson assembly');
 
     // Delete both sources that say "PCR with primers"
     deleteSourceByContent('PCR with primers');
@@ -262,7 +266,11 @@ describe('Test primer designer functionality', () => {
     setInputValue('Min. hybridization length', '3', '.primer-design');
     setInputValue('Target hybridization Tm', '3', '.primer-design');
     // For some reason, we need to intercept twice
-    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/gibson_assembly*', times: 2 }, (req) => {
+    cy.intercept({
+      method: 'POST',
+      pathname: '/primer_design/gibson_assembly*',
+      query: {homology_length: '20'},
+    }, (req) => {
       req.reply({
         forceNetworkError: true,
       });
@@ -334,7 +342,7 @@ describe('Test primer designer functionality', () => {
   });
 
   it('Gibson assembly primer design - fragment not amplified', () => {
-    loadExample('Gibson assembly');
+    cy.loadExample('Gibson assembly');
     // Delete both sources that say "PCR with primers"
     deleteSourceByContent('PCR with primers');
     deleteSourceByContent('PCR with primers');
@@ -367,7 +375,7 @@ describe('Test primer designer functionality', () => {
   })
 
   it('Gibson assembly primer design - linear assembly', () => {
-    loadExample('Gibson assembly');
+    cy.loadExample('Gibson assembly');
     // Delete both sources that say "PCR with primers"
     deleteSourceByContent('PCR with primers');
     deleteSourceByContent('PCR with primers');
@@ -404,7 +412,7 @@ describe('Test primer designer functionality', () => {
   });
 
   it('In-Fusion primer design', () => {
-    loadExample('Gibson assembly');
+    cy.loadExample('Gibson assembly');
 
     // Delete both sources that say "PCR with primers"
     deleteSourceByContent('PCR with primers');
@@ -499,7 +507,10 @@ describe('Test primer designer functionality', () => {
     cy.get('svg.rowViewTextContainer text').contains(`TTTgaattcAAA${selectedSequence}CCCggatccAAA`);
 
     // Create primers and check that the right values are being submitted
-    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/simple_pair*', times: 2 }).as('primerDesign');
+    cy.intercept({
+      method: 'POST',
+      pathname: '/primer_design/simple_pair*',
+    }).as('primerDesign');
     cy.get('button').contains('Design primers').click();
     cy.wait('@primerDesign').then((interception) => {
       expect(interception.request.query.minimal_hybridization_length).to.equal('10');
@@ -590,7 +601,7 @@ describe('Test primer designer functionality', () => {
     setInputValue('Target hybridization Tm', '4', '.primer-design');
 
     // Submit and check that the right values are being submitted
-    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/simple_pair*', times: 2 }).as('primerDesign');
+    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/simple_pair*'}).as('primerDesign');
     cy.get('button').contains('Design primers').click();
     cy.wait('@primerDesign').then((interception) => {
       expect(interception.request.query.left_enzyme_inverted).to.equal('true');
@@ -637,7 +648,7 @@ describe('Test primer designer functionality', () => {
     setInputValue('Target hybridization Tm', '4', '.primer-design');
     cy.get('table span').contains('Reverse').first().click({ force: true });
     // Submit and check that the right values are being submitted
-    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/simple_pair*', times: 2 }).as('primerDesign');
+    cy.intercept({ method: 'POST', url: 'http://127.0.0.1:8000/primer_design/simple_pair*'}).as('primerDesign');
     getBottomButton('Design primers', 1).click();
     cy.wait('@primerDesign').then((interception) => {
       expect(interception.request.query.minimal_hybridization_length).to.equal('10');
@@ -696,7 +707,7 @@ describe('Test primer designer functionality', () => {
     checkInputValue('Amplified region', '2 - 30', '.primer-design #tab-panel-0');
   });
   it('Gateway BP primer design', () => {
-    loadExample('Gateway');
+    cy.loadExample('Gateway');
     deleteSourceByContent('PCR with primers');
     addSource('PCRSource');
     cy.get('button').contains('Design primers').click();
