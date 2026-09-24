@@ -126,6 +126,7 @@ jobs:
             "unit-tests",
             "opencloningdb1",
             "opencloningdb2",
+            "opencloningdb-clerk",
           ]
     steps:
       - name: Checkout
@@ -188,7 +189,22 @@ jobs:
           docker compose -f docker/docker-compose.postgres.yml up -d postgres
 
       - name: run python dev server in background (opencloningdb)
-        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
+        if: ${{ startsWith(matrix.group, 'opencloningdb') && matrix.group != 'opencloningdb-clerk' }}
+        working-directory: OpenCloning_backend
+        run: |
+          uv run opencloning-cli db seed
+          uv run uvicorn opencloning_db.combined:app --port 8000 &
+        env:
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
+          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          OPENCLONING_TESTING: "1"
+          OIDC_TEST_MODE: "1"
+          OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
+          OIDC_ISSUER_URL: "http://dummy.value.test"
+
+      - name: run python dev server in background (opencloningdb clerk)
+        if: ${{ matrix.group == 'opencloningdb-clerk' }}
         working-directory: OpenCloning_backend
         run: |
           uv run opencloning-cli db seed
@@ -199,9 +215,10 @@ jobs:
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
           OPENCLONING_TESTING: "1"
           OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
-          OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
-          OPENCLONING_RATE_LIMIT_ENABLED: false
-          OIDC_ISSUER_URL: "http://dummy.value.test"
+          OIDC_TEST_MODE: "1"
+          OIDC_ISSUER_URL: ${{ secrets.OIDC_ISSUER_URL }}
+          OIDC_AUTHORIZED_PARTIES: http://localhost:3000
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: check if the backend server is running
         if: ${{ !startsWith(matrix.group, 'opencloningdb') }}
@@ -254,12 +271,24 @@ jobs:
           start: yarn start
 
       - name: Cypress run E2E tests (OpenCloningDB)
-        if: ${{ startsWith(matrix.group, 'opencloningdb') }}
+        if: ${{ startsWith(matrix.group, 'opencloningdb') && matrix.group != 'opencloningdb-clerk' }}
         uses: cypress-io/github-action@v6
         env:
           VITE_COVERAGE: "true"
           VITE_OIDC_PROVIDER: "test"
           VITE_LOG_LEVEL: "warn"
+          CYPRESS_TEST_GROUP: ${{ matrix.group }}
+        with:
+          start: yarn workspace opencloningdb dev --port 3000
+
+      - name: Cypress run E2E tests (OpenCloningDB Clerk)
+        if: ${{ matrix.group == 'opencloningdb-clerk' }}
+        uses: cypress-io/github-action@v6
+        env:
+          VITE_COVERAGE: "true"
+          VITE_LOG_LEVEL: "warn"
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           CYPRESS_TEST_GROUP: ${{ matrix.group }}
         with:
           start: yarn workspace opencloningdb dev --port 3000

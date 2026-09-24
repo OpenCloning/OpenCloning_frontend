@@ -643,7 +643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@clerk/testing@npm:^2.2.37":
+"@clerk/testing@npm:2.2.37":
   version: 2.2.37
   resolution: "@clerk/testing@npm:2.2.37"
   dependencies:
@@ -659,6 +659,25 @@ __metadata:
     cypress:
       optional: true
   checksum: 10/00bcc8dac96a120d4b9524299f33c17d858e9b0ada9e4a975a457e160366d20a28ca4a2e10a65c3f85ba5829327b2f902c5986d3a3054f372bf54839926c436b
+  languageName: node
+  linkType: hard
+
+"@clerk/testing@patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch":
+  version: 2.2.37
+  resolution: "@clerk/testing@patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch::version=2.2.37&hash=d2f0be"
+  dependencies:
+    "@clerk/backend": "npm:^3.19.0"
+    "@clerk/shared": "npm:^4.34.0"
+    dotenv: "npm:17.2.2"
+  peerDependencies:
+    "@playwright/test": ^1
+    cypress: ^13 || ^14 || ^15
+  peerDependenciesMeta:
+    "@playwright/test":
+      optional: true
+    cypress:
+      optional: true
+  checksum: 10/b08720ec733e489a2e3eabab0e12efd476c85b9736debb3556f542c08b9566409189a8451a8a0ab7d659bdcf06bd981c6f2aaf2c305a29362a64ece3b6e0ae3a
   languageName: node
   linkType: hard
 
@@ -8857,7 +8876,7 @@ __metadata:
   dependencies:
     "@changesets/changelog-github": "npm:^0.5.2"
     "@changesets/cli": "patch:@changesets/cli@npm%3A2.29.8#~/.yarn/patches/@changesets-cli-npm-2.29.8-52df46efd2.patch"
-    "@clerk/testing": "npm:^2.2.37"
+    "@clerk/testing": "patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch"
     "@cypress/code-coverage": "npm:^4.0.3"
     "@cypress/react": "npm:^9.0.2"
     "@testing-library/jest-dom": "npm:^6.9.1"
