@@ -12,7 +12,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
     cy.addTagInDetailPageTest('primers', 'fwd_restriction_then_ligation', 'restriction_then_ligation');
   });
   it('can edit the name and UID of a primer', () => {
-    cy.e2eLogin('/primers?name=rvs_restriction_then_ligation', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/primers?name=rvs_restriction_then_ligation', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('rvs_restriction_then_ligation').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('rvs_restriction_then_ligation').should('exist');
     cy.get('[aria-label="Edit name and UID"]').click();
@@ -40,7 +40,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
     });
   });
   it('can add primers from the design tab', () => {
-    cy.e2eLogin('/design', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/design', 'bootstrap+clerk_test@example.com', 'password');
     cy.addPrimer('test_primer', 'AACCCCTTTGGG').then(() => {
       cy.get('.primer-table-container').contains('test_primer').should('exist');
       cy.intercept('POST', Cypress.getDbURL(endpoints.postPrimer)).as('addPrimer');
@@ -65,7 +65,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
 
   it('can delete a primer from the detail page when not in use, but not otherwise', () => {
     let primerName = 'no_source_primer';
-    cy.e2eLogin(`/primers?name=${primerName}`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/primers?name=${primerName}`, 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody button').contains(primerName).click();
     cy.get('[data-testid="delete-primer-button"]').should('not.be.disabled').click();
     cy.get('[role="dialog"]').contains('Confirm delete').click();
@@ -84,7 +84,7 @@ describe('Actions that can be perfomed by an edit user on the Primers page', () 
   });
 
   it('can bulk upload primers', () => {
-    cy.e2eLogin('/primers', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/primers', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('[data-testid="bulk-upload-primers-button"]').click();
     // Can download the template
     cy.get('div[role="presentation"] a').contains('Download template').then((link) => {

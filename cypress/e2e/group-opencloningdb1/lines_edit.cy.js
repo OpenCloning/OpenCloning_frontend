@@ -12,7 +12,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.addTagInDetailPageTest('lines', 'crispr_hdr-line', 'crispr_hdr');
   });
   it('can rename a line', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
     cy.get('[aria-label="Edit line UID"]').click();
@@ -23,7 +23,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line-new').should('exist');
   });
   it('can delete a line that has no children', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
     cy.get('button').contains('Delete line').click();
@@ -36,13 +36,13 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('tbody').should('not.contain', 'crispr_hdr-line');
   });
   it('cannot delete a line that has children', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('parent_strain').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('parent_strain').should('exist');
     cy.get('button').contains('Delete line').should('be.disabled');
   });
   it('can update the UID of a line to a non-existing UID', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
     cy.get('[aria-label="Edit line UID"]').click();
@@ -60,7 +60,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line-new').should('exist');
   });
   it('can do a transformation of a line and applies the right constraints', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
     for (const mode of ['from_parent', 'from_list']) {
@@ -123,7 +123,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
 
   });
   it('can create a line by mating', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('button').contains('Create line').click();
     cy.get('[data-testid="create-line-dialog"]').within(() => {
       cy.get('button').contains('Submit').should('be.disabled');
@@ -173,7 +173,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('[data-testid="line-parent-lines"]').contains('homologous_recombination-line').should('exist');
   });
   it('can create a line without parents nor alleles nor plasmids', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('button').contains('Create line').click();
     cy.get('[data-testid="create-line-dialog"]').within(() => {
       cy.setInputValue('Line UID', 'reference-line', 'div');
@@ -186,7 +186,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.contains('No genotype or plasmids in this line.').should('exist');
   });
   it('can bulk upload lines', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('[data-testid="bulk-upload-lines-button"]').click();
     // Can download the template
     cy.get('div[role="presentation"] a').contains('Download template').then((link) => {
@@ -297,7 +297,7 @@ describe('Actions that can be perfomed by an edit user on the Lines page', () =>
     cy.get('tbody').contains('bulk_line_cypress_1').should('exist');
   });
   it('can remove plasmids and alleles from a line in a transformation', () => {
-    cy.e2eLogin('/lines', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/lines', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').contains('crispr_hdr-line').click();
     cy.get('[data-testid="resource-detail-header-title"]').contains('crispr_hdr-line').should('exist');
     cy.get('button').contains('Transformation').click();

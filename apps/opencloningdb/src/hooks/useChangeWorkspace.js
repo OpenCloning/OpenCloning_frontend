@@ -1,8 +1,8 @@
 import React from 'react';
-import { useClerk } from '@clerk/react';
 import { batch, useDispatch } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import { setWorkspaceHeader, clearWorkspaceHeader } from '@opencloning/opencloningdb';
+import { useOidcAuth } from '../auth/OidcAuthContext';
 import { setWorkspace, clearUser, setUser } from '../store/authSlice';
 import { setRememberedWorkspaceId } from '../utils/auth_utils';
 import useStableNavigate from './useStableNavigate';
@@ -11,7 +11,7 @@ import { cloningActions } from '@opencloning/store/cloning';
 const { reset: resetCloningState } = cloningActions;
 
 export default function useChangeWorkspace() {
-  const { signOut } = useClerk();
+  const { signOut } = useOidcAuth();
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const navigate = useStableNavigate();

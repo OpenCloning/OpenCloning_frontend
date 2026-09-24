@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn run -T vite",
+    "dev:test": "VITE_OIDC_PROVIDER=test yarn run -T vite",
     "start": "yarn run -T vite",
     "build": "yarn run -T vite build",
     "preview": "yarn run -T vite preview"

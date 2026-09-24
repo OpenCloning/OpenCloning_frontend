@@ -247,6 +247,7 @@ jobs:
         uses: cypress-io/github-action@v6
         env:
           VITE_COVERAGE: "true"
+          VITE_OIDC_PROVIDER: "test"
           VITE_LOG_LEVEL: "warn"
           CYPRESS_TEST_GROUP: ${{ matrix.group }}
         with:

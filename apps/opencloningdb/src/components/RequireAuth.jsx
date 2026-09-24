@@ -1,10 +1,10 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useAuth } from '@clerk/react';
+import { useOidcAuth } from '../auth/OidcAuthContext';
 
 export default function RequireAuth({ children }) {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useOidcAuth();
   const user = useSelector((state) => state.auth.user);
   const workspaceId = useSelector((state) => state.auth.workspace?.id);
   const location = useLocation();

@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { useAuth } from '@clerk/react';
 import { setUnauthorizedHandler } from '@opencloning/opencloningdb';
+import { useOidcAuth } from '../auth/OidcAuthContext';
 import useChangeWorkspace from './useChangeWorkspace';
 import { fetchUserAndFirstWorkspace } from '../utils/auth_utils';
 
 export default function useAuthBootstrap() {
-  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useOidcAuth();
   const { applySession, logout } = useChangeWorkspace();
 
   useEffect(() => {
