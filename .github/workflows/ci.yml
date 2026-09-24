@@ -116,7 +116,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [1, 2, 3, 4, "component", "unit-tests", "opencloningdb1", "opencloningdb2"]
+        group:
+          [
+            1,
+            2,
+            3,
+            4,
+            "component",
+            "unit-tests",
+            "opencloningdb1",
+            "opencloningdb2",
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -191,6 +201,7 @@ jobs:
           OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
           OPENCLONING_JWT_SECRET: local-dev-only-jwt-secret-change-for-shared-envs
           OPENCLONING_RATE_LIMIT_ENABLED: false
+          OIDC_ISSUER_URL: "http://dummy.value.test"
 
       - name: check if the backend server is running
         if: ${{ !startsWith(matrix.group, 'opencloningdb') }}
