@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
+import { Alert, Box, Button, FormControl, InputLabel, Link, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { OidcAuthContext } from '../OidcAuthContext';
-import { TEST_USERS } from '../testUsers';
+import { buildTestToken, TEST_USERS } from '../testUsers';
 
 const TestSignInContext = createContext(null);
 
@@ -38,6 +38,25 @@ export function TestOidcAuthProvider({ children }) {
   );
 }
 
+function redirectAfterAuth(navigate, location) {
+  const from = location.state?.from;
+  const destination = from
+    ? `${from.pathname}${from.search || ''}`
+    : '/sequences';
+  navigate(destination, { replace: true });
+}
+
+function TestAuthPageShell({ children }) {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: 4 }}>
+      <Typography sx={{ color: 'primary.main' }} variant="h1" textAlign="center">
+        OpenCloningDB
+      </Typography>
+      {children}
+    </Box>
+  );
+}
+
 export function TestLoginPage() {
   const signIn = useContext(TestSignInContext);
   const navigate = useNavigate();
@@ -50,18 +69,11 @@ export function TestLoginPage() {
     if (!user || !signIn) return;
 
     signIn(user.token);
-    const from = location.state?.from;
-    const destination = from
-      ? `${from.pathname}${from.search || ''}`
-      : '/sequences';
-    navigate(destination, { replace: true });
+    redirectAfterAuth(navigate, location);
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: 4 }}>
-      <Typography sx={{ color: 'primary.main' }} variant="h1" textAlign="center">
-        OpenCloningDB
-      </Typography>
+    <TestAuthPageShell>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 320 }}>
         <FormControl fullWidth>
           <InputLabel id="test-oidc-user-label">User</InputLabel>
@@ -87,7 +99,65 @@ export function TestLoginPage() {
         >
           Sign in
         </Button>
+        <Link component={RouterLink} to="/signup" align="center">
+          Sign up
+        </Link>
       </Box>
-    </Box>
+    </TestAuthPageShell>
+  );
+}
+
+export function TestSignUpPage() {
+  const signIn = useContext(TestSignInContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [subject, setSubject] = useState('');
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
+
+  const fields = {
+    subject: subject.trim(),
+    email: email.trim(),
+    displayName: displayName.trim(),
+  };
+  const canSubmit = Boolean(fields.subject && fields.email && fields.displayName);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!canSubmit || !signIn) return;
+
+    signIn(buildTestToken(fields));
+    redirectAfterAuth(navigate, location);
+  };
+
+  return (
+    <TestAuthPageShell>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 320 }}>
+        <TextField
+          label="Subject"
+          value={subject}
+          inputProps={{ pattern: '^[^\\|]+$' }}
+          onChange={(event) => setSubject(event.target.value)}
+        />
+        <TextField
+          label="Email"
+          value={email}
+          type="email"
+          onChange={(event) => setEmail(event.target.value)}
+        />
+        <TextField
+          label="Display name"
+          value={displayName}
+          inputProps={{ pattern: '^[^\\|]+$' }}
+          onChange={(event) => setDisplayName(event.target.value)}
+        />
+        <Button type="submit" variant="contained" disabled={!canSubmit}>
+          Create user
+        </Button>
+        <Link component={RouterLink} to="/login" align="center">
+          Sign in
+        </Link>
+      </Box>
+    </TestAuthPageShell>
   );
 }

@@ -19,6 +19,10 @@ export const TEST_USERS = [
   },
 ];
 
+export function buildTestToken({ subject, email, displayName }) {
+  return `test:${subject}|${email}|${displayName}`;
+}
+
 export function resolveTestUserByEmail(email) {
   const user = TEST_USERS.find((candidate) => candidate.email === email);
   if (!user) {

@@ -3,7 +3,7 @@ import {
   ClerkOidcAuthProvider,
   ClerkSignUpPage,
 } from './providers/clerkOidc';
-import { TestLoginPage, TestOidcAuthProvider } from './providers/testOidc';
+import { TestLoginPage, TestOidcAuthProvider, TestSignUpPage } from './providers/testOidc';
 
 const providers = {
   clerk: {
@@ -14,7 +14,7 @@ const providers = {
   test: {
     AuthProvider: TestOidcAuthProvider,
     LoginPage: TestLoginPage,
-    SignUpPage: null,
+    SignUpPage: TestSignUpPage,
   },
 };
 
