@@ -16,7 +16,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   it('can toggle sequence circularity from the detail page', () => {
     const sequenceName = 'pREX0008';
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.e2eLogin(`/sequences?name=${sequenceName}`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=${sequenceName}`, 'bootstrap+clerk_test@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === sequenceName);
       cy.intercept('PATCH', Cypress.getDbURL(endpoints.sequenceChangeCircularity(sequence.id))).as('changeCircularity');
@@ -42,7 +42,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   it('can add and remove sequencing files from the detail page', () => {
     const sequenceName = 'pREX0008';
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap+clerk_test@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === sequenceName);
       cy.intercept('GET', Cypress.getDbURL(endpoints.sequenceSequencingFiles(sequence.id))).as('getSequenceSequencingFiles');
@@ -70,7 +70,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   it('can add and remove sample UIDs from the detail page', () => {
     const sequenceName = 'pREX0008';
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
-    cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap+clerk_test@example.com', 'password');
     cy.wait('@getSequences').then(({ response }) => {
       const sequence = response.body.items.find((item) => item.name === sequenceName);
       cy.get('tbody tr button').contains(sequenceName).click();
@@ -115,7 +115,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   });
   it('can change name but not sequence type in circular sequence', () => {
 
-    cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=pREX0008`, 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr button').contains('pREX0008').click();
     cy.get('[data-testid="sequence-header"]').within(() => {
       cy.get('[aria-label="Edit name and type"]').click();
@@ -130,7 +130,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.closeDbAlerts();
   });
   it('can change name and sequence type in linear sequence', () => {
-    cy.e2eLogin(`/sequences?name=reconstituted_locus`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=reconstituted_locus`, 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr button').contains('reconstituted_locus').click();
     cy.get('[data-testid="sequence-header"]').within(() => {
       cy.contains('Linear DNA').should('exist');
@@ -152,13 +152,13 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.closeDbAlerts();
   });
   it('cannot change type in sequence present in a line', () => {
-    cy.e2eLogin(`/sequences?name=ase1delta`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=ase1delta`, 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr button').contains('ase1delta').click();
     cy.get('[aria-label="Edit name and type"]').click();
     cy.get('[aria-label="Cannot change type of sequence present in a line"] input').should('be.disabled');
   });
   it('can bulk upload sequences', () => {
-    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/sequences', 'bootstrap+clerk_test@example.com', 'password');
     // Test a connection error
     cy.intercept({
       method: 'POST',
@@ -243,7 +243,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     });
   });
   it('can bulk upload template sequences', () => {
-    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/sequences', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('[data-testid="bulk-upload-template-sequences-button"]').click();
     // Can download the template
     cy.get('div[role="presentation"] a').contains('Download template').then((link) => {
@@ -324,7 +324,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.closeDbAlerts();
   });
   it('can bulk upload cloning strategies', () => {
-    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/sequences', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('input[type="file"]').eq(1).selectFile([
       'cypress/test_files/old_and_bug_fix/crispr_hdr.json', // old format
       'cypress/test_files/bulk_cloning_strategies/linearised_pFA6a-kanMX6_wrong_database_id.json', // wrong database id
@@ -416,7 +416,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
   });
   it('can change annotation', () => {
     cy.viewport(1920, 1080);
-    cy.e2eLogin(`/sequences?name=lacZ_PCR_product`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?name=lacZ_PCR_product`, 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr button').contains('lacZ_PCR_product').click();
     cy.get('[data-testid="sequence-header"]').contains('lacZ_PCR_product').should('exist');
     // Remove covering html elements that prevent selecting
@@ -463,7 +463,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.get('.veEditor').contains('feature_name3').should('exist');
   });
   it('can delete a sequence that has no children and is present in no lines', () => {
-    cy.e2eLogin(`/sequences?uid=templateless_PCR-sample`, 'bootstrap@example.com', 'password');
+    cy.e2eLogin(`/sequences?uid=templateless_PCR-sample`, 'bootstrap+clerk_test@example.com', 'password');
     cy.get('tbody tr').filter(`:contains(templateless_PCR-sample)`).first().within( () => {
       cy.get('button').click();
     });
@@ -493,7 +493,7 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
     cy.get('[data-testid="delete-sequence-button"]').should('be.disabled');
   });
   it('can create template sequences', () => {
-    cy.e2eLogin('/sequences', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/sequences', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('button').contains('Create Template Sequence').click();
     cy.get('[data-testid="create-template-sequence-dialog"] label').eq(1).siblings('div').first().click();
     cy.get('ul[aria-labelledby="sequence-type-label"] li').should('have.length', 2);

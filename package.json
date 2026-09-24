@@ -47,6 +47,7 @@
     "devDependencies": {
         "@changesets/changelog-github": "^0.5.2",
         "@changesets/cli": "patch:@changesets/cli@npm%3A2.29.8#~/.yarn/patches/@changesets-cli-npm-2.29.8-52df46efd2.patch",
+        "@clerk/testing": "patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch",
         "@cypress/code-coverage": "^4.0.3",
         "@cypress/react": "^9.0.2",
         "@testing-library/jest-dom": "^6.9.1",

@@ -1,5 +1,6 @@
 import { setWorkspaceHeader } from '../../packages/opencloningdb/src/common.js';
 import endpoints from '../../packages/opencloningdb/src/endpoints';
+import { resolveTestUserByEmail } from '../../apps/opencloningdb/src/auth/testUsers.js';
 
 const DB_URL = 'http://localhost:8000/db';
 const STUB_FOLDER = 'OpenCloning_backend/stubs/db';
@@ -105,17 +106,20 @@ Cypress.Commands.add('interceptOpenCloningDBStub', (stubOrName, options = {}) =>
 });
 
 
-Cypress.Commands.add('e2eLogin', (page, email, password) => {
+Cypress.Commands.add('e2eLogin', (page, email) => {
+  const user = resolveTestUserByEmail(email);
+  const url = new URL(page, Cypress.config('baseUrl'));
+
+  cy.intercept('GET', Cypress.getDbURL(endpoints.authMe)).as('authMe');
+  cy.intercept('GET', Cypress.getDbURL(endpoints.workspaces)).as('workspaces');
   cy.visit(page);
-  // Split page into pathname and search params
-  const url = new URL(page, DB_URL);
-  const pathname = url.pathname;
-  const searchParams = url.search;
-  cy.setInputValue('Email', email);
-  cy.setInputValue('Password', password);
-  cy.get('button[type="submit"]').click();
-  cy.location('pathname').should('eq', pathname);
-  cy.location('search').should('eq', searchParams);
+  cy.get('[data-testid="test-oidc-user-select"]').click();
+  cy.get(`li[data-value="${user.id}"]`).click();
+  cy.get('[data-testid="test-oidc-sign-in"]').click();
+  cy.wait('@authMe');
+  cy.wait('@workspaces');
+  cy.location('pathname').should('eq', url.pathname);
+  cy.location('search').should('eq', url.search);
 });
 
 Cypress.Commands.add('resetDB', () => {

@@ -14,10 +14,13 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
+import { addClerkCommands } from '@clerk/testing/cypress';
 import './commands';
 import '@cypress/code-coverage/support';
 import './opencloningdb-commands';
 import './common-tests';
+
+addClerkCommands({ Cypress, cy });
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
