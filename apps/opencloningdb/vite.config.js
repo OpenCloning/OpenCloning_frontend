@@ -3,6 +3,7 @@ import istanbul from 'vite-plugin-istanbul';
 import { resolve } from 'path';
 
 export default () => ({
+  envDir: resolve(import.meta.dirname, '../..'),
   plugins: [
     react(),
     (process.env.VITE_COVERAGE) && istanbul({
@@ -15,7 +16,7 @@ export default () => ({
     }),
   ],
   server: {
-    port: 3002,
+    port: 3000,
   },
   optimizeDeps: {
     include: [

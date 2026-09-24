@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ClerkProvider } from '@clerk/react';
 import { AppBar, Toolbar, Typography, Tabs, Tab, Box } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { ConfigProvider } from '@opencloning/ui/providers/ConfigProvider';
@@ -100,13 +101,31 @@ function AppLayout() {
   );
 }
 
+function ClerkProviderWithRouter({ children }) {
+  const navigate = useNavigate();
+
+  return (
+    <ClerkProvider
+      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
+      routerPush={(to) => navigate(to)}
+      routerReplace={(to) => navigate(to, { replace: true })}
+      signInUrl="/login"
+      signUpUrl="/signup"
+      signInFallbackRedirectUrl="/sequences"
+      signUpFallbackRedirectUrl="/sequences"
+    >
+      {children}
+    </ClerkProvider>
+  );
+}
+
 function AppRoutes() {
   useAuthBootstrap();
   useAppStartup();
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/login/*" element={<LoginPage />} />
+      <Route path="/signup/*" element={<SignUpPage />} />
       <Route
         path="/*"
         element={
@@ -123,11 +142,13 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ConfigProvider config={config}>
-          <DatabaseProvider value={OpenCloningDBInterface}>
-            <AppRoutes />
-          </DatabaseProvider>
-        </ConfigProvider>
+        <ClerkProviderWithRouter>
+          <ConfigProvider config={config}>
+            <DatabaseProvider value={OpenCloningDBInterface}>
+              <AppRoutes />
+            </DatabaseProvider>
+          </ConfigProvider>
+        </ClerkProviderWithRouter>
       </BrowserRouter>
     </QueryClientProvider>
   );

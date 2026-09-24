@@ -11,6 +11,7 @@
     "preview": "yarn run -T vite preview"
   },
   "dependencies": {
+    "@clerk/react": "^6.16.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^5.18.0",
