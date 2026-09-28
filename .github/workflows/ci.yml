@@ -193,7 +193,8 @@ jobs:
         working-directory: OpenCloning_backend
         run: |
           uv run opencloning-cli db seed
-          uv run uvicorn opencloning_db.combined:app --port 8000 &
+          uv run uvicorn opencloning_db.combined:app --port 8000 \
+            > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
@@ -208,7 +209,8 @@ jobs:
         working-directory: OpenCloning_backend
         run: |
           uv run opencloning-cli db seed
-          uv run uvicorn opencloning_db.combined:app --port 8000 &
+          uv run uvicorn opencloning_db.combined:app --port 8000 \
+            > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
@@ -218,6 +220,9 @@ jobs:
           OIDC_TEST_MODE: "0"
           OIDC_ISSUER_URL: ${{ secrets.OIDC_ISSUER_URL }}
           OIDC_AUTHORIZED_PARTIES: http://localhost:3000
+          OIDC_SUBJECT_CLAIM: sub
+          OIDC_EMAIL_CLAIM: email_address
+          OIDC_NAME_CLAIM: display_name
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: check if the backend server is running
@@ -324,6 +329,14 @@ jobs:
         with:
           name: cypress-screenshots-${{ matrix.group }}
           path: cypress/screenshots
+
+      - name: Upload backend log
+        uses: actions/upload-artifact@v4.6.0
+        if: failure() && startsWith(matrix.group, 'opencloningdb')
+        with:
+          name: backend-log-${{ matrix.group }}
+          path: backend.log
+          if-no-files-found: ignore
 
   cypress-gather-coverage:
     needs: cypress-tests

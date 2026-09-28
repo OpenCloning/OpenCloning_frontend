@@ -28,6 +28,8 @@ describe('clerk sign in', () => {
       await signUp.create({
         emailAddress: email,
         password: 'ClerkTestPassword1!',
+        firstName: 'Bootstrap',
+        lastName: 'User',
       });
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       const attempt = await signUp.attemptEmailAddressVerification({ code: '424242' });
