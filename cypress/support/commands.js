@@ -24,6 +24,8 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+import { TEST_USERS } from '../../apps/opencloningdb/src/auth/testUsers';
+
 Cypress.Commands.add('readFileAsText', (file) => {
   return new Cypress.Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -266,4 +268,12 @@ Cypress.Commands.add('sequenceEditorClickUndoTool', () => {
 
 Cypress.Commands.add('sequenceEditorClickRedoTool', () => {
   cy.get('[data-test="veRedoTool"] svg').click();
+});
+
+Cypress.Commands.add('resolveTestUserByEmail', (email) => {
+  const user = TEST_USERS.find((candidate) => candidate.email === email);
+  if (!user) {
+    throw new Error(`Unknown OpenCloningDB test user: ${email}`);
+  }
+  return user;
 });

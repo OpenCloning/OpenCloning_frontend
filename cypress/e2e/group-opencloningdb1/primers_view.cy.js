@@ -42,6 +42,7 @@ describe('Actions that can be perfomed by a view-only user on the Primers page',
     cy.get('[data-testid="primers-page"] label').contains('With UID').parent().find('input').click({ force: true });
     cy.get('button').contains('Search').click();
     cy.wait('@getPrimers2').then(({ response, request }) => {
+      console.log('request', request.query);
       cy.wrap(request.query).should('have.property', 'page', "1");
       cy.wrap(request.query).should('have.property', 'size', "25");
       cy.wrap(request.query).should('have.property', 'uid', "ML7");

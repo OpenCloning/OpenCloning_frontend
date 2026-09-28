@@ -579,6 +579,108 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@clerk/backend@npm:^3.19.0":
+  version: 3.19.0
+  resolution: "@clerk/backend@npm:3.19.0"
+  dependencies:
+    "@clerk/shared": "npm:^4.34.0"
+    standardwebhooks: "npm:^1.0.0"
+    tslib: "npm:2.8.1"
+  checksum: 10/93654628b58550454ea4d08aca1a02a6bcfaa2fc23f9c978cc25cc6b3b09f81c69e167c9837004a182c09de09582fe6dbb36b15e71f92d73faa5806ec934a097
+  languageName: node
+  linkType: hard
+
+"@clerk/react@npm:^6.16.1":
+  version: 6.16.1
+  resolution: "@clerk/react@npm:6.16.1"
+  dependencies:
+    "@clerk/shared": "npm:^4.33.0"
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+    react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+  checksum: 10/48bb7836bd5b6e40742ad9837956c64cb4697c47d1fa77ba9f07f2d71a01cd12b2b9c48fb01f4ecea612515f49a4ac8d79818b2a76bbe00b764c2a6aec39c1d4
+  languageName: node
+  linkType: hard
+
+"@clerk/shared@npm:^4.33.0":
+  version: 4.33.0
+  resolution: "@clerk/shared@npm:4.33.0"
+  dependencies:
+    "@tanstack/query-core": "npm:^5.101.4"
+    dequal: "npm:2.0.3"
+    glob-to-regexp: "npm:0.4.1"
+    js-cookie: "npm:3.0.8"
+  peerDependencies:
+    react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+    react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10/27aae2cc30c65b831a4681da00141dde733ac3f924fa6ebad55f5c657c6881808b04a5b28abcc94b09b9b27e59dfdf936c673c3bf48680dd31b17d950c530dca
+  languageName: node
+  linkType: hard
+
+"@clerk/shared@npm:^4.34.0":
+  version: 4.34.0
+  resolution: "@clerk/shared@npm:4.34.0"
+  dependencies:
+    "@tanstack/query-core": "npm:^5.101.4"
+    dequal: "npm:2.0.3"
+    glob-to-regexp: "npm:0.4.1"
+    js-cookie: "npm:3.0.8"
+  peerDependencies:
+    react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+    react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10/5534abff6b9fed6b8dda32a4f2306de8e58a647efa0005181dde990a711ba8cc1037f181f46a01706bf1bffe1bef1657d342f224643de06d16069f4eab17d309
+  languageName: node
+  linkType: hard
+
+"@clerk/testing@npm:2.2.37":
+  version: 2.2.37
+  resolution: "@clerk/testing@npm:2.2.37"
+  dependencies:
+    "@clerk/backend": "npm:^3.19.0"
+    "@clerk/shared": "npm:^4.34.0"
+    dotenv: "npm:17.2.2"
+  peerDependencies:
+    "@playwright/test": ^1
+    cypress: ^13 || ^14 || ^15
+  peerDependenciesMeta:
+    "@playwright/test":
+      optional: true
+    cypress:
+      optional: true
+  checksum: 10/00bcc8dac96a120d4b9524299f33c17d858e9b0ada9e4a975a457e160366d20a28ca4a2e10a65c3f85ba5829327b2f902c5986d3a3054f372bf54839926c436b
+  languageName: node
+  linkType: hard
+
+"@clerk/testing@patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch":
+  version: 2.2.37
+  resolution: "@clerk/testing@patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch::version=2.2.37&hash=d2f0be"
+  dependencies:
+    "@clerk/backend": "npm:^3.19.0"
+    "@clerk/shared": "npm:^4.34.0"
+    dotenv: "npm:17.2.2"
+  peerDependencies:
+    "@playwright/test": ^1
+    cypress: ^13 || ^14 || ^15
+  peerDependenciesMeta:
+    "@playwright/test":
+      optional: true
+    cypress:
+      optional: true
+  checksum: 10/b08720ec733e489a2e3eabab0e12efd476c85b9736debb3556f542c08b9566409189a8451a8a0ab7d659bdcf06bd981c6f2aaf2c305a29362a64ece3b6e0ae3a
+  languageName: node
+  linkType: hard
+
 "@cypress/code-coverage@npm:^4.0.3":
   version: 4.0.3
   resolution: "@cypress/code-coverage@npm:4.0.3"
@@ -2056,6 +2158,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stablelib/base64@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@stablelib/base64@npm:1.0.1"
+  checksum: 10/93f3edb05d5a828a775d23ebde49884abeb456b8946942acbe6a0815630e769c59c06c7275983031c8707bdcefc1c62917aaa99522ff1ec5f457704c83b686da
+  languageName: node
+  linkType: hard
+
 "@standard-schema/spec@npm:^1.1.0":
   version: 1.1.0
   resolution: "@standard-schema/spec@npm:1.1.0"
@@ -2067,6 +2176,13 @@ __metadata:
   version: 5.100.10
   resolution: "@tanstack/query-core@npm:5.100.10"
   checksum: 10/99aedb513bcc5b81b341bd6e6493803ce305861fdb0e99acc3ae19e36fdd680185572faa3bd84c4af4cdb1b1bc4aa4a5980151032d7b79105759236f3c1c7e48
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:^5.101.4":
+  version: 5.103.2
+  resolution: "@tanstack/query-core@npm:5.103.2"
+  checksum: 10/f19ea502e50fd4d0241fc6796d9303637666ce139b751c875eb9f1680278f20bce2dc95d9fbab30f3a997a456e02f9760e6ce9e4e58db71e256591e77bbc65c9
   languageName: node
   linkType: hard
 
@@ -4346,7 +4462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dequal@npm:^2.0.0, dequal@npm:^2.0.2":
+"dequal@npm:2.0.3, dequal@npm:^2.0.0, dequal@npm:^2.0.2":
   version: 2.0.3
   resolution: "dequal@npm:2.0.3"
   checksum: 10/6ff05a7561f33603df87c45e389c9ac0a95e3c056be3da1a0c4702149e3a7f6fe5ffbb294478687ba51a9e95f3a60e8b6b9005993acd79c292c7d15f71964b6b
@@ -4465,6 +4581,13 @@ __metadata:
   dependencies:
     webidl-conversions: "npm:^7.0.0"
   checksum: 10/4ed443227d2871d76c58d852b2e93c68e0443815b2741348f20881bedee8c1ad4f9bfc5d30c7dec433cd026b57da63407c010260b1682fef4c8847e7181ea43f
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:17.2.2":
+  version: 17.2.2
+  resolution: "dotenv@npm:17.2.2"
+  checksum: 10/258210c403a426e887f0fb63d1cddb2e7dcc028974a38a4a440411b651b9c588ee4e8605e252d87d15489b3e311d7ba56d588d6cfda1b11bfbf494dd7b3ef2a3
   languageName: node
   linkType: hard
 
@@ -5340,6 +5463,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-sha256@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "fast-sha256@npm:1.3.0"
+  checksum: 10/3bef0491f10a254348ec11dcddb26e4d951cfd3b4c0662ea5843ad1be3fe184ed74d640df68565fcc60f6437548cddf49e3ac886f88a69e05b5142e862840bf9
+  languageName: node
+  linkType: hard
+
 "fast-string-truncated-width@npm:^3.0.2":
   version: 3.0.3
   resolution: "fast-string-truncated-width@npm:3.0.3"
@@ -5803,6 +5933,13 @@ __metadata:
   dependencies:
     is-glob: "npm:^4.0.3"
   checksum: 10/c13ee97978bef4f55106b71e66428eb1512e71a7466ba49025fc2aec59a5bfb0954d5abd58fc5ee6c9b076eef4e1f6d3375c2e964b88466ca390da4419a786a8
+  languageName: node
+  linkType: hard
+
+"glob-to-regexp@npm:0.4.1":
+  version: 0.4.1
+  resolution: "glob-to-regexp@npm:0.4.1"
+  checksum: 10/9009529195a955c40d7b9690794aeff5ba665cc38f1519e111c58bb54366fd0c106bde80acf97ba4e533208eb53422c83b136611a54c5fefb1edd8dc267cb62e
   languageName: node
   linkType: hard
 
@@ -6955,6 +7092,13 @@ __metadata:
   bin:
     jake: bin/cli.js
   checksum: 10/97e48f73f5e315a3b6e1a48b4bcc0cdf2c2cf82100ec9e76a032fd5d614dcd32c4315572cfcb66e9f9bdecca3900aaa61fe72b781a74b06aefd3ec4c1c917f0b
+  languageName: node
+  linkType: hard
+
+"js-cookie@npm:3.0.8":
+  version: 3.0.8
+  resolution: "js-cookie@npm:3.0.8"
+  checksum: 10/6bc10dc1ef0ad4780cd43a0413702d0b8d9d8d167c4fb605ae66c388270dece6b4cad4c8944654cc67b6e0e7639da379a7b48e7b7ad8711a80f60aba6a915548
   languageName: node
   linkType: hard
 
@@ -8732,6 +8876,7 @@ __metadata:
   dependencies:
     "@changesets/changelog-github": "npm:^0.5.2"
     "@changesets/cli": "patch:@changesets/cli@npm%3A2.29.8#~/.yarn/patches/@changesets-cli-npm-2.29.8-52df46efd2.patch"
+    "@clerk/testing": "patch:@clerk/testing@npm%3A2.2.37#~/.yarn/patches/@clerk-testing-npm-2.2.37-69582bb577.patch"
     "@cypress/code-coverage": "npm:^4.0.3"
     "@cypress/react": "npm:^9.0.2"
     "@testing-library/jest-dom": "npm:^6.9.1"
@@ -8781,6 +8926,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "opencloningdb@workspace:apps/opencloningdb"
   dependencies:
+    "@clerk/react": "npm:^6.16.1"
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.1"
     "@mui/material": "npm:^5.18.0"
@@ -10629,6 +10775,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"standardwebhooks@npm:^1.0.0":
+  version: 1.1.1
+  resolution: "standardwebhooks@npm:1.1.1"
+  dependencies:
+    "@stablelib/base64": "npm:^1.0.0"
+    fast-sha256: "npm:^1.3.0"
+  checksum: 10/50d1f5b923eacfc7a78ad45c3364f3879d47a6f2231c96c7d8efec8153f5405f847ee3d7b990fa22c1c0ed208beadba8777688c34b5c9a88b4004bb81a512400
+  languageName: node
+  linkType: hard
+
 "statuses@npm:^2.0.2":
   version: 2.0.2
   resolution: "statuses@npm:2.0.2"
@@ -11325,7 +11481,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.0.3":
+"tslib@npm:2.8.1, tslib@npm:^2.0.0, tslib@npm:^2.0.3":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7

@@ -19,9 +19,8 @@ import SequenceDetailPage from './pages/SequenceDetailPage';
 import PrimerDetailPage from './pages/PrimerDetailPage';
 import LinesPage from './pages/LinesPage';
 import LineDetailPage from './pages/LineDetailPage';
-import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage';
 import WorkspacePage from './pages/WorkspacePage';
+import { getOidcProvider } from './auth/oidcConfig';
 import useAppStartup from './hooks/useAppStartup';
 
 const queryClient = new QueryClient();
@@ -35,6 +34,7 @@ const config = {
 };
 
 const TABS = ['/sequences', '/primers', '/lines', '/design'];
+const { AuthProvider, LoginPage, SignUpPage } = getOidcProvider();
 
 function AppLayout() {
   const location = useLocation();
@@ -105,8 +105,8 @@ function AppRoutes() {
   useAppStartup();
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/login/*" element={<LoginPage />} />
+      {SignUpPage ? <Route path="/signup/*" element={<SignUpPage />} /> : null}
       <Route
         path="/*"
         element={
@@ -123,11 +123,13 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ConfigProvider config={config}>
-          <DatabaseProvider value={OpenCloningDBInterface}>
-            <AppRoutes />
-          </DatabaseProvider>
-        </ConfigProvider>
+        <AuthProvider>
+          <ConfigProvider config={config}>
+            <DatabaseProvider value={OpenCloningDBInterface}>
+              <AppRoutes />
+            </DatabaseProvider>
+          </ConfigProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

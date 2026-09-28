@@ -9,6 +9,7 @@ import {
 } from '@opencloning/opencloningdb';
 import store from '../store';
 import { clearUser, setUser, setWorkspace } from '../store/authSlice';
+import { TestOidcAuthProvider } from '../auth/providers/testOidc';
 import useAuthBootstrap from './useAuthBootstrap';
 import { LAST_WORKSPACE_ID_KEY } from '../utils/auth_utils';
 import { baseUrl } from '@opencloning/opencloningdb';
@@ -61,12 +62,14 @@ function LoginRouteProbe() {
 
 function mountHook() {
   cy.mount(
-    <MemoryRouter initialEntries={['/']}>
-      <Routes>
-        <Route path="/" element={<AuthBootstrapProbe />} />
-        <Route path="/login" element={<LoginRouteProbe />} />
-      </Routes>
-    </MemoryRouter>,
+    <TestOidcAuthProvider>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<AuthBootstrapProbe />} />
+          <Route path="/login" element={<LoginRouteProbe />} />
+        </Routes>
+      </MemoryRouter>
+    </TestOidcAuthProvider>,
     { reduxStore: store },
   );
 }

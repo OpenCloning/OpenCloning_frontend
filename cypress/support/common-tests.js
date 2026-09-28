@@ -14,7 +14,7 @@ const tagEndpoints = {
 
 Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
   cy.intercept('GET', Cypress.getDbURL(listEndpoints[resourcePlural], '*')).as('getRequest');
-  cy.e2eLogin(`/${resourcePlural}`, 'bootstrap@example.com', 'password');
+  cy.e2eLogin(`/${resourcePlural}`, 'bootstrap+clerk_test@example.com', 'password');
   cy.wait('@getRequest')
   cy.get('tbody tr').contains('test-tag').should('not.exist')
   cy.get('tbody tr input').eq(0).click();
@@ -54,7 +54,7 @@ Cypress.Commands.add('addTagInTableTest', (resourcePlural, tagEndpointName) => {
 
 Cypress.Commands.add('addTagInDetailPageTest', (resourcePlural, resourceName, expectedTagName) => {
   cy.intercept('GET', Cypress.getDbURL(listEndpoints[resourcePlural], '*')).as('getRequest');
-  cy.e2eLogin(`/${resourcePlural}?name=${resourceName}`, 'bootstrap@example.com', 'password');
+  cy.e2eLogin(`/${resourcePlural}?name=${resourceName}`, 'bootstrap+clerk_test@example.com', 'password');
   cy.wait('@getRequest').then(({ response }) => {
     const resource = response.body.items.find((resource) => resource.name === resourceName || resource.uid === resourceName);
     const tagId = resource.tags[0].id;

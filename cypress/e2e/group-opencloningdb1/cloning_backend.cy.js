@@ -1,15 +1,14 @@
-import endpoints from '../../../packages/opencloningdb/src/endpoints';
-
 describe('cloning backend', () => {
   it('uses cloning backend auth', () => {
     cy.intercept('GET', 'http://localhost:8000/cloning/version').as('getVersion');
-    cy.intercept('POST', Cypress.getDbURL(endpoints.authToken)).as('getToken');
-    cy.e2eLogin('/design', 'bootstrap@example.com', 'password');
-    cy.wait('@getToken').then(({ response: { body: { access_token } } }) => {
+    cy.e2eLogin('/design', 'bootstrap+clerk_test@example.com', 'password');
+
+    cy.resolveTestUserByEmail('bootstrap+clerk_test@example.com').then((user) => {
       cy.wait('@getVersion').then(({ request, response: { statusCode } }) => {
-        expect(request.headers).to.have.property('authorization', `Bearer ${access_token}`);
+        expect(request.headers).to.have.property('authorization', `Bearer ${user.token}`);
         expect(statusCode).to.eq(200);
       });
     });
+
   });
 });

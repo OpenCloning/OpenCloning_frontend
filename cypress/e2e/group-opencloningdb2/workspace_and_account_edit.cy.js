@@ -12,7 +12,7 @@ describe('workspace and account (edit)', () => {
 
 
   it('creates a workspace from the workspace page', () => {
-    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/workspace', 'bootstrap+clerk_test@example.com', 'password');
     cy.contains('h5', 'Manage workspaces').should('be.visible');
     cy.contains('h6', 'Create workspace').closest('.MuiPaper-root').within(() => {
       cy.setInputValue('Workspace name', 'e2e-created-workspace', 'div');
@@ -25,7 +25,7 @@ describe('workspace and account (edit)', () => {
 
   it('renames the current workspace', () => {
     const newName = 'e2e-renamed';
-    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/workspace', 'bootstrap+clerk_test@example.com', 'password');
     cy.contains('h5', 'Manage workspaces').should('be.visible');
     cy.contains('h6', 'Rename current workspace').closest('.MuiPaper-root').within(() => {
       cy.setInputValue('Workspace name', newName, 'div');
@@ -38,7 +38,7 @@ describe('workspace and account (edit)', () => {
 
   it('switches workspace and sends x-workspace-id on the next list request', () => {
     cy.intercept('GET', Cypress.getDbURL(endpoints.workspaces, '*')).as('getWorkspaces');
-    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/workspace', 'bootstrap+clerk_test@example.com', 'password');
     cy.wait('@getWorkspaces').then(({ response: { body } }) => {
       cy.contains('h5', 'Manage workspaces').should('be.visible');
       expect(body).to.have.length.greaterThan(0);
@@ -81,7 +81,7 @@ describe('workspace and account (edit)', () => {
   });
 
   it('shows workspace members section for owners only', () => {
-    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/workspace', 'bootstrap+clerk_test@example.com', 'password');
     cy.contains('h6', 'Workspace members').should('be.visible');
 
     openAccountMenu();
@@ -92,7 +92,7 @@ describe('workspace and account (edit)', () => {
 
   it('lists, adds, and removes workspace members', () => {
     cy.intercept('GET', Cypress.getDbURL('/workspaces/', '*/users')).as('getWorkspaceUsers');
-    cy.e2eLogin('/workspace', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/workspace', 'bootstrap+clerk_test@example.com', 'password');
     cy.wait('@getWorkspaceUsers').then(({ response: { body: members } }) => {
       cy.get('h6').contains('Workspace members').should('exist');
       cy.get('[data-testid="workspace-members-list"]').within(() => {
@@ -123,7 +123,7 @@ describe('workspace and account (edit)', () => {
   });
 
   it('changing workspace clears the design tab', () => {
-    cy.e2eLogin('/design', 'bootstrap@example.com', 'password');
+    cy.e2eLogin('/design', 'bootstrap+clerk_test@example.com', 'password');
     cy.get('.open-cloning', { timeout: 20000 }).should('exist');
     cy.manuallyTypeSequence('AACCCCTTTGGG', true);
     cy.get('li#sequence-1').should('exist');

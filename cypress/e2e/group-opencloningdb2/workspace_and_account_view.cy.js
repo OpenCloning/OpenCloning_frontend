@@ -1,6 +1,5 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
 
-
 describe('workspace and account', () => {
 
   function openAccountMenu() {
@@ -16,15 +15,14 @@ describe('workspace and account', () => {
   });
 
   it('signs out and clears the token', () => {
-    cy.intercept('POST', Cypress.getDbURL(endpoints.authToken)).as('getToken');
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
-    cy.wait('@getToken').then(({ response: { body: { access_token: accessToken } } }) => {
-      cy.window().its('localStorage').invoke('getItem', 'token').should('equal', accessToken);
-      openAccountMenu();
-      cy.contains('Sign out').click();
-      cy.location('pathname').should('eq', '/login');
-      cy.window().its('localStorage').invoke('getItem', 'token').should('be.null');
+    cy.resolveTestUserByEmail('view-only-user@example.com').then((user) => {
+      cy.window().its('localStorage').invoke('getItem', 'token').should('equal', user.token);
     });
+    openAccountMenu();
+    cy.contains('Sign out').click();
+    cy.location('pathname').should('eq', '/login');
+    cy.window().its('localStorage').invoke('getItem', 'token').should('be.null');
   });
 
   it('logging out clears the design tab', () => {
@@ -34,9 +32,15 @@ describe('workspace and account', () => {
     cy.get('li#sequence-1').should('exist');
     openAccountMenu();
     cy.contains('Sign out').click();
-    cy.setInputValue('Email', 'view-only-user@example.com');
-    cy.setInputValue('Password', 'password');
-    cy.get('button[type="submit"]').click();
+    cy.intercept('GET', Cypress.getDbURL(endpoints.authMe)).as('authMe');
+    cy.intercept('GET', Cypress.getDbURL(endpoints.workspaces)).as('workspaces');
+    cy.get('[data-testid="test-oidc-user-select"]').click();
+    cy.resolveTestUserByEmail('view-only-user@example.com').then((user) => {
+      cy.get(`li[data-value="${user.id}"]`).click();
+    });
+    cy.get('[data-testid="test-oidc-sign-in"]').click();
+    cy.wait('@authMe');
+    cy.wait('@workspaces');
     cy.changeTab('Design');
     cy.get('.open-cloning').should('exist');
     cy.get('li#sequence-1').should('not.exist');

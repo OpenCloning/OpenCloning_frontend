@@ -1,19 +1,18 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
-
+import { buildTestToken } from '../../../apps/opencloningdb/src/auth/testUsers';
 
 describe('opencloningdb sign up', () => {
   afterEach(() => {
     cy.resetDB();
   });
 
-  it('shows validation error when passwords do not match', () => {
+  it('shows validation error when a field contains a pipe', () => {
     cy.visit('/signup');
-    cy.setInputValue('Display name', 'E2E User');
+    cy.setInputValue('Subject', 'e2e-user');
     cy.setInputValue('Email', 'e2e-mismatch@example.com');
-    cy.setInputValue('Password', 'password-one');
-    cy.setInputValue('Confirm password', 'password-two');
+    cy.setInputValue('Display name', 'E2E | User');
     cy.get('button[type="submit"]').click();
-    cy.get('.MuiAlert-message').contains('Passwords do not match').should('be.visible');
+    // No validation error is shown (html5 validation), but the form does not go through
     cy.location('pathname').should('eq', '/signup');
   });
 
@@ -26,17 +25,21 @@ describe('opencloningdb sign up', () => {
   });
 
   it('registers a new user and lands on sequences', () => {
+    const subject = 'e2e-signup';
+    const email = 'e2e-signup@example.com';
+    const displayName = 'E2E Signup';
+    const token = buildTestToken({ subject, email, displayName });
+
     cy.visit('/signup');
-    cy.setInputValue('Display name', `E2E Signup`);
-    cy.setInputValue('Email', `e2e-signup@example.com`);
-    cy.setInputValue('Password', 'password');
-    cy.setInputValue('Confirm password', 'password');
-    cy.intercept('POST', Cypress.getDbURL(endpoints.authRegister)).as('register');
+    cy.setInputValue('Subject', subject);
+    cy.setInputValue('Email', email);
+    cy.setInputValue('Display name', displayName);
+    cy.intercept('GET', Cypress.getDbURL(endpoints.authMe)).as('authMe');
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.get('button[type="submit"]').click();
-    cy.wait('@register').then(({ request }) => {
-      expect(request.body).to.include({ email: `e2e-signup@example.com`, display_name: `E2E Signup` });
-    });
+    cy.window().its('localStorage').invoke('getItem', 'token').should('equal', token);
+    cy.wait('@authMe').its('response.body.email').should('eq', email);
+    cy.get('@authMe').its('response.body.display_name').should('eq', displayName);
     cy.wait('@getSequences');
     cy.location('pathname').should('eq', '/sequences');
     cy.contains('Sequences').should('be.visible');

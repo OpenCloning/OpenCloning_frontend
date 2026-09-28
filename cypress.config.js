@@ -2,6 +2,7 @@ import { defineConfig } from 'cypress';
 import fs from 'fs';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import registerCodeCoverageTasks from '@cypress/code-coverage/task';
+import { clerkSetup } from '@clerk/testing/cypress';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
@@ -36,6 +37,10 @@ export default defineConfig({
       // Filter specs by test group if specified
       if (process.env.CYPRESS_TEST_GROUP) {
         config.specPattern = `cypress/e2e/group-${process.env.CYPRESS_TEST_GROUP}/**/*.cy.{js,jsx}`;
+      }
+
+      if (process.env.CYPRESS_TEST_GROUP === 'opencloningdb-clerk') {
+        return clerkSetup({ config });
       }
 
       return config;
