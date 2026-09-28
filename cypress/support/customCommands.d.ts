@@ -35,6 +35,7 @@ declare namespace Cypress {
         sequenceEditorChangeTab(tabName: any): Chainable<any>;
         sequenceEditorClickUndoTool(): Chainable<any>;
         sequenceEditorClickRedoTool(): Chainable<any>;
+        resolveTestUserByEmail(email: any): Chainable<any>;
         addTagInTableTest(resourcePlural: any, tagEndpointName: any): Chainable<any>;
         addTagInDetailPageTest(resourcePlural: any, resourceName: any, expectedTagName: any): Chainable<any>;
         openCloningDbTablePaginationTest(resourcePlural: any, pageTestId: any): Chainable<any>;
@@ -46,7 +47,7 @@ declare namespace Cypress {
         setupOpenCloningDBTestAuth(workspaceId?: number, token?: string): Chainable<any>;
         getStub(name: any): Chainable<any>;
         interceptOpenCloningDBStub(stubOrName: any, options?: object): Chainable<any>;
-        e2eLogin(page: any, email: any, password: any): Chainable<any>;
+        e2eLogin(page: any, email: any): Chainable<any>;
         resetDB(): Chainable<any>;
     }
 }

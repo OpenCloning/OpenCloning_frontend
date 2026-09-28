@@ -1,12 +1,12 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
-import { resolveTestUserByEmail } from '../../../apps/opencloningdb/src/auth/testUsers';
 
 function signInAs(email) {
-  const user = resolveTestUserByEmail(email);
-  cy.get('[data-testid="test-oidc-user-select"]').click();
-  cy.get(`li[data-value="${user.id}"]`).click();
-  cy.get('[data-testid="test-oidc-sign-in"]').click();
-  return user;
+  return cy.resolveTestUserByEmail(email).then((user) => {
+    cy.get('[data-testid="test-oidc-user-select"]').click();
+    cy.get(`li[data-value="${user.id}"]`).click();
+    cy.get('[data-testid="test-oidc-sign-in"]').click();
+    return cy.wrap(user);
+  });
 }
 
 describe('opencloningdb login', () => {
@@ -17,19 +17,19 @@ describe('opencloningdb login', () => {
   });
 
   it('logs in the bootstrap user, sets the workspace and token, and lands on /sequences', () => {
-    const user = resolveTestUserByEmail('bootstrap+clerk_test@example.com');
     cy.intercept('GET', Cypress.getDbURL(endpoints.authMe)).as('authMe');
     cy.intercept('GET', Cypress.getDbURL(endpoints.sequences, '*')).as('getSequences');
     cy.visit('/login');
-    signInAs('bootstrap+clerk_test@example.com');
-    cy.wait('@authMe');
-    cy.window().its('localStorage').invoke('getItem', 'token').should('equal', user.token);
-    cy.wait('@getSequences').then(({ request }) => {
-      expect(request.headers).to.have.property('authorization', `Bearer ${user.token}`);
-      expect(request.headers).to.have.property('x-workspace-id', '1');
+    signInAs('bootstrap+clerk_test@example.com').then((user) => {
+      cy.wait('@authMe');
+      cy.window().its('localStorage').invoke('getItem', 'token').should('equal', user.token);
+      cy.wait('@getSequences').then(({ request }) => {
+        expect(request.headers).to.have.property('authorization', `Bearer ${user.token}`);
+        expect(request.headers).to.have.property('x-workspace-id', '1');
+      });
+      cy.location('pathname').should('eq', '/sequences');
+      cy.contains('Sequences').should('be.visible');
     });
-    cy.location('pathname').should('eq', '/sequences');
-    cy.contains('Sequences').should('be.visible');
   });
 
   it('redirects anonymous visits to /login', () => {

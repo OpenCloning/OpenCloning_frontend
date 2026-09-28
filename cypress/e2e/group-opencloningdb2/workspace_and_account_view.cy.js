@@ -1,5 +1,4 @@
 import endpoints from '../../../packages/opencloningdb/src/endpoints';
-import { resolveTestUserByEmail } from '../../../apps/opencloningdb/src/auth/testUsers';
 
 describe('workspace and account', () => {
 
@@ -17,7 +16,9 @@ describe('workspace and account', () => {
 
   it('signs out and clears the token', () => {
     cy.e2eLogin('/sequences', 'view-only-user@example.com', 'password');
-    cy.window().its('localStorage').invoke('getItem', 'token').should('equal', resolveTestUserByEmail('view-only-user@example.com').token);
+    cy.resolveTestUserByEmail('view-only-user@example.com').then((user) => {
+      cy.window().its('localStorage').invoke('getItem', 'token').should('equal', user.token);
+    });
     openAccountMenu();
     cy.contains('Sign out').click();
     cy.location('pathname').should('eq', '/login');
@@ -34,7 +35,9 @@ describe('workspace and account', () => {
     cy.intercept('GET', Cypress.getDbURL(endpoints.authMe)).as('authMe');
     cy.intercept('GET', Cypress.getDbURL(endpoints.workspaces)).as('workspaces');
     cy.get('[data-testid="test-oidc-user-select"]').click();
-    cy.get(`li[data-value="${resolveTestUserByEmail('view-only-user@example.com').id}"]`).click();
+    cy.resolveTestUserByEmail('view-only-user@example.com').then((user) => {
+      cy.get(`li[data-value="${user.id}"]`).click();
+    });
     cy.get('[data-testid="test-oidc-sign-in"]').click();
     cy.wait('@authMe');
     cy.wait('@workspaces');
