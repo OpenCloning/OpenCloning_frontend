@@ -215,7 +215,7 @@ jobs:
           ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
           OPENCLONING_TESTING: "1"
           OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
-          OIDC_TEST_MODE: "1"
+          OIDC_TEST_MODE: "0"
           OIDC_ISSUER_URL: ${{ secrets.OIDC_ISSUER_URL }}
           OIDC_AUTHORIZED_PARTIES: http://localhost:3000
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
