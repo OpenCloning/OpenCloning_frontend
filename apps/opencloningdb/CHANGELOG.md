@@ -1,5 +1,15 @@
 # opencloningdb
 
+## 0.4.0
+
+### Minor Changes
+
+- [#766](https://github.com/OpenCloning/OpenCloning_frontend/pull/766) [`06063fc`](https://github.com/OpenCloning/OpenCloning_frontend/commit/06063fc80863c80650cd5a353fe5da40ef5e40b6) Thanks [@manulera](https://github.com/manulera)! - Use OIDC for logging in
+
+### Patch Changes
+
+- [#764](https://github.com/OpenCloning/OpenCloning_frontend/pull/764) [`49afc87`](https://github.com/OpenCloning/OpenCloning_frontend/commit/49afc8706ec67b6fcfd71be081371b66a07e42db) Thanks [@manulera](https://github.com/manulera)! - Change dependency resolution, remove vulns.
+
 ## 0.3.7
 
 ### Patch Changes
