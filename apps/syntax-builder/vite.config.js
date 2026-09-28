@@ -6,5 +6,9 @@ export default () => {
     server: {
       port: 3001,
     },
+    build: {
+      outDir: 'build',
+      cssMinify: 'esbuild',
+    },
   };
 };
