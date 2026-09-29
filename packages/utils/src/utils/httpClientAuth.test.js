@@ -1,30 +1,54 @@
 import axios from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { attachAuthInterceptors, setHttpClientUnauthorizedHandler } from './httpClientAuth';
+import { attachAuthInterceptors, setHttpClientTokenGetter, setHttpClientUnauthorizedHandler } from './httpClientAuth';
 
 describe('httpClientAuth', () => {
   beforeEach(() => {
-    localStorage.clear();
     setHttpClientUnauthorizedHandler(null);
+    setHttpClientTokenGetter(null);
   });
 
   afterEach(() => {
-    localStorage.clear();
     setHttpClientUnauthorizedHandler(null);
+    setHttpClientTokenGetter(null);
   });
 
-  it('adds the bearer token to authenticated requests', () => {
+  it('leaves request headers unchanged when no token getter is set', async () => {
     const client = attachAuthInterceptors(axios.create());
     const requestFulfilled = client.interceptors.request.handlers[0].fulfilled;
     const config = { headers: {} };
 
-    localStorage.setItem('token', '__TEST_TOKEN__');
+    const result = await requestFulfilled(config);
 
-    const result = requestFulfilled(config);
+    expect(result).toBe(config);
+    expect(config.headers.Authorization).toBeUndefined();
+  });
+
+  it('adds the bearer token from a sync token getter', async () => {
+    const client = attachAuthInterceptors(axios.create());
+    const requestFulfilled = client.interceptors.request.handlers[0].fulfilled;
+    const config = { headers: {} };
+
+    setHttpClientTokenGetter(() => '__TEST_TOKEN__');
+
+    const result = await requestFulfilled(config);
 
     expect(result).toBe(config);
     expect(config.headers.Authorization).toBe('Bearer __TEST_TOKEN__');
+  });
+
+  it('adds the bearer token from an async token getter', async () => {
+    const client = attachAuthInterceptors(axios.create());
+    const requestFulfilled = client.interceptors.request.handlers[0].fulfilled;
+    const config = { headers: {} };
+
+    setHttpClientTokenGetter(async () => 'fresh-token');
+
+    const result = await requestFulfilled(config);
+
+    expect(result).toBe(config);
+    expect(config.headers.Authorization).toBe('Bearer fresh-token');
   });
 
   it('calls the shared unauthorized handler for 401 responses', async () => {

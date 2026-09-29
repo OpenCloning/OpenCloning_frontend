@@ -11,7 +11,7 @@ function ClerkOidcBridge({ children }) {
     () => ({
       isLoaded,
       isSignedIn,
-      getToken,
+      getToken: () => getToken({ template: 'default' }),
       signOut,
     }),
     [isLoaded, isSignedIn, getToken, signOut],

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { baseUrl } from './common';
+import { baseUrl, setHttpClientTokenGetter } from './common';
 
 const STUB_FOLDER = `${__dirname}/../../../OpenCloning_backend/stubs/db`;
 
@@ -75,11 +75,11 @@ export function addStubToServer(server, stub) {
 }
 
 export function setupToken() {
-  localStorage.setItem('token', '__TEST_TOKEN__');
+  setHttpClientTokenGetter(() => '__TEST_TOKEN__');
 }
 
 export function clearToken() {
-  localStorage.removeItem('token');
+  setHttpClientTokenGetter(null);
 }
 
 describe('test utility module', () => {

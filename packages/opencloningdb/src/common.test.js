@@ -4,6 +4,7 @@ import {
   baseUrl,
   clearWorkspaceHeader,
   openCloningDBHttpClient,
+  setHttpClientTokenGetter,
   setUnauthorizedHandler,
   setWorkspaceHeader,
 } from './common';
@@ -13,15 +14,15 @@ const responseFulfilled = openCloningDBHttpClient.interceptors.response.handlers
 const responseRejected = openCloningDBHttpClient.interceptors.response.handlers[0].rejected;
 
 beforeEach(() => {
-  localStorage.clear();
   clearWorkspaceHeader();
   setUnauthorizedHandler(null);
+  setHttpClientTokenGetter(null);
 });
 
 afterEach(() => {
-  localStorage.clear();
   clearWorkspaceHeader();
   setUnauthorizedHandler(null);
+  setHttpClientTokenGetter(null);
 });
 
 describe('common', () => {
@@ -55,20 +56,20 @@ describe('common', () => {
     expect(openCloningDBHttpClient.defaults.paramsSerializer()).toBe('');
   });
 
-  it('adds the bearer token to request headers when present', () => {
-    localStorage.setItem('token', '__TEST_TOKEN__');
+  it('adds the bearer token from the registered token getter', async () => {
+    setHttpClientTokenGetter(() => '__TEST_TOKEN__');
     const config = { headers: {} };
 
-    const result = requestFulfilled(config);
+    const result = await requestFulfilled(config);
 
     expect(result).toBe(config);
     expect(config.headers.Authorization).toBe('Bearer __TEST_TOKEN__');
   });
 
-  it('leaves request headers unchanged when there is no token', () => {
+  it('leaves request headers unchanged when no token getter is set', async () => {
     const config = { headers: {} };
 
-    const result = requestFulfilled(config);
+    const result = await requestFulfilled(config);
 
     expect(result).toBe(config);
     expect(config.headers.Authorization).toBeUndefined();

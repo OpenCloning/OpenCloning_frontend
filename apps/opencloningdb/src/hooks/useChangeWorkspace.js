@@ -54,7 +54,6 @@ export default function useChangeWorkspace() {
 
   const logout = React.useCallback(async () => {
     clearWorkspace();
-    localStorage.removeItem('token');
     dispatch(clearUser());
     await signOut();
     navigate('/login');

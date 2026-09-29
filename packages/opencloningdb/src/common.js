@@ -1,10 +1,13 @@
 import axios from 'axios';
-import { attachAuthInterceptors, setHttpClientUnauthorizedHandler } from '@opencloning/utils/httpClientAuth';
+import { attachAuthInterceptors, setHttpClientTokenGetter, setHttpClientUnauthorizedHandler } from '@opencloning/utils/httpClientAuth';
 
 
 export const baseUrl = `${import.meta.env?.VITE_OPENCLONING_DB_BACKEND || 'http://localhost:8000'}/db`;
 
-export const setUnauthorizedHandler = setHttpClientUnauthorizedHandler;
+export {
+  setHttpClientTokenGetter,
+  setHttpClientUnauthorizedHandler as setUnauthorizedHandler,
+};
 
 export function setWorkspaceHeader(id) {
   openCloningDBHttpClient.defaults.headers.common['X-Workspace-Id'] = id;
