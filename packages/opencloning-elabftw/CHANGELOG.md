@@ -1,5 +1,15 @@
 # @opencloning/opencloning-elabftw
 
+## 1.9.4
+
+### Patch Changes
+
+- [#769](https://github.com/OpenCloning/OpenCloning_frontend/pull/769) [`105210b`](https://github.com/OpenCloning/OpenCloning_frontend/commit/105210b8149af71101f348967b3096636aeeea09) Thanks [@manulera](https://github.com/manulera)! - Fix request payloads. Drop support for eLabFTW < 5.3. Related to https://github.com/elabftw/elabftw/issues/7218.
+
+- Updated dependencies []:
+  - @opencloning/ui@1.9.4
+  - @opencloning/utils@1.9.4
+
 ## 1.9.3
 
 ### Patch Changes

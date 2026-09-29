@@ -1,5 +1,13 @@
 # @opencloning/opencloningdb
 
+## 1.8.5
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @opencloning/ui@1.9.4
+  - @opencloning/utils@1.9.4
+
 ## 1.8.4
 
 ### Patch Changes

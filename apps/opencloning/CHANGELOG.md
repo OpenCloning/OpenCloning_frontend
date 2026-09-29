@@ -1,5 +1,15 @@
 # opencloning
 
+## 1.5.18
+
+### Patch Changes
+
+- Updated dependencies [[`105210b`](https://github.com/OpenCloning/OpenCloning_frontend/commit/105210b8149af71101f348967b3096636aeeea09)]:
+  - @opencloning/opencloning-elabftw@1.9.4
+  - @opencloning/ui@1.9.4
+  - @opencloning/store@1.9.4
+  - @opencloning/utils@1.9.4
+
 ## 1.5.17
 
 ### Patch Changes
