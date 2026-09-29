@@ -1,5 +1,14 @@
 # @opencloning/utils
 
+## 1.9.5
+
+### Patch Changes
+
+- [#771](https://github.com/OpenCloning/OpenCloning_frontend/pull/771) [`73363e7`](https://github.com/OpenCloning/OpenCloning_frontend/commit/73363e7a7f7e494e20a54bd87e5dba97f8a9197e) Thanks [@manulera](https://github.com/manulera)! - Keep OIDC sessions signed in by requesting a token on each API call instead of reusing a stored JWT
+
+- Updated dependencies []:
+  - @opencloning/store@1.9.5
+
 ## 1.9.4
 
 ### Patch Changes
