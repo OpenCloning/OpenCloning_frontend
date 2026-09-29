@@ -26,7 +26,7 @@ const createTestStore = (cloningState) => configureStore({
 describe('<SubmitToDatabaseComponent />', () => {
   it('Primers: initializes with primer name and handles updates', () => {
     cy.stub(eLabFTWHttpClient, 'get')
-      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: { limit: 9999 } })
+      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: {} })
       .resolves({
         data: [
           { id: PRIMER_CATEGORY_ID, title: 'Primers' },
@@ -81,7 +81,7 @@ describe('<SubmitToDatabaseComponent />', () => {
 
   it('Sequences: initializes with sequence name and handles updates', () => {
     cy.stub(eLabFTWHttpClient, 'get')
-      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: { limit: 9999 } })
+      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: {} })
       .resolves({
         data: [
           { id: PRIMER_CATEGORY_ID, title: 'Primers' },
@@ -140,7 +140,7 @@ describe('<SubmitToDatabaseComponent />', () => {
 
     // Stub API to fail first time
     cy.stub(eLabFTWHttpClient, 'get')
-      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: { limit: 9999 } })
+      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: {} })
       .callsFake(() => {
         if (firstCall) {
           firstCall = false;

@@ -135,7 +135,10 @@ async function getScenario(method, url, data, config) {
   expect(nextScenario).toBeDefined();
   expect({ method: nextScenario.method, url: nextScenario.url, config: nextScenario.config }).toEqual({ method, url, config });
 
-  if (nextScenario.data instanceof FormData && data instanceof FormData) {
+  if (nextScenario.data instanceof FormData || data instanceof FormData) {
+    expect(data).toBeInstanceOf(FormData);
+    expect(nextScenario.data).toBeInstanceOf(FormData);
+
     const scenarioComment = nextScenario.data.get('comment');
     const requestComment = data.get('comment');
     expect(scenarioComment).toBe(requestComment);
@@ -152,6 +155,8 @@ async function getScenario(method, url, data, config) {
     } else if (scenarioFileText !== requestFileText) {
       expect(scenarioFileText).toBe(requestFileText);
     }
+  } else {
+    expect(data).toEqual(nextScenario.data);
   }
   return nextScenario;
 }
@@ -212,8 +217,7 @@ const mockCreateResource = {
   method: 'post',
   url: '/api/v2/items',
   data: {
-    category_id: MAIN_RESOURCE_CATEGORY_ID,
-    tags: [],
+    template: MAIN_RESOURCE_CATEGORY_ID,
   },
   config: { headers: {} },
   response: { headers: { location: `/api/v2/items/${MAIN_RESOURCE_DATABASE_ID}` } },
@@ -686,8 +690,7 @@ const submissionPayloadWithAncestors = {
 const mockCreateSecondaryResource = {
   ...mockCreateResource,
   data: {
-    tags: [],
-    category_id: SECONDARY_RESOURCE_CATEGORY_ID,
+    template: SECONDARY_RESOURCE_CATEGORY_ID,
   },
   response: { headers: { location: `/api/v2/items/${SECONDARY_RESOURCE_DATABASE_ID1}` } },
 };

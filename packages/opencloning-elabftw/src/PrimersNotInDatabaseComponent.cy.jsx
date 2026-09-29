@@ -107,7 +107,7 @@ describe('<PrimersNotInDatabaseComponent />', () => {
   it('shows error when update fails', () => {
     let firstCall = true;
     cy.stub(eLabFTWHttpClient, 'get')
-      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: { limit: 9999 } })
+      .withArgs('/api/v2/items_types', { headers: { Authorization: 'test-read-key' }, params: {} })
       .callsFake((url, config) => {
         if (url !== '/api/v2/items_types' || config.headers?.Authorization !== 'test-read-key') {
           throw new Error('Unexpected call to get method with these parameters');
