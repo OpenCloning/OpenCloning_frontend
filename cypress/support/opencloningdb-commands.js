@@ -1,4 +1,4 @@
-import { setWorkspaceHeader } from '../../packages/opencloningdb/src/common.js';
+import { setHttpClientTokenGetter, setWorkspaceHeader } from '../../packages/opencloningdb/src/common.js';
 import endpoints from '../../packages/opencloningdb/src/endpoints';
 
 const DB_URL = 'http://localhost:8000/db';
@@ -42,7 +42,7 @@ Cypress.Commands.add('loginToOpenCloningDB', (email, password, workspaceId) => {
     form: true,
     body: { username: email, password },
   }).then(({ body }) => {
-    localStorage.setItem('token', body.access_token);
+    setHttpClientTokenGetter(() => body.access_token);
     setWorkspaceHeader(workspaceId);
   });
 });
@@ -61,7 +61,7 @@ Cypress.Commands.add('mockLogin', () => {
  * @param {string} token
  */
 Cypress.Commands.add('setupOpenCloningDBTestAuth', (workspaceId = 1, token = '__TEST_TOKEN__') => {
-  localStorage.setItem('token', token);
+  setHttpClientTokenGetter(() => token);
   setWorkspaceHeader(workspaceId);
 });
 

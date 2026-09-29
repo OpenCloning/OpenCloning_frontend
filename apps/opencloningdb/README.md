@@ -8,13 +8,13 @@ Only `clerk` and `test` are supported today. Another provider can be added the s
 
 `VITE_OIDC_PROVIDER` selects a provider in [`src/auth/oidcConfig.js`](src/auth/oidcConfig.js). An unknown id throws.
 
-Every provider fills [`OidcAuthContext`](src/auth/OidcAuthContext.jsx) with `isLoaded`, `isSignedIn`, `getToken`, and `signOut`. After sign-in, [`useAuthBootstrap`](src/hooks/useAuthBootstrap.js) calls `getToken({ template: 'default' })`, stores the bearer token, and loads `GET /auth/me` plus the first workspace. The API provisions the local user from that token on first use.
+Every provider fills [`OidcAuthContext`](src/auth/OidcAuthContext.jsx) with `isLoaded`, `isSignedIn`, `getToken`, and `signOut`. After sign-in, [`useAuthBootstrap`](src/hooks/useAuthBootstrap.js) registers that `getToken` for API requests and loads `GET /auth/me` plus the first workspace. Each request asks the active provider's `getToken` for a bearer token, and a 401 signs the user out. The API provisions the local user from that token on first use.
 
 ## Clerk
 
 This is the default (`yarn workspace opencloningdb dev`). It requires `VITE_CLERK_PUBLISHABLE_KEY`.
 
-`/login` and `/signup` render Clerk's components and redirect to `/sequences`. The session JWT must be a real OIDC token the API can verify, so leave `OIDC_TEST_MODE` off. Local backend claim names in `.env.dev` are `email_address` and `display_name`. The Clerk JWT template passed to `getToken` is `default`.
+`/login` and `/signup` render Clerk's components and redirect to `/sequences`. The session JWT must be a real OIDC token the API can verify, so leave `OIDC_TEST_MODE` off. Local backend claim names in `.env.dev` are `email_address` and `display_name`. The Clerk provider's `getToken` requests the `default` JWT template.
 
 ## Test
 

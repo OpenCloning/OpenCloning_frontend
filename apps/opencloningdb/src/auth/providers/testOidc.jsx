@@ -23,7 +23,7 @@ export function TestOidcAuthProvider({ children }) {
     () => ({
       isLoaded: true,
       isSignedIn: Boolean(token),
-      getToken: async () => token,
+      getToken: () => localStorage.getItem('token'),
       signOut,
     }),
     [token, signOut],

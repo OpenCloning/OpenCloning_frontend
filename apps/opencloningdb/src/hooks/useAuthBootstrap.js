@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { setUnauthorizedHandler } from '@opencloning/opencloningdb';
+import { setHttpClientTokenGetter, setUnauthorizedHandler } from '@opencloning/opencloningdb';
 import { useOidcAuth } from '../auth/OidcAuthContext';
 import useChangeWorkspace from './useChangeWorkspace';
 import { fetchUserAndFirstWorkspace } from '../utils/auth_utils';
@@ -15,29 +15,23 @@ export default function useAuthBootstrap() {
   }, [logout]);
 
   useEffect(() => {
-    if (!isLoaded) return undefined;
+    setHttpClientTokenGetter(getToken);
+    return () => setHttpClientTokenGetter(null);
+  }, [getToken]);
 
-    if (!isSignedIn) {
-      localStorage.removeItem('token');
-      return undefined;
-    }
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return undefined;
 
     let cancelled = false;
 
     (async () => {
       try {
-        const token = await getToken( {template: 'default'});
-        if (cancelled || !token) return;
-
-        localStorage.setItem('token', token);
         const { user, workspace } = await fetchUserAndFirstWorkspace();
         if (!cancelled) {
           applySession(user, workspace);
         }
       } catch {
-        if (!cancelled) {
-          localStorage.removeItem('token');
-        }
+        // A 401 signs the user out from the response interceptor.
       }
     })();
 
@@ -46,5 +40,5 @@ export default function useAuthBootstrap() {
     return () => {
       cancelled = true;
     };
-  }, [isLoaded, isSignedIn, getToken, applySession]);
+  }, [isLoaded, isSignedIn, applySession]);
 }
