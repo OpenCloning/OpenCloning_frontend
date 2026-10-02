@@ -153,9 +153,11 @@ function AssemblyIdSelector({ setAssemblyId, setHasAnnotation = () => {}, onAsse
   const [newerAssembly, setNewerAssembly] = React.useState(false);
   const [species, setSpecies] = React.useState(null);
   const [pairedAccessionWithAnnotation, setPairedAccessionWithAnnotation] = React.useState('');
+  const [pairedAccessionLookupFailed, setPairedAccessionLookupFailed] = React.useState(false);
 
   const onChange = async (userInput, resp) => {
     setPairedAccessionWithAnnotation('');
+    setPairedAccessionLookupFailed(false);
     setSpecies(resp === null ? null : resp.species);
     if (resp === null) {
       setAssemblyId('');
@@ -172,9 +174,14 @@ function AssemblyIdSelector({ setAssemblyId, setHasAnnotation = () => {}, onAsse
     setNewerAssembly(resp !== null && resp.newerAssembly);
     onAssemblyIdChange();
     if (resp !== null && !resp.hasAnnotation && resp.pairedAccession) {
-      const pairedAccessionInfo = await getInfoFromAssemblyId(resp.pairedAccession);
-      if (pairedAccessionInfo !== null && pairedAccessionInfo.hasAnnotation) {
-        setPairedAccessionWithAnnotation(resp.pairedAccession);
+      try {
+        const pairedAccessionInfo = await getInfoFromAssemblyId(resp.pairedAccession);
+        if (pairedAccessionInfo !== null && pairedAccessionInfo.hasAnnotation) {
+          setPairedAccessionWithAnnotation(resp.pairedAccession);
+        }
+      } catch (e) {
+        console.error(e);
+        setPairedAccessionLookupFailed(true);
       }
     }
   };
@@ -192,6 +199,11 @@ function AssemblyIdSelector({ setAssemblyId, setHasAnnotation = () => {}, onAsse
       {pairedAccessionWithAnnotation && (
         <Alert severity="warning">
           Equivalent assembly <a href={`https://www.ncbi.nlm.nih.gov/datasets/genome/${pairedAccessionWithAnnotation}`} target="_blank" rel="noopener noreferrer">{pairedAccessionWithAnnotation}</a> has annotation.
+        </Alert>
+      )}
+      {pairedAccessionLookupFailed && (
+        <Alert severity="warning">
+          Could not check whether an equivalent assembly has annotation: Try deleting and retyping the assembly ID.
         </Alert>
       )}
       {species && <KnownSpeciesField species={species} />}
