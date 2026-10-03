@@ -1,7 +1,7 @@
 {
     "license": "MIT",
     "name": "@opencloning/utils",
-    "version": "1.9.5",
+    "version": "1.10.0",
     "type": "module",
     "main": "./src/utils/index.js",
     "exports": {
