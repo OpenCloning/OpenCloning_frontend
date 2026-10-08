@@ -3,7 +3,7 @@ import GetRequestMultiSelect from '@opencloning/ui/components/form/GetRequestMul
 import RequestStatusWrapper from '@opencloning/ui/components/form/RequestStatusWrapper';
 import { eLabFTWHttpClient, getELabFTWVersion, readHeaders } from './common';
 
-function ELabFTWCategorySelect({ setCategory, label = 'Resource category', ...rest }) {
+function ELabFTWCategorySelect({ setCategory, mode, label = 'Resource category', ...rest }) {
   const [eLabFTWVersion, setELabFTWVersion] = React.useState(null);
   const [requestStatus, setRequestStatus] = React.useState({ status: 'loading' });
   const [retry, setRetry] = React.useState(0);
@@ -16,7 +16,14 @@ function ELabFTWCategorySelect({ setCategory, label = 'Resource category', ...re
       }
     ).catch(() => setRequestStatus({ status: 'error', message: 'Could not retrieve eLabFTW version' }));
   }, [retry]);
-  const url = '/api/v2/items_types';
+  let url;
+  if (mode === 'resource_type') {
+    url = '/api/v2/teams/current/resources_categories';
+  } else if (mode === 'template') {
+    url = '/api/v2/items_types';
+  } else {
+    throw new Error(`Invalid mode: ${mode}`);
+  }
   const getOptionsFromResponse = (data) => data;
   const messages = { loadingMessage: 'retrieving categories', errorMessage: 'Could not retrieve categories from eLab' };
   const onChange = (value) => setCategory(value);

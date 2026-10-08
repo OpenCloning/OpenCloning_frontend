@@ -37,6 +37,7 @@ function GetPrimerComponent({ primer, setPrimer, setError }) {
   return (
     <>
       <ELabFTWCategorySelect
+        mode="resource_type"
         setCategory={setCategory}
         fullWidth
       />

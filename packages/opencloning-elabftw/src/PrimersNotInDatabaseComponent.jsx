@@ -40,6 +40,7 @@ function PrimersNotInDatabaseComponent({ id, submissionData, setSubmissionData }
       )}
 
       <ELabFTWCategorySelect
+        mode="template"
         setCategory={(c) => {
           setSubmissionData((prev) => ({ ...prev, primerCategoryId: c ? c.id : null }));
         }}
