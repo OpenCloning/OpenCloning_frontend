@@ -40,6 +40,7 @@ function SubmitToDatabaseComponent({ id, setSubmissionData, resourceType }) {
         />
       </FormControl>
       <ELabFTWCategorySelect
+        mode="template"
         fullWidth
         label={`Save ${resourceType} as`}
         setCategory={setCategory}

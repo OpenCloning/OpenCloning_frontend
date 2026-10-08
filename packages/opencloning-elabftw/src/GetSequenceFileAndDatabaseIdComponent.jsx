@@ -51,7 +51,7 @@ function GetSequenceFileAndDatabaseIdComponent({ setFile, setDatabaseId }) {
 
   return (
     <>
-      <ELabFTWCategorySelect fullWidth setCategory={setCategory} className="elabftw-category-select" />
+      <ELabFTWCategorySelect mode="resource_type" fullWidth setCategory={setCategory} className="elabftw-category-select" />
       {category && <ELabFTWResourceSelect fullWidth setResource={setResource} categoryId={category.id} className="elabftw-resource-select" />}
       {resource && <ELabFTWFileSelect fullWidth setFileInfo={setFileInfo} itemId={resource.id} className="elabftw-file-select" />}
       {fileLoadError && <RetryAlert severity="error" onRetry={() => setRetry((prev) => prev + 1)}>{fileLoadError}</RetryAlert>}
