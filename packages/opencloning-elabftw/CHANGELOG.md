@@ -1,5 +1,15 @@
 # @opencloning/opencloning-elabftw
 
+## 1.10.0
+
+### Patch Changes
+
+- [#776](https://github.com/OpenCloning/OpenCloning_frontend/pull/776) [`5f84aea`](https://github.com/OpenCloning/OpenCloning_frontend/commit/5f84aea004a24499a5634c17678696925ee780cf) Thanks [@manulera](https://github.com/manulera)! - Hotfix for issue where to load resources the template categories were shown instead
+
+- Updated dependencies [[`f7f376e`](https://github.com/OpenCloning/OpenCloning_frontend/commit/f7f376ee351d9b2da52413700836dc55ba54b5ea)]:
+  - @opencloning/ui@1.10.0
+  - @opencloning/utils@1.10.0
+
 ## 1.9.5
 
 ### Patch Changes
