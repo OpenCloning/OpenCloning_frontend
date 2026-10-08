@@ -1,5 +1,17 @@
 # @opencloning/ui
 
+## 1.10.0
+
+### Minor Changes
+
+- [#773](https://github.com/OpenCloning/OpenCloning_frontend/pull/773) [`f7f376e`](https://github.com/OpenCloning/OpenCloning_frontend/commit/f7f376ee351d9b2da52413700836dc55ba54b5ea) Thanks [@manulera](https://github.com/manulera)! - Handle failed NCBI request to `dataset_report` in `SourceGenomeRegion`.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @opencloning/store@1.10.0
+  - @opencloning/utils@1.10.0
+
 ## 1.9.5
 
 ### Patch Changes
