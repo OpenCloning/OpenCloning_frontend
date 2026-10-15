@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { attachAuthInterceptors } from './httpClientAuth';
+import { urlMatchesPrefix } from './urlUtils';
 import urlWhitelist from '../config/urlWhitelist';
 
 export default function getHttpClient(extraUrls = []) {
@@ -14,7 +15,7 @@ export default function getHttpClient(extraUrls = []) {
   client.interceptors.request.use((config) => {
     const url = new URL(config.url, config.baseURL || window.location.origin);
 
-    if (!whitelist.some((whitelistedUrl) => url.href.match(new RegExp(`^${whitelistedUrl}`)))) {
+    if (!whitelist.some((whitelistedUrl) => urlMatchesPrefix(url.href, whitelistedUrl))) {
       return Promise.reject(new Error(`Request blocked: URL not in whitelist ${url.href}`));
     }
 
