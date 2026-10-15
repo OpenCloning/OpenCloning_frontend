@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
-import useBackendRoute from '../../../hooks/useBackendRoute';
-import useHttpClient from '../../../hooks/useHttpClient';
+import useBackendHttpClient from '../../../hooks/useBackendHttpClient';
 import { isEqual } from 'lodash-es';
 import { useSelector } from 'react-redux';
 
@@ -16,15 +15,14 @@ export function makeHeterodimerCacheKey(sequence1, sequence2, globalPrimerSettin
   return `${pairKey}::${settingsKey}`;
 }
 export function usePrimerDetailsEndpoints() {
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   const globalPrimerSettings = useSelector((state) => state.cloning.globalPrimerSettings, isEqual);
 
   // Caches are keyed by both the input sequence(s) and the current globalPrimerSettings,
   // so we don't need to clear them on settings change.
 
-  const url = backendRoute('primer_details');
-  const heterodimerUrl = backendRoute('primer_heterodimer');
+  const url = 'primer_details';
+  const heterodimerUrl = 'primer_heterodimer';
 
   const getPrimerDetails = useCallback(async (sequence) => {
     const cacheKey = makePrimerDetailsCacheKey(sequence, globalPrimerSettings);

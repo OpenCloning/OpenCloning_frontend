@@ -1,8 +1,7 @@
 import { Alert, Button, CircularProgress } from '@mui/material';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import useBackendRoute from '../hooks/useBackendRoute';
-import useHttpClient from '../hooks/useHttpClient';
+import useBackendHttpClient from '../hooks/useBackendHttpClient';
 import { cloningActions } from '@opencloning/store/cloning';
 import { version } from '../index';
 
@@ -14,8 +13,7 @@ function ExternalServicesStatusCheck() {
   const [loading, setLoading] = React.useState(false);
   const [successMessage, setSuccessMessage] = React.useState('');
   const dispatch = useDispatch();
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   React.useEffect(() => {
     dispatch(updateAppInfo({ frontendVersion: version }));
     setLoading(true);
@@ -23,7 +21,7 @@ function ExternalServicesStatusCheck() {
       const services = [
         {
           message: 'Backend server is down',
-          url: backendRoute('version'),
+          url: 'version',
           check: (resp) => {
             if (resp.status === 200) {
               const { backend_version: backendVersion, schema_version: schemaVersion } = resp.data;

@@ -4,12 +4,15 @@ import { cloningActions } from '@opencloning/store/cloning';
 import useDatabase from './useDatabase';
 import useLoadDatabaseFile from './useLoadDatabaseFile';
 import useCloningAlerts from './useCloningAlerts';
-import useHttpClient from './useHttpClient';
 import useValidateState from './useValidateState';
 import useCloningHistoryLoader from './useCloningHistoryLoader';
 import { formatSequenceLocationString, getUrlParameters } from '@opencloning/utils/other';
 import { formatTemplate } from '@opencloning/utils/readNwrite';
 import { encodePathSegment } from '@opencloning/utils/urlUtils';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
+
+// For public urls (not the backend)
+const httpClient = getExternalHttpClient();
 
 const { updateSource } = cloningActions;
 
@@ -22,9 +25,8 @@ export default function useUrlParamsLoader() {
   const database = useDatabase();
   const { addAlert } = useCloningAlerts();
   const setHistoryFileError = (e) => addAlert({ message: e, severity: 'error' });
-  const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendPostRequest: null, setHistoryFileError });
+  const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendSourceRequest: null, setHistoryFileError });
   const validateState = useValidateState();
-  const httpClient = useHttpClient();
   const { applyCloningStrategy, loadHistoryFromFile } = useCloningHistoryLoader();
 
   useEffect(() => {

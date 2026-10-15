@@ -19,6 +19,8 @@ export function clearWorkspaceHeader() {
 
 export const openCloningDBHttpClient = axios.create({
   baseURL: baseUrl,
+  // Every url is appended to baseURL, so requests (and the auth token) only reach the backend
+  allowAbsoluteUrls: false,
   paramsSerializer: (params) => {
     const searchParams = new URLSearchParams();
 

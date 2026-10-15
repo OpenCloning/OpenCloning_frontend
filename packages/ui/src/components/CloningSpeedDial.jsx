@@ -7,8 +7,7 @@ import { getSequencesNotInDatabase } from '@opencloning/utils/network';
 import { cloningActions } from '@opencloning/store/cloning';
 import useCloningAlerts from '../hooks/useCloningAlerts';
 import { cloneDeep } from 'lodash-es';
-import useBackendRoute from '../hooks/useBackendRoute';
-import useHttpClient from '../hooks/useHttpClient';
+import useBackendHttpClient from '../hooks/useBackendHttpClient';
 
 const { setState: setCloningState } = cloningActions;
 
@@ -17,9 +16,8 @@ function useLocateSequencesInDatabaseAction() {
   const database = useDatabase();
   const store = useStore();
   const dispatch = useDispatch();
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
-  const url = backendRoute('normalize_cloning_strategy');
+  const httpClient = useBackendHttpClient();
+  const url = 'normalize_cloning_strategy';
 
   const { addAlert } = useCloningAlerts();
   const main = React.useCallback(async () => {

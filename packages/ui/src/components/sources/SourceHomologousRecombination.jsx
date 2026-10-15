@@ -9,7 +9,7 @@ import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 import SelectPrimerForm from '../primers/SelectPrimerForm';
 
 // A component representing the ligation of several fragments
-function SourceHomologousRecombination({ source, requestStatus, sendPostRequest }) {
+function SourceHomologousRecombination({ source, requestStatus, sendSourceRequest }) {
   const isCrispr = source.type === 'CRISPRSource';
   const { id: sourceId, input } = source;
   const inputSequences = useSelector((state) => getInputSequencesFromSourceId(state, sourceId), isEqual);
@@ -33,9 +33,9 @@ function SourceHomologousRecombination({ source, requestStatus, sendPostRequest 
     const config = { params: { minimal_homology: minimalHomologyRef.current.value } };
     if (isCrispr) {
       requestData.guides = selectedPrimers.map((primerId) => primers.find((p) => p.id === primerId));
-      sendPostRequest({ endpoint: 'crispr', requestData, config, source });
+      sendSourceRequest({ endpoint: 'crispr', requestData, config, source });
     } else {
-      sendPostRequest({ endpoint: 'homologous_recombination', requestData, config, source });
+      sendSourceRequest({ endpoint: 'homologous_recombination', requestData, config, source });
     }
   };
 

@@ -2,7 +2,7 @@ import React from 'react'
 import ServerStaticFileSelect from '../form/ServerStaticFileSelect';
 import { Alert, LinearProgress } from '@mui/material';
 
-function SourceServerStaticFile({ source, requestStatus, sendPostRequest }) {
+function SourceServerStaticFile({ source, requestStatus, sendSourceRequest }) {
   const onFileSelected = React.useCallback((file) => {
     const requestData = new FormData();
     requestData.append('file', file);
@@ -11,8 +11,8 @@ function SourceServerStaticFile({ source, requestStatus, sendPostRequest }) {
         'content-type': 'multipart/form-data',
       },
     };
-    sendPostRequest({ endpoint: 'read_from_file', requestData, config, source });
-  }, [sendPostRequest, source]);
+    sendSourceRequest({ endpoint: 'read_from_file', requestData, config, source });
+  }, [sendSourceRequest, source]);
 
   return (
     <>

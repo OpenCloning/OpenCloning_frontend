@@ -10,7 +10,7 @@ import { cloningActions } from '@opencloning/store/cloning';
 import useStoreEditor from '../../hooks/useStoreEditor';
 import LabelWithTooltip from '../form/LabelWithTooltip';
 
-function SourcePCRorHybridization({ source, requestStatus, sendPostRequest }) {
+function SourcePCRorHybridization({ source, requestStatus, sendSourceRequest }) {
   // Represents a PCR if inputs != [], else is a oligo hybridization
 
   const dispatch = useDispatch();
@@ -58,14 +58,14 @@ function SourcePCRorHybridization({ source, requestStatus, sendPostRequest }) {
     if (!isPcr) {
       requestData.source.input = [forwardPrimerId, reversePrimerId].map((id) => ({ sequence: id }));
       const config = { params: { minimal_annealing: minimalAnnealingRef.current.value } };
-      sendPostRequest({ endpoint: 'oligonucleotide_hybridization', requestData, config, source });
+      sendSourceRequest({ endpoint: 'oligonucleotide_hybridization', requestData, config, source });
     } else {
       const config = { params: {
         minimal_annealing: minimalAnnealingRef.current.value,
         allowed_mismatches: allowedMismatchesRef.current.value,
       } };
       requestData.source.add_primer_features = addPrimerFeatures;
-      sendPostRequest({ endpoint: 'pcr', requestData, config, source });
+      sendSourceRequest({ endpoint: 'pcr', requestData, config, source });
     }
   };
 

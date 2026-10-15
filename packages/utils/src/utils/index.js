@@ -3,7 +3,7 @@
 
 export * from './readNwrite.js';
 export * from './network.js';
-export * from './getHttpClient.js';
+export * from './httpClients.js';
 export * from './httpClientAuth.js';
 export * from './sourceFunctions.js';
 export { default as error2String } from './error2String.js';

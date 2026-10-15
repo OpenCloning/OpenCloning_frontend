@@ -5,7 +5,7 @@ import { isEqual } from 'lodash-es';
 import { getInputSequencesFromSourceId } from '@opencloning/store/cloning_utils';
 import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 
-function SourceAnnotation({ source, requestStatus, sendPostRequest }) {
+function SourceAnnotation({ source, requestStatus, sendSourceRequest }) {
   const [annotationTool, setAnnotationTool] = React.useState('plannotate');
 
   const inputSequences = useSelector((state) => getInputSequencesFromSourceId(state, source.id), isEqual);
@@ -16,7 +16,7 @@ function SourceAnnotation({ source, requestStatus, sendPostRequest }) {
       sequence: inputSequences[0],
       source: { id: source.id, input: inputSequences.map((e) => ({ sequence: e.id })), annotation_tool: annotationTool },
     };
-    sendPostRequest({ endpoint: 'annotate/plannotate', requestData, source });
+    sendSourceRequest({ endpoint: 'annotate/plannotate', requestData, source });
   };
 
   return (

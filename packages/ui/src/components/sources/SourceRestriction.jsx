@@ -7,7 +7,7 @@ import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 // A component providing an interface for the user to perform a restriction reaction
 // with one or more restriction enzymes, move between output fragments, and eventually
 // select one as an output.
-function SourceRestriction({ source, requestStatus, sendPostRequest }) {
+function SourceRestriction({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
   const [enzymes, setEnzymes] = React.useState([]);
   const inputSequences = useSelector((state) => getInputSequencesFromSourceId(state, sourceId), shallowEqual);
@@ -19,7 +19,7 @@ function SourceRestriction({ source, requestStatus, sendPostRequest }) {
       source: { id: sourceId, input: source.input },
       sequences: inputSequences,
     };
-    sendPostRequest({ endpoint: 'restriction', requestData, source, config: { params: { restriction_enzymes: enzymes } } });
+    sendSourceRequest({ endpoint: 'restriction', requestData, source, config: { params: { restriction_enzymes: enzymes } } });
   };
 
   return (

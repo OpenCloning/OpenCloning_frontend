@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ConfigProvider } from '@opencloning/ui/providers/ConfigProvider';
 import { DatabaseProvider } from '@opencloning/ui/providers/DatabaseContext';
-import getHttpClient from '@opencloning/utils/getHttpClient';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
 import { MainAppBar, OpenCloning, useUrlParamsLoader, useInitializeApp } from '@opencloning/ui/components';
 import { useConfig } from '@opencloning/ui/hooks';
 import { eLabFTWInterface } from '@opencloning/opencloning-elabftw';
 import DummyInterface from '@opencloning/ui/components/dummy';
 
 // Create a basic HTTP client for loading config (doesn't require backendUrl)
-const configHttpClient = getHttpClient([]);
+const configHttpClient = getExternalHttpClient();
 
 function AppContent() {
   const { showAppBar } = useConfig();

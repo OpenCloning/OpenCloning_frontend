@@ -14,7 +14,7 @@ import SourceAnnotation from './SourceAnnotation';
 import SourceDatabase from './SourceDatabase';
 import SourcePolymeraseExtension from './SourcePolymeraseExtension';
 import CollectionSource from './CollectionSource';
-import useBackendAPI from '../../hooks/useBackendAPI';
+import useSourceRequest from '../../hooks/useSourceRequest';
 import MultipleOutputsSelector from './MultipleOutputsSelector';
 import { cloningActions } from '@opencloning/store/cloning';
 import SourceCopySequence from './SourceCopySequence';
@@ -31,7 +31,7 @@ function Source({ sourceId }) {
   const { type: sourceType } = source;
   let specificSource = null;
   const templateOnlySources = ['CollectionSource', 'KnownGenomeCoordinatesSource'];
-  const { requestStatus, sendPostRequest, sources, sequences } = useBackendAPI();
+  const { requestStatus, sendSourceRequest, sources, sequences } = useSourceRequest();
   const { addSequenceAndUpdateItsSource, updateSequenceAndItsSource } = cloningActions;
   const [chosenFragment, setChosenFragment] = React.useState(null);
   const dispatch = useDispatch();
@@ -49,67 +49,67 @@ function Source({ sourceId }) {
   switch (sourceType) {
     /* eslint-disable */
     case 'UploadedFileSource':
-      specificSource = <SourceFile {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceFile {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'LocalFileSource':
-      specificSource = <SourceServerStaticFile {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceServerStaticFile {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'RestrictionEnzymeDigestionSource':
-      specificSource = <SourceRestriction {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRestriction {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'RepositoryIdSource':
-      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'AddgeneIdSource':
-      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'SnapGenePlasmidSource':
-      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'EuroscarfSource':
-      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'WekWikGeneIdSource':
-      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'OpenDNACollectionsSource':
-      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceRepositoryId {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'LigationSource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'GibsonAssemblySource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'OverlapExtensionPCRLigationSource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'InFusionSource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'InVivoAssemblySource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'GatewaySource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'CreLoxRecombinationSource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'RecombinaseSource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'HomologousRecombinationSource':
-      specificSource = <SourceHomologousRecombination {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceHomologousRecombination {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'PCRSource':
-      specificSource = <SourcePCRorHybridization {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourcePCRorHybridization {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'RestrictionAndLigationSource':
-      specificSource = <SourceAssembly {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAssembly {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'GenomeCoordinatesSource':
-      specificSource = <SourceGenomeRegion {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceGenomeRegion {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'KnownGenomeCoordinatesSource':
-      specificSource = <SourceKnownGenomeRegion {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceKnownGenomeRegion {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'ManuallyTypedSource':
-      specificSource = <SourceManuallyTyped {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceManuallyTyped {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'CRISPRSource':
-      specificSource = <SourceHomologousRecombination {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceHomologousRecombination {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'OligoHybridizationSource':
-      specificSource = <SourcePCRorHybridization {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourcePCRorHybridization {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'PolymeraseExtensionSource':
-      specificSource = <SourcePolymeraseExtension {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourcePolymeraseExtension {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'DatabaseSource':
-      specificSource = <SourceDatabase {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceDatabase {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'CollectionSource':
-      specificSource = <CollectionSource {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <CollectionSource {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'CopySequence':
       specificSource = <SourceCopySequence {...{ source }} />; break;
     case 'AnnotationSource':
-      specificSource = <SourceAnnotation {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceAnnotation {...{ source, requestStatus, sendSourceRequest }} />; break;
     case 'ReverseComplementSource':
-      specificSource = <SourceReverseComplement {...{ source, requestStatus, sendPostRequest }} />; break;
+      specificSource = <SourceReverseComplement {...{ source, requestStatus, sendSourceRequest }} />; break;
     default:
       break;
     /* eslint-enable */

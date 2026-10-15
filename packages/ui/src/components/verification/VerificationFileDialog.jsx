@@ -21,11 +21,10 @@ import { isEqual } from 'lodash-es';
 import { getTeselaJsonFromBase64, file2base64 } from '@opencloning/utils/readNwrite';
 import SequencingFileRow from './SequencingFileRow';
 import { cloningActions } from '@opencloning/store/cloning';
-import useBackendRoute from '../../hooks/useBackendRoute';
 import useStoreEditor from '../../hooks/useStoreEditor';
 import LoadFromDatabaseButton from './LoadFromDatabaseButton';
 import { sequencingFileExtensions } from '@opencloning/utils/sequencingFileExtensions';
-import useHttpClient from '../../hooks/useHttpClient';
+import useBackendHttpClient from '../../hooks/useBackendHttpClient';
 import { getVerificationFileName } from '@opencloning/utils/readNwrite';
 import {
   getVerificationFileContent,
@@ -47,9 +46,8 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
   const { updateStoreEditor } = useStoreEditor();
-  const backendRoute = useBackendRoute();
   const store = useStore();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
 
   const toggleMain = React.useCallback(() => {
     dispatch(setMainSequenceId(id));
@@ -98,7 +96,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
     const allSequencingFiles = [...existingSequencingFilesInState, ...parsedSequencingFiles];
     const alignments = [];
     const traces = allSequencingFiles.map((f) => f.trace);
-    const resp = await httpClient.post(backendRoute('align_sanger'), { sequence, traces });
+    const resp = await httpClient.post('align_sanger', { sequence, traces });
 
     for (let i = 0; i < allSequencingFiles.length; i++) {
       alignments.push({ ...allSequencingFiles[i], alignment: [resp.data[0], resp.data[i + 1]] });
@@ -114,7 +112,7 @@ export default function VerificationFileDialog({ id, dialogOpen, setDialogOpen }
       alignments.forEach(({ base64str, file_name }) => { setVerificationFileContent(`verification-${id}-${file_name}`, base64str); });
     });
     setLoadingMessage('');
-  }, [id, dispatch, httpClient, backendRoute, store, sequence]);
+  }, [id, dispatch, httpClient, store, sequence]);
 
   const onFileChange = useCallback(async (files) => {
     setLoadingMessage('Aligning...');

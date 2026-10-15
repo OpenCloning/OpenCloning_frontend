@@ -1,18 +1,16 @@
 import React from 'react';
 import useCloningAlerts from './useCloningAlerts';
-import useBackendRoute from './useBackendRoute';
-import useHttpClient from './useHttpClient';
+import useBackendHttpClient from './useBackendHttpClient';
 
 export default function useValidateState() {
-  const backendRoute = useBackendRoute();
   const { addAlert } = useCloningAlerts();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
 
   const validateState = React.useCallback(async (newState) => {
     // Returns null if the state is valid, otherwise the new updated state
     // It also adds alerts
     try {
-      const response = await httpClient.post(backendRoute('validate'), newState);
+      const response = await httpClient.post('validate', newState);
       if (response.data !== null) {
         response.headers['x-warning'].split(';').forEach((warning) => {
           addAlert({
@@ -37,7 +35,7 @@ export default function useValidateState() {
       }
       return newState;
     }
-  }, [addAlert, backendRoute, httpClient]);
+  }, [addAlert, httpClient]);
 
   return validateState;
 }

@@ -7,7 +7,7 @@ import { classNameToEndPointMap } from '@opencloning/utils/sourceFunctions';
 import ObjectTable from '../ObjectTable';
 import { cloningActions } from '@opencloning/store/cloning';
 
-function CollectionSource({ source, requestStatus, sendPostRequest }) {
+function CollectionSource({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId, options, image: imageInfo, title, description } = source;
   const [image, imageWidth] = imageInfo || [null, null];
   const [selectedOption, setSelectedOption] = React.useState(null);
@@ -34,7 +34,7 @@ function CollectionSource({ source, requestStatus, sendPostRequest }) {
       const reverseOligo = primers.find((primer) => primer.id === selectedSource.input[1].sequence);
       requestData = { source: { id: sourceId, ...selectedSource }, primers: [forwardOligo, reverseOligo] };
     }
-    sendPostRequest({ endpoint, requestData, source, modifySource });
+    sendSourceRequest({ endpoint, requestData, source, modifySource });
   };
 
   const onChange = (event) => {

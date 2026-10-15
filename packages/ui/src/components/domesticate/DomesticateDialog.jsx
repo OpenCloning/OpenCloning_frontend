@@ -19,8 +19,7 @@ import {
   TextField,
 } from '@mui/material';
 import error2String from '@opencloning/utils/error2String';
-import useBackendRoute from '../../hooks/useBackendRoute';
-import useHttpClient from '../../hooks/useHttpClient';
+import useBackendHttpClient from '../../hooks/useBackendHttpClient';
 import { featureToGenbankLocationString, mergeStates } from '@opencloning/utils';
 import { useDispatch, useStore } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
@@ -77,8 +76,7 @@ function categoryPrefixSuffixValid(category, prefix, suffix) {
 }
 
 export default function DomesticateDialog({ open, onClose, initialContext, mainSequenceId }) {
-  const httpClient = useHttpClient();
-  const backendRoute = useBackendRoute();
+  const httpClient = useBackendHttpClient();
   const store = useStore();
 
   const location = React.useMemo(() => featureToGenbankLocationString(initialContext.annotation), [initialContext]);
@@ -131,7 +129,7 @@ export default function DomesticateDialog({ open, onClose, initialContext, mainS
       enzymes,
     };
     try {
-      const url = backendRoute('batch_cloning/domesticate');
+      const url = 'batch_cloning/domesticate';
       const { data } = await httpClient.post(url, body);
 
       const { mergedState, idShift } = mergeStates(data, store.getState().cloning);
