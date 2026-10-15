@@ -2,6 +2,7 @@
 // so including them in eLabFTWInterface.js would make circular dependencies.
 // They are not included in common.js to be able to mock eLabFTWHttpClient in tests.
 import { eLabFTWHttpClient, readHeaders } from './common';
+import { encodePathSegment } from '@opencloning/utils/urlUtils';
 
 export function error2String(error) {
   if (error.code === 'ERR_NETWORK') { return 'Network error: Cannot connect to eLabFTW'; }
@@ -18,7 +19,7 @@ export function error2String(error) {
 }
 
 export const getFileFromELabFTW = async (itemId, fileInfo) => {
-  const url = `/api/v2/items/${itemId}/uploads/${fileInfo.id}?format=binary`;
+  const url = `/api/v2/items/${encodePathSegment(itemId)}/uploads/${encodePathSegment(fileInfo.id)}?format=binary`;
   try {
     const resp = await eLabFTWHttpClient.get(url, { headers: readHeaders, responseType: 'blob' });
     // Convert blob to file

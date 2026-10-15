@@ -9,6 +9,7 @@ import useValidateState from './useValidateState';
 import useCloningHistoryLoader from './useCloningHistoryLoader';
 import { formatSequenceLocationString, getUrlParameters } from '@opencloning/utils/other';
 import { formatTemplate } from '@opencloning/utils/readNwrite';
+import { encodePathSegment } from '@opencloning/utils/urlUtils';
 
 const { updateSource } = cloningActions;
 
@@ -46,7 +47,7 @@ export default function useUrlParamsLoader() {
         }
       } else if (urlParams.source === 'example' && urlParams.example) {
         try {
-          const url = `${import.meta.env.BASE_URL}examples/${urlParams.example}`;
+          const url = `${import.meta.env.BASE_URL}examples/${encodePathSegment(urlParams.example)}`;
           const fileName = urlParams.example;
           if (fileName.endsWith('.zip')) {
             const resp = await httpClient.get(url, { responseType: 'blob' });
@@ -75,7 +76,7 @@ export default function useUrlParamsLoader() {
       } else if (urlParams.source === 'template' && urlParams.template && urlParams.key) {
         try {
           const baseUrl = 'https://assets.opencloning.org/OpenCloning-submission';
-          const url = `${baseUrl}/processed/${urlParams.key}/templates/${urlParams.template}`;
+          const url = `${baseUrl}/processed/${encodePathSegment(urlParams.key)}/templates/${encodePathSegment(urlParams.template)}`;
           const { data } = await httpClient.get(url);
           const validatedData = await validateState(data);
           const newState = formatTemplate(validatedData, url);

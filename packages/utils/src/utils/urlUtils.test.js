@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { urlMatchesPrefix } from './urlUtils';
+import { encodePathSegment, urlMatchesPrefix } from './urlUtils';
 
 describe('urlMatchesPrefix', () => {
   it('matches urls under the prefix', () => {
@@ -23,5 +23,27 @@ describe('urlMatchesPrefix', () => {
     expect(urlMatchesPrefix('/backend/db/sequences', '/backend/db')).toBe(true);
     expect(urlMatchesPrefix(`${origin}/backend/db/sequences`, '/backend/db')).toBe(true);
     expect(urlMatchesPrefix('https://evil.org/backend/db/sequences', '/backend/db')).toBe(false);
+  });
+});
+
+describe('encodePathSegment', () => {
+  it('encodes characters that would change the path', () => {
+    expect(encodePathSegment('../workspaces/1/users/5')).toBe('..%2Fworkspaces%2F1%2Fusers%2F5');
+    expect(encodePathSegment('a?b#c')).toBe('a%3Fb%23c');
+    expect(encodePathSegment(12)).toBe('12');
+  });
+
+  it('rejects dot segments', () => {
+    expect(() => encodePathSegment('.')).toThrow();
+    expect(() => encodePathSegment('..')).toThrow();
+  });
+
+  it('keeps the request path when resolved by the browser', () => {
+    for (const value of ['../workspaces/1', '..%2F..', 'a/../../b', '...']) {
+      const url = new URL(`/db/sequence_samples/${encodePathSegment(value)}`, 'https://example.com');
+      expect(url.pathname.startsWith('/db/sequence_samples/')).toBe(true);
+      // Only has 3 "/" > "/db/sequence_samples/"
+      expect(url.pathname.split('/')).toHaveLength(4);
+    }
   });
 });
