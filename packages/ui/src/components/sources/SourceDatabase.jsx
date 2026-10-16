@@ -4,12 +4,12 @@ import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 import useDatabase from '../../hooks/useDatabase';
 import useLoadDatabaseFile from '../../hooks/useLoadDatabaseFile';
 
-function SourceDatabase({ source, requestStatus, sendPostRequest }) {
+function SourceDatabase({ source, requestStatus, sendSourceRequest }) {
   const [file, setFile] = React.useState(null);
   const [databaseId, setDatabaseId] = React.useState(null);
   const database = useDatabase();
   const [historyFileError, setHistoryFileError] = React.useState(null);
-  const { loadDatabaseFile } = useLoadDatabaseFile({ source, sendPostRequest, setHistoryFileError });
+  const { loadDatabaseFile } = useLoadDatabaseFile({ source, sendSourceRequest, setHistoryFileError });
 
   const onSubmit = async (e) => {
     e.preventDefault();

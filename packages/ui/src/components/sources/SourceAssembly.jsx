@@ -15,7 +15,7 @@ const helpSingleSite = 'Even if input sequences contain multiple att sites '
   + 'Select this option to get those products.';
 
 // A component representing the ligation or gibson assembly of several fragments
-function SourceAssembly({ source, requestStatus, sendPostRequest }) {
+function SourceAssembly({ source, requestStatus, sendSourceRequest }) {
   const assemblyType = source.type;
   const { id: sourceId, input: sourceInput } = source;
   const inputSequences = useSelector((state) => getInputSequencesFromSourceId(state, sourceId), shallowEqual);
@@ -91,21 +91,21 @@ function SourceAssembly({ source, requestStatus, sendPostRequest }) {
       } };
       // To instantiate the correct class on the backend
       requestData.source.type = assemblyType;
-      sendPostRequest({ endpoint: 'gibson_assembly', requestData, config, source });
+      sendSourceRequest({ endpoint: 'gibson_assembly', requestData, config, source });
     } else if (assemblyType === 'RestrictionAndLigationSource') {
       if (enzymes.length === 0) { return; }
       requestData.source.restriction_enzymes = enzymes;
       const config = { params: {
         circular_only: circularOnly,
       } };
-      sendPostRequest({ endpoint: 'restriction_and_ligation', requestData, config, source });
+      sendSourceRequest({ endpoint: 'restriction_and_ligation', requestData, config, source });
     } else if (assemblyType === 'GatewaySource') {
       requestData.source.greedy = gatewaySettings.greedy;
       requestData.source.reaction_type = gatewaySettings.reactionType;
       const config = { params: { circular_only: circularOnly, only_multi_site: gatewaySettings.onlyMultiSite } };
-      sendPostRequest({ endpoint: 'gateway', requestData, config, source });
+      sendSourceRequest({ endpoint: 'gateway', requestData, config, source });
     } else if (assemblyType === 'CreLoxRecombinationSource') {
-      sendPostRequest({ endpoint: 'cre_lox_recombination', requestData, source });
+      sendSourceRequest({ endpoint: 'cre_lox_recombination', requestData, source });
     } else if (assemblyType === 'RecombinaseSource') {
       if (recombinases.length === 0) { return; }
       requestData.source.recombinases = recombinases;
@@ -113,14 +113,14 @@ function SourceAssembly({ source, requestStatus, sendPostRequest }) {
         reverse_recombinase: reverseRecombinase,
         input_contains_genome: inputContainsGenome,
       } };
-      sendPostRequest({ endpoint: 'recombinase', requestData, config, source });
+      sendSourceRequest({ endpoint: 'recombinase', requestData, config, source });
     } else {
       const config = { params: {
         allow_partial_overlap: allowPartialOverlap,
         circular_only: circularOnly,
         blunt: bluntLigation,
       } };
-      sendPostRequest({ endpoint: classNameToEndPointMap[assemblyType], requestData, config, source });
+      sendSourceRequest({ endpoint: classNameToEndPointMap[assemblyType], requestData, config, source });
     }
   };
 

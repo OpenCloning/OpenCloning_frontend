@@ -4,16 +4,14 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 import { isEqual } from 'lodash-es';
 import { cloningActions } from '@opencloning/store/cloning';
 import error2String from '@opencloning/utils/error2String';
-import useBackendRoute from '../hooks/useBackendRoute';
-import useHttpClient from '../hooks/useHttpClient';
+import useBackendHttpClient from '../hooks/useBackendHttpClient';
 
 function EditSequenceNameDialog({ id, dialogOpen, setDialogOpen }) {
   const [name, setName] = React.useState('');
   const [originalName, setOriginalName] = React.useState('');
   const [error, setError] = React.useState('');
   const store = useStore();
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
 
   const { updateSequenceAndItsSource } = cloningActions;
   const dispatch = useDispatch();
@@ -23,7 +21,7 @@ function EditSequenceNameDialog({ id, dialogOpen, setDialogOpen }) {
     const source = sources.find((s) => s.id === id);
     const sequence = sequences.find((s) => s.id === id);
     setError('');
-    const url = backendRoute('rename_sequence');
+    const url = 'rename_sequence';
     try {
       const { data: newSequence } = await httpClient.post(url, sequence, { params: { name } });
       const newSource = { ...source, output_name: newName };

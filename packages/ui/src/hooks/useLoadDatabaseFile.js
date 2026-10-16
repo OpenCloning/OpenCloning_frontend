@@ -6,7 +6,7 @@ import useCloningHistoryLoader from './useCloningHistoryLoader';
 import useDatabase from './useDatabase';
 import { useStore } from 'react-redux';
 
-export default function useLoadDatabaseFile({ source, sendPostRequest, setHistoryFileError }) {
+export default function useLoadDatabaseFile({ source, sendSourceRequest, setHistoryFileError }) {
   const validateState = useValidateState();
   const store = useStore();
   const database = useDatabase();
@@ -88,7 +88,7 @@ export default function useLoadDatabaseFile({ source, sendPostRequest, setHistor
         },
       };
       const modifySource = (s) => ({ ...s, database_id: databaseId });
-      sendPostRequest({ endpoint: 'read_from_file', requestData, config, source, modifySource });
+      sendSourceRequest({ endpoint: 'read_from_file', requestData, config, source, modifySource });
     }
   };
   return { loadDatabaseFile };

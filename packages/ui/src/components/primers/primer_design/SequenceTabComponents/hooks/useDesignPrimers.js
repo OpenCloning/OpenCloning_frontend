@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { batch, useDispatch, useStore } from 'react-redux';
-import useBackendRoute from '../../../../../hooks/useBackendRoute';
-import useHttpClient from '../../../../../hooks/useHttpClient';
+import useBackendHttpClient from '../../../../../hooks/useBackendHttpClient';
 import useStoreEditor from '../../../../../hooks/useStoreEditor';
 import error2String from '@opencloning/utils/error2String';
 import { cloningActions } from '@opencloning/store/cloning';
@@ -19,8 +18,7 @@ export default function useDesignPrimers({
 
   const store = useStore();
   const dispatch = useDispatch();
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   const { updateStoreEditor } = useStoreEditor();
 
   const designPrimers = useCallback(async () => {
@@ -43,7 +41,7 @@ export default function useDesignPrimers({
     });
 
     requestData.settings = globalPrimerSettings;
-    const url = backendRoute(`primer_design/${endpoint}`);
+    const url = `primer_design/${endpoint}`;
 
     try {
       const resp = await httpClient.post(url, requestData, { params });
@@ -55,7 +53,7 @@ export default function useDesignPrimers({
       setError(error2String(thrownError));
       return true;
     }
-  }, [fragmentOrientations, rois, sequenceIds, templateSequenceIds, designType, circularAssembly, primerDesignSettings, spacers, store, httpClient, backendRoute, handleNext, isAmplified]);
+  }, [fragmentOrientations, rois, sequenceIds, templateSequenceIds, designType, circularAssembly, primerDesignSettings, spacers, store, httpClient, handleNext, isAmplified]);
 
   const addPrimers = useCallback(() => {
     const pcrSources = store.getState().cloning.sources.filter((source) => source.type === 'PCRSource');

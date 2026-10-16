@@ -1,9 +1,10 @@
 import React from 'react';
 import GetRequestMultiSelect from '@opencloning/ui/components/form/GetRequestMultiSelect';
 import { eLabFTWHttpClient, readHeaders } from './common';
+import { encodePathSegment } from '@opencloning/utils/urlUtils';
 
 function ELabFTWFileSelect({ itemId, setFileInfo, ...rest }) {
-  const url = `/api/v2/items/${itemId}`;
+  const url = `/api/v2/items/${encodePathSegment(itemId)}`;
   const getOptionsFromResponse = ({ uploads }) => uploads;
   const label = 'File with sequence';
   const messages = { loadingMessage: 'retrieving attachments', errorMessage: 'Could not retrieve attachment from eLab' };

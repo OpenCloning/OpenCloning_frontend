@@ -2,16 +2,14 @@ import React, { useCallback, useState } from 'react';
 import { useStore } from 'react-redux';
 import error2String from '@opencloning/utils/error2String';
 import { formatGatewaySites } from '@opencloning/store/cloning_utils';
-import useBackendRoute from './useBackendRoute';
-import useHttpClient from './useHttpClient';
+import useBackendHttpClient from './useBackendHttpClient';
 
 export default function useGatewaySites({ target, greedy }) {
   const store = useStore();
   const [requestStatus, setRequestStatus] = useState({ status: null, message: '' });
   const [connectAttempt, setConnectAttempt] = useState(0);
   const [sites, setSites] = useState([]);
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
 
   const attemptAgain = useCallback(() => {
     setConnectAttempt((p) => p + 1);
@@ -20,7 +18,7 @@ export default function useGatewaySites({ target, greedy }) {
   React.useEffect(() => {
     async function getSitesInTarget() {
       setRequestStatus({ status: 'loading', message: 'loading' });
-      const url = backendRoute('annotation/get_gateway_sites');
+      const url = 'annotation/get_gateway_sites';
       const state = store.getState();
       const sequence = state.cloning.sequences.find((seq) => seq.id === target);
       try {

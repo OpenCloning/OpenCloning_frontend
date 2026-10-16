@@ -4,7 +4,7 @@ import { Alert } from '@mui/material';
 import { getInputSequencesFromSourceId } from '@opencloning/store/cloning_utils';
 import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 
-function SourcePolymeraseExtension({ source, requestStatus, sendPostRequest }) {
+function SourcePolymeraseExtension({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
   const inputSequences = useSelector((state) => getInputSequencesFromSourceId(state, sourceId), shallowEqual);
   const { overhang_crick_3prime, overhang_watson_3prime } = inputSequences[0];
@@ -16,7 +16,7 @@ function SourcePolymeraseExtension({ source, requestStatus, sendPostRequest }) {
       sequences: inputSequences,
       source: { id: sourceId, input: inputSequences.map((e) => ({ sequence: e.id })) },
     };
-    sendPostRequest({ endpoint: 'polymerase_extension', requestData, source });
+    sendSourceRequest({ endpoint: 'polymerase_extension', requestData, source });
   };
   // No need for MultipleOutputsSelector, since there is only one output
   return (

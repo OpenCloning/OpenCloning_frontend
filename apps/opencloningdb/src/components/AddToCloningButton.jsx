@@ -14,7 +14,7 @@ function AddToCloningButton({ selectedEntities, children, entityType, ...rest })
 
   const { addAlert } = useCloningAlerts();
   const setHistoryFileError = (e) => addAlert({ message: e, severity: 'error' });
-  const { loadDatabaseFile } = useLoadDatabaseFile({ source: null, sendPostRequest: null, setHistoryFileError });
+  const { loadDatabaseFile } = useLoadDatabaseFile({ source: null, sendSourceRequest: null, setHistoryFileError });
   const dispatch = useDispatch();
   const store = useStore();
   if (selectedEntities.length < 1) {

@@ -5,8 +5,11 @@ import { getReferenceAssemblyId, taxonSuggest, geneSuggest, getInfoFromAssemblyI
 import TextFieldValidate from '../form/TextFieldValidate';
 import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 import GetRequestMultiSelect from '../form/GetRequestMultiSelect';
-import useHttpClient from '../../hooks/useHttpClient';
 import { formatSequenceLocationString } from '@opencloning/utils/other';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
+
+// External urls (not the backend): no auth token, only whitelisted urls
+const httpClient = getExternalHttpClient();
 
 function getGeneCoordsInfo(gene) {
   const { range: geneRange, accession_version: accessionVersion } = gene.annotation.genomic_regions[0].gene_range;
@@ -59,7 +62,6 @@ function SpeciesPicker({ setSpecies, setAssemblyId }) {
 }
 
 function SequenceAccessionPicker({ assemblyAccession, setSequenceAccession }) {
-  const httpClient = useHttpClient();
 
   const url = `https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/${assemblyAccession}/sequence_reports`
   return (
@@ -80,7 +82,7 @@ function SequenceAccessionPicker({ assemblyAccession, setSequenceAccession }) {
 }
 
 // Extra component to be used in SourceGenomeRegion
-function SourceGenomeRegionLocusOnReference({ source, requestStatus, sendPostRequest }) {
+function SourceGenomeRegionLocusOnReference({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
   const [gene, setGene] = React.useState(null);
   const [species, setSpecies] = React.useState(null);
@@ -92,7 +94,7 @@ function SourceGenomeRegionLocusOnReference({ source, requestStatus, sendPostReq
     event.preventDefault();
     const requestData = formatBackendPayloadWithGene(assemblyId, gene, Number(upstreamBasesRef.current.value), Number(downstreamBasesRef.current.value));
     requestData.id = sourceId;
-    sendPostRequest({ endpoint: 'genome_coordinates', requestData, source });
+    sendSourceRequest({ endpoint: 'genome_coordinates', requestData, source });
   };
 
   // Reset gene when species changes
@@ -212,7 +214,7 @@ function AssemblyIdSelector({ setAssemblyId, setHasAnnotation = () => {}, onAsse
 }
 
 // Extra component to be used in SourceGenomeRegion
-function SourceGenomeRegionLocusOnOther({ source, requestStatus, sendPostRequest }) {
+function SourceGenomeRegionLocusOnOther({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
   const [gene, setGene] = React.useState(null);
   const [assemblyId, setAssemblyId] = React.useState('');
@@ -224,7 +226,7 @@ function SourceGenomeRegionLocusOnOther({ source, requestStatus, sendPostRequest
     event.preventDefault();
     const requestData = formatBackendPayloadWithGene(assemblyId, gene, Number(upstreamBasesRef.current.value), Number(downstreamBasesRef.current.value));
     requestData.id = sourceId;
-    sendPostRequest({ endpoint: 'genome_coordinates', requestData, source });
+    sendSourceRequest({ endpoint: 'genome_coordinates', requestData, source });
   };
 
   return (
@@ -247,7 +249,7 @@ function SourceGenomeRegionLocusOnOther({ source, requestStatus, sendPostRequest
 }
 
 // Extra component to be used in SourceGenomeRegion
-function SourceGenomeRegionCustomCoordinates({ source, requestStatus, sendPostRequest, selectionMode }) {
+function SourceGenomeRegionCustomCoordinates({ source, requestStatus, sendSourceRequest, selectionMode }) {
   // https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi?dbfrom=nuccore&db=assembly&id=CM041205.1&idtype=acc
   const { id: sourceId } = source;
   const [species, setSpecies] = React.useState(null);
@@ -297,7 +299,7 @@ function SourceGenomeRegionCustomCoordinates({ source, requestStatus, sendPostRe
       assembly_accession: assemblyId || null,
       coordinates: formatSequenceLocationString(coords.start, coords.end, coords.strand === 'plus' ? 1 : -1),
     };
-    sendPostRequest({ endpoint: 'genome_coordinates', requestData, source });
+    sendSourceRequest({ endpoint: 'genome_coordinates', requestData, source });
   };
 
   const onSequenceAccessionChange = async (userInput, resp) => {
@@ -458,7 +460,7 @@ function SourceGenomeRegionSelectGene({ gene, upstreamBasesRef, downstreamBasesR
   );
 }
 
-function SourceGenomeRegion({ source, requestStatus, sendPostRequest }) {
+function SourceGenomeRegion({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
   const [selectionMode, setSelectionMode] = React.useState('');
   const changeSelectionMode = (event) => { setSelectionMode(event.target.value); };
@@ -482,9 +484,9 @@ function SourceGenomeRegion({ source, requestStatus, sendPostRequest }) {
           </Select>
         </FormControl>
       </form>
-      {selectionMode === 'reference_genome' && (<SourceGenomeRegionLocusOnReference {...{ source, requestStatus, sendPostRequest }} />)}
-      {selectionMode === 'other_assembly' && (<SourceGenomeRegionLocusOnOther {...{ source, requestStatus, sendPostRequest }} />)}
-      {selectionMode.startsWith('custom') && (<SourceGenomeRegionCustomCoordinates {...{ source, requestStatus, sendPostRequest, selectionMode }} />)}
+      {selectionMode === 'reference_genome' && (<SourceGenomeRegionLocusOnReference {...{ source, requestStatus, sendSourceRequest }} />)}
+      {selectionMode === 'other_assembly' && (<SourceGenomeRegionLocusOnOther {...{ source, requestStatus, sendSourceRequest }} />)}
+      {selectionMode.startsWith('custom') && (<SourceGenomeRegionCustomCoordinates {...{ source, requestStatus, sendSourceRequest, selectionMode }} />)}
 
     </>
   );

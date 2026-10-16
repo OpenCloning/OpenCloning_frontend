@@ -1,22 +1,20 @@
 import { useState, useCallback } from 'react';
 import error2String from '@opencloning/utils/error2String';
-import useBackendRoute from './useBackendRoute';
 import useCloningAlerts from './useCloningAlerts';
-import useHttpClient from './useHttpClient';
+import useBackendHttpClient from './useBackendHttpClient';
 
-export default function useBackendAPI() {
+export default function useSourceRequest() {
   const [requestStatus, setRequestStatus] = useState({ status: null, message: '' });
   const [sources, setSources] = useState([]);
   const [sequences, setSequences] = useState([]);
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   const { addAlert } = useCloningAlerts();
 
-  const sendPostRequest = useCallback(async ({ endpoint, requestData, config = {}, source: { output }, modifySource = (s) => s }) => {
+  const sendSourceRequest = useCallback(async ({ endpoint, requestData, config = {}, source: { output }, modifySource = (s) => s }) => {
     setRequestStatus({ status: 'loading', message: 'loading' });
 
     // Url built like this in case trailing slash
-    const url = backendRoute(endpoint);
+    const url = endpoint;
     // paramsSerializer: { indexes: null } is to correctly serialize arrays in the URL
     const fullConfig = { ...config, paramsSerializer: { indexes: null } };
     try {
@@ -50,5 +48,5 @@ export default function useBackendAPI() {
     }
   }, []);
 
-  return { requestStatus, sources, sequences, sendPostRequest };
+  return { requestStatus, sources, sequences, sendSourceRequest };
 }

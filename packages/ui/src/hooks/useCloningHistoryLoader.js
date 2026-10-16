@@ -8,9 +8,8 @@ import {
   parseHistoryFile,
   updateVerificationFileNames,
 } from '@opencloning/utils/readNwrite';
-import useBackendRoute from './useBackendRoute';
 import useCloningAlerts from './useCloningAlerts';
-import useHttpClient from './useHttpClient';
+import useBackendHttpClient from './useBackendHttpClient';
 import useValidateState from './useValidateState';
 
 const {
@@ -31,9 +30,8 @@ export default function useCloningHistoryLoader() {
   const store = useStore();
   const validateState = useValidateState();
   const { addAlert } = useCloningAlerts();
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
-  const snapgeneUrl = backendRoute('read_snapgene_history');
+  const httpClient = useBackendHttpClient();
+  const snapgeneUrl = 'read_snapgene_history';
 
   const applyCloningStrategy = React.useCallback(async (cloningStrategy, options = {}) => {
     const {

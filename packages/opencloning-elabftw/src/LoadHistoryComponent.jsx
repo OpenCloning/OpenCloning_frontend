@@ -3,9 +3,10 @@ import React from 'react';
 import { eLabFTWHttpClient, readHeaders } from './common';
 import RetryAlert from '@opencloning/ui/components/form/RetryAlert';
 import { getFileFromELabFTW } from './utils';
+import { encodePathSegment } from '@opencloning/utils/urlUtils';
 
 function LoadHistoryComponent({ databaseId, loadDatabaseFile }) {
-  const url = `/api/v2/items/${databaseId}`;
+  const url = `/api/v2/items/${encodePathSegment(databaseId)}`;
   const [error, setError] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [retry, setRetry] = React.useState(0);

@@ -1,18 +1,16 @@
 import * as React from 'react';
 import GetRequestMultiSelect from './GetRequestMultiSelect';
-import useBackendRoute from '../../hooks/useBackendRoute';
-import useHttpClient from '../../hooks/useHttpClient';
+import useBackendHttpClient from '../../hooks/useBackendHttpClient';
 
 function EnzymeMultiSelect({ setEnzymes, label = 'Enzymes used', multiple = true }) {
-  const backendRoute = useBackendRoute();
-  const url = backendRoute('restriction_enzyme_list');
+  const url = 'restriction_enzyme_list';
   const getOptionsFromResponse = React.useCallback((data) => data.enzyme_names, []);
   const messages = React.useMemo(() => ({
     loadingMessage: 'retrieving enzymes...',
     errorMessage: 'Could not retrieve enzymes from server',
   }), []);
   const onChange = React.useCallback((value) => setEnzymes(value), [setEnzymes]);
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
 
   return (
 

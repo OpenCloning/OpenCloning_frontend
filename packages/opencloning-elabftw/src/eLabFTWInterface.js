@@ -6,9 +6,10 @@ import GetPrimerComponent from './GetPrimerComponent';
 import { eLabFTWHttpClient, writeHeaders, readHeaders, baseUrl, getELabFTWVersion } from './common';
 import { getFileFromELabFTW, error2String } from './utils';
 import LoadHistoryComponent from './LoadHistoryComponent';
+import { encodePathSegment } from '@opencloning/utils/urlUtils';
 
 async function deleteResource(resourceId) {
-  const url = `/api/v2/items/${resourceId}`;
+  const url = `/api/v2/items/${encodePathSegment(resourceId)}`;
   // eLabFTW requires application/json for delete requests, axios seems to require a data field for it to work
   const resp = await eLabFTWHttpClient.delete(url, { data: {}, headers: { ...writeHeaders, 'Content-Type': 'application/json' } });
   return resp.data;
@@ -16,7 +17,7 @@ async function deleteResource(resourceId) {
 
 const linkToParent = async (childId, parentId) => {
   await eLabFTWHttpClient.post(
-    `/api/v2/items/${childId}/items_links/${parentId}`,
+    `/api/v2/items/${encodePathSegment(childId)}/items_links/${encodePathSegment(parentId)}`,
     {},
     { headers: writeHeaders },
   );
@@ -36,7 +37,7 @@ const createResource = async (categoryId) => {
 };
 
 const patchResource = async (resourceId, title, metadata = undefined) => eLabFTWHttpClient.patch(
-  `/api/v2/items/${resourceId}`,
+  `/api/v2/items/${encodePathSegment(resourceId)}`,
   { title, ...(metadata !== undefined && { metadata }) },
   { headers: writeHeaders },
 );
@@ -76,7 +77,7 @@ async function uploadTextFileToResource(resourceId, fileName, textContent, comme
   const formData = new FormData();
   formData.append('file', blob, fileName);
   formData.append('comment', comment);
-  const response = await eLabFTWHttpClient.post(`/api/v2/items/${resourceId}/uploads`, formData, { headers: writeHeaders });
+  const response = await eLabFTWHttpClient.post(`/api/v2/items/${encodePathSegment(resourceId)}/uploads`, formData, { headers: writeHeaders });
   return Number(response.headers.location.split('/').pop());
 }
 
@@ -192,7 +193,7 @@ async function loadSequenceFromUrlParams(urlParams) {
   const { item_id: itemId, file_id: fileId } = urlParams;
 
   if (itemId && fileId) {
-    const url = `/api/v2/items/${itemId}/uploads/${fileId}`;
+    const url = `/api/v2/items/${encodePathSegment(itemId)}/uploads/${encodePathSegment(fileId)}`;
     let fileInfo;
     try {
       const resp = await eLabFTWHttpClient.get(url, { headers: readHeaders });
@@ -209,7 +210,7 @@ async function loadSequenceFromUrlParams(urlParams) {
 }
 
 async function getPrimer(databaseId) {
-  const url = `/api/v2/items/${databaseId}`;
+  const url = `/api/v2/items/${encodePathSegment(databaseId)}`;
   try {
     const resp = await eLabFTWHttpClient.get(url, { headers: readHeaders });
     resp.data.metadata = JSON.parse(resp.data.metadata);
@@ -224,7 +225,7 @@ async function getPrimer(databaseId) {
 }
 
 async function getSequenceName(databaseId) {
-  const url = `/api/v2/items/${databaseId}`;
+  const url = `/api/v2/items/${encodePathSegment(databaseId)}`;
   try {
     const resp = await eLabFTWHttpClient.get(url, { headers: readHeaders });
     return resp.data.title;
@@ -241,7 +242,7 @@ async function getSequencingFiles(databaseId) {
   // This function should return an array of objects:
   // name: the name of the file
   // getFile: an async function that returns the file content
-  const url = `/api/v2/items/${databaseId}/uploads`;
+  const url = `/api/v2/items/${encodePathSegment(databaseId)}/uploads`;
   try {
     const resp = await eLabFTWHttpClient.get(url, { headers: readHeaders });
     return resp.data.map((fileInfo) => ({

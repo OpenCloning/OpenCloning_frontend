@@ -9,7 +9,7 @@ ALL_FILES="$ALL_FILES $(find apps -name "*.js" -o -name "*.jsx" | grep -v "test.
 EXCLUDED_PATHS="node_modules|dist|build"
 FILES_WITH_AXIOS=$(grep -l "import.*axios\|axios.*import" $ALL_FILES | grep -v -E "$EXCLUDED_PATHS")
 
-ACCEPTED_FILES="packages/utils/src/utils/getHttpClient.js packages/opencloning-elabftw/src/common.js packages/opencloningdb/src/common.js"
+ACCEPTED_FILES="packages/utils/src/utils/httpClients.js packages/opencloning-elabftw/src/common.js packages/opencloningdb/src/common.js"
 
 
 for file in $FILES_WITH_AXIOS; do

@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { classNameToEndPointMap } from '@opencloning/utils/sourceFunctions'
-import useBackendRoute from '../../hooks/useBackendRoute'
-import useHttpClient from '../../hooks/useHttpClient'
+import useBackendHttpClient from '../../hooks/useBackendHttpClient'
 import { arrayCombinations } from './assembler_utils'
 
 
@@ -28,8 +27,7 @@ function formatLoadedFile(plasmid, id) {
 }
 
 export const useAssembler = () => {
-  const httpClient = useHttpClient();
-  const backendRoute = useBackendRoute();
+  const httpClient = useBackendHttpClient();
 
   const requestSources = useCallback(async (assemblerOutput) => {
     const processedOutput = []
@@ -41,7 +39,7 @@ export const useAssembler = () => {
             processedOutput[pos].push(formatLoadedFile(plasmid, pos + 1))
           } else {
             const { source } = plasmid;
-            const url = backendRoute(classNameToEndPointMap[source.type])
+            const url = classNameToEndPointMap[source.type]
             const {data} = await httpClient.post(url, source)
             if (data.sources.length !== 1) {
               console.error('Expected 1 source, got ' + data.sources.length)
@@ -59,7 +57,7 @@ export const useAssembler = () => {
       }
     }
     return processedOutput
-  }, [ httpClient, backendRoute ])
+  }, [ httpClient ])
 
 
   const requestAssemblies = useCallback(async (requestedSources, enzymes=['BsaI']) => {
@@ -67,7 +65,7 @@ export const useAssembler = () => {
     const assemblies = arrayCombinations(requestedSources);
     const output = []
     for (let assembly of assemblies) {
-      const url = backendRoute('restriction_and_ligation')
+      const url = 'restriction_and_ligation'
       const config = {
         params: {
           circular_only: true,
@@ -102,7 +100,7 @@ export const useAssembler = () => {
       }
     }
     return output;
-  }, [ httpClient, backendRoute ])
+  }, [ httpClient ])
 
   return { requestSources, requestAssemblies }
 }
