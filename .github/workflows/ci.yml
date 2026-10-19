@@ -179,8 +179,7 @@ jobs:
           uv run uvicorn opencloning.main:app --port 8000 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
-          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
-          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          ADDGENE_TOKEN: ${{ secrets.ADDGENE_TOKEN }}
 
       - name: run postgres in docker
         if: ${{ startsWith(matrix.group, 'opencloningdb') }}
@@ -197,8 +196,7 @@ jobs:
             > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
-          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
-          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          ADDGENE_TOKEN: ${{ secrets.ADDGENE_TOKEN }}
           OPENCLONING_TESTING: "1"
           OIDC_TEST_MODE: "1"
           OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
@@ -213,8 +211,7 @@ jobs:
             > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
         env:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
-          ADDGENE_USERNAME: ${{ secrets.ADDGENE_USERNAME }}
-          ADDGENE_PASSWORD: ${{ secrets.ADDGENE_PASSWORD }}
+          ADDGENE_TOKEN: ${{ secrets.ADDGENE_TOKEN }}
           OPENCLONING_TESTING: "1"
           OPENCLONING_DB_URL: postgresql+psycopg://dbuser:dbpassword@localhost:5432/opencloning_dev
           OIDC_TEST_MODE: "0"
