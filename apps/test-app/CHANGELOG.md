@@ -1,5 +1,14 @@
 # test-app
 
+## 1.1.48
+
+### Patch Changes
+
+- Updated dependencies [[`fe1d81c`](https://github.com/OpenCloning/OpenCloning_frontend/commit/fe1d81c6f4b85f6317a2a9e46cc68c571c79c394), [`fe1d81c`](https://github.com/OpenCloning/OpenCloning_frontend/commit/fe1d81c6f4b85f6317a2a9e46cc68c571c79c394), [`fe1d81c`](https://github.com/OpenCloning/OpenCloning_frontend/commit/fe1d81c6f4b85f6317a2a9e46cc68c571c79c394)]:
+  - @opencloning/utils@2.0.0
+  - @opencloning/ui@2.0.0
+  - @opencloning/store@2.0.0
+
 ## 1.1.47
 
 ### Patch Changes
