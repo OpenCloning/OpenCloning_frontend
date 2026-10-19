@@ -56,4 +56,16 @@ describe('getBackendHttpClient', () => {
     expect(() => getBackendHttpClient(undefined)).toThrow('backendUrl is required');
     expect(() => getBackendHttpClient('', { authenticated: true })).toThrow('backendUrl is required');
   });
+
+  it('resolves relative backend urls against the current origin and keeps absolute ones', () => {
+    const { origin } = window.location;
+
+    const relative = getBackendHttpClient('/cloning');
+    expect(relative.defaults.baseURL).toBe(`${origin}/cloning`);
+    expect(relative.getUri({ url: 'version' })).toBe(`${origin}/cloning/version`);
+    expect(relative.getUri({ url: 'https://evil.org/x' })).toBe(`${origin}/cloning/https://evil.org/x`);
+
+    const absolute = getBackendHttpClient('https://api.example.com/cloning');
+    expect(absolute.defaults.baseURL).toBe('https://api.example.com/cloning');
+  });
 });

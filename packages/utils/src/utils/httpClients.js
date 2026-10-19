@@ -39,7 +39,8 @@ export function getBackendHttpClient(backendUrl, { authenticated = false } = {})
   if (!backendUrl) {
     throw new Error('backendUrl is required to create a backend http client');
   }
-  const client = axios.create({ baseURL: backendUrl, allowAbsoluteUrls: false });
+  // Handles both absolute and relative urls
+  const client = axios.create({ baseURL: new URL(backendUrl, window.location.origin).href, allowAbsoluteUrls: false });
   if (authenticated) {
     attachAuthInterceptors(client);
   }

@@ -3,8 +3,8 @@
 "@opencloning/opencloningdb": patch
 "opencloningdb": patch
 "opencloning": patch
-"@opencloning/utils": minor
-"@opencloning/ui": minor
+"@opencloning/utils": major
+"@opencloning/ui": major
 ---
 
 Only send the auth token to the backend, and rename the http client APIs.
