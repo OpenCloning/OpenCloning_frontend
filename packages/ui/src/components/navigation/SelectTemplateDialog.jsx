@@ -2,14 +2,16 @@ import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, CircularP
 
 import React from 'react';
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
-import useHttpClient from '../../hooks/useHttpClient';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
+
+// External urls (not the backend): no auth token, only whitelisted urls
+const httpClient = getExternalHttpClient();
 
 function SelectTemplateDialog({ onClose, open }) {
   const [templates, setTemplates] = React.useState(null);
   const [connectAttempt, setConnectAttemp] = React.useState(0);
   const [error, setError] = React.useState(null);
   const baseUrl = 'https://assets.opencloning.org/OpenCloning-submission';
-  const httpClient = useHttpClient();
 
   React.useEffect(() => {
     const fetchData = async () => {

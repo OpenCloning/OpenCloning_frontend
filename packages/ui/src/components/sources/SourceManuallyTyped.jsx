@@ -4,7 +4,7 @@ import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 import ValidatedTextField from '../form/ValidatedTextField';
 import { stringIsNotDNA } from '@opencloning/store/cloning_utils';
 
-function SourceManuallyTyped({ source, requestStatus, sendPostRequest }) {
+function SourceManuallyTyped({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
 
   const [userInput, setUserInput] = React.useState('');
@@ -48,7 +48,7 @@ function SourceManuallyTyped({ source, requestStatus, sendPostRequest }) {
           overhang_watson_3prime: overhangWatson3prime,
         },
       };
-      sendPostRequest({ endpoint: 'manually_typed', requestData, source });
+      sendSourceRequest({ endpoint: 'manually_typed', requestData, source });
     }
   };
 

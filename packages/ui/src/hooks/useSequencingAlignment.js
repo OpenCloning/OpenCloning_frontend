@@ -1,17 +1,15 @@
 import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { buildAlignmentTrack, buildReferenceTrack, buildAlignmentConfig } from '@opencloning/utils/alignmentUtils';
-import useBackendRoute from './useBackendRoute';
-import useHttpClient from './useHttpClient';
+import useBackendHttpClient from './useBackendHttpClient';
 
 export default function useSequencingAlignment({ onError } = {}) {
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
 
   const fetchAlignments = useCallback(async ({ sequenceModel, sequenceData, parsedFiles }) => {
     // parsedFiles: [{ fileName, fileContent }] where fileContent is getTeselaJsonFromBase64 output
     const traces = parsedFiles.map((f) => f.fileContent.sequence);
-    const resp = await httpClient.post(backendRoute('align_sanger'), { sequence: sequenceModel, traces });
+    const resp = await httpClient.post('align_sanger', { sequence: sequenceModel, traces });
 
     const referenceTrack = buildReferenceTrack(sequenceData, resp.data[0]);
     const otherTracks = parsedFiles.map((f, i) => {
@@ -20,7 +18,7 @@ export default function useSequencingAlignment({ onError } = {}) {
     });
 
     return buildAlignmentConfig(sequenceModel.id, sequenceData, [referenceTrack, ...otherTracks]);
-  }, [httpClient, backendRoute]);
+  }, [httpClient]);
 
   return useMutation({ mutationFn: fetchAlignments, onError });
 }

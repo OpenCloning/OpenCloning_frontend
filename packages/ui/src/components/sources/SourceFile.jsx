@@ -14,7 +14,7 @@ const fileFormatToExtension = {
 };
 
 // A component providing an interface to import a file
-function SourceFile({ source, requestStatus, sendPostRequest }) {
+function SourceFile({ source, requestStatus, sendSourceRequest }) {
   const [circularize, setCircularize] = React.useState(false);
   const [showCoordinates, setShowCoordinates] = React.useState(false);
   const [coordinates, setCoordinates] = React.useState({ start: null, end: null });
@@ -80,7 +80,7 @@ function SourceFile({ source, requestStatus, sendPostRequest }) {
       },
       params: { circularize, sequence_file_format: fileFormat || null, ...coordinates },
     };
-    sendPostRequest({ endpoint: 'read_from_file', requestData, config, source });
+    sendSourceRequest({ endpoint: 'read_from_file', requestData, config, source });
   };
 
   const updateCoordinates = (value, isStart) => {

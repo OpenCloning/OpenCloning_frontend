@@ -3,10 +3,10 @@ import { IconButton, InputAdornment, InputLabel, MenuItem, TextField, FormContro
 import { Clear as ClearIcon } from '@mui/icons-material';
 import SubmitButtonBackendAPI from '../form/SubmitButtonBackendAPI';
 import RequestStatusWrapper from '../form/RequestStatusWrapper';
-import getHttpClient from '@opencloning/utils/getHttpClient';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
 import repositoryMetadata from './repositoryMetadata';
 
-const httpClient = getHttpClient();
+const httpClient = getExternalHttpClient();
 
 function validateRepositoryId(repositoryId, repository) {
   switch (repository) {
@@ -243,7 +243,7 @@ function IndexJsonSelector({
 
 // A component providing an interface for the user to type a repository ID
 // and get a sequence
-function SourceRepositoryId({ source, requestStatus, sendPostRequest }) {
+function SourceRepositoryId({ source, requestStatus, sendSourceRequest }) {
   const { id: sourceId } = source;
   const [inputValue, setInputValue] = React.useState('');
   const [repositoryType, setRepositoryType] = React.useState(source.type || '');
@@ -290,7 +290,7 @@ function SourceRepositoryId({ source, requestStatus, sendPostRequest }) {
       extra.sequence_file_url = encodeURI(inputValue.url);
     }
     const requestData = { id: sourceId, ...extra, type: repositoryType };
-    sendPostRequest({ endpoint: `repository_id/${repositoryMeta.slug}`, requestData, source });
+    sendSourceRequest({ endpoint: `repository_id/${repositoryMeta.slug}`, requestData, source });
   };
   const helperText = error || (repositoryMeta?.example && `Example: ${repositoryMeta.example}`);
   return (

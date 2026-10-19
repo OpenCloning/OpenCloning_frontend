@@ -1,13 +1,13 @@
 import React from 'react'
 import { Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText, ListItemButton, Alert, Button, Box, ButtonGroup, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
-import getHttpClient from '@opencloning/utils/getHttpClient';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
 import RequestStatusWrapper from '../form/RequestStatusWrapper';
 import ServerStaticFileSelect from '../form/ServerStaticFileSelect';
 import { readSubmittedTextFile } from '@opencloning/utils/readNwrite';
 import { normalizeSyntaxEnzymes } from '@opencloning/utils/normalizeSyntax';
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 
-const httpClient = getHttpClient();
+const httpClient = getExternalHttpClient();
 const baseURL = 'https://assets.opencloning.org/syntaxes/syntaxes/';
 httpClient.defaults.baseURL = baseURL;
 

@@ -7,6 +7,8 @@ export const writeHeaders = writeApiKey ? { Authorization: writeApiKey } : {};
 
 export const eLabFTWHttpClient = axios.create({
   baseURL: baseUrl,
+  // Every url is appended to baseURL, so requests (and the API key) only reach eLabFTW
+  allowAbsoluteUrls: false,
 });
 
 export const makeSequenceMetadata = (sequence) => JSON.stringify({

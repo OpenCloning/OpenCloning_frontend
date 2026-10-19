@@ -1,10 +1,10 @@
 import React from 'react';
-import getHttpClient from '@opencloning/utils/getHttpClient';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
 import { useConfig } from '../providers';
 import useRequestForEffect from './useRequestForEffect';
 
 
-export const localFilesHttpClient = getHttpClient([]);
+export const localFilesHttpClient = getExternalHttpClient();
 
 function sequencesToCategories(sequences) {
   const allCategories = sequences

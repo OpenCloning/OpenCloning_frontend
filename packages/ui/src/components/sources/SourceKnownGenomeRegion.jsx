@@ -4,7 +4,7 @@ import { geneSuggest } from '@opencloning/utils/ncbiRequests';
 import { formatBackendPayloadWithGene } from './SourceGenomeRegion';
 import { Box, CircularProgress } from '@mui/material';
 
-function SourceKnownGenomeRegion({ source, requestStatus, sendPostRequest }) {
+function SourceKnownGenomeRegion({ source, requestStatus, sendSourceRequest }) {
   // A source where we pass a complete GenomeCoordinatesSource, so we just have to make the request
   const [error, setError] = React.useState('');
   const [connectAttempt, setConnectAttempt] = React.useState(0);
@@ -25,14 +25,14 @@ function SourceKnownGenomeRegion({ source, requestStatus, sendPostRequest }) {
         }
         const requestData = formatBackendPayloadWithGene(source.assembly_accession, resp[0], source.padding, source.padding);
         requestData.id = source.id;
-        sendPostRequest({ endpoint: 'genome_coordinates', requestData, source });
+        sendSourceRequest({ endpoint: 'genome_coordinates', requestData, source });
       }
       else {
         const requestData = {
           ...source,
           type: 'GenomeCoordinatesSource',
         };
-        sendPostRequest({ endpoint: 'genome_coordinates', requestData, source });
+        sendSourceRequest({ endpoint: 'genome_coordinates', requestData, source });
       }
     }
   makeRequest();

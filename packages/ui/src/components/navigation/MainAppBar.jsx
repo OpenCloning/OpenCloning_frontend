@@ -15,7 +15,10 @@ import DownloadCloningStrategyDialog from '../DownloadCloningStrategyDialog';
 import LoadCloningHistoryWrapper from '../LoadCloningHistoryWrapper';
 import useCloningHistoryLoader from '../../hooks/useCloningHistoryLoader';
 import GithubCornerRight from './GithubCornerRight';
-import useHttpClient from '../../hooks/useHttpClient';
+import { getExternalHttpClient } from '@opencloning/utils/httpClients';
+
+// External urls (not the backend): no auth token, only whitelisted urls
+const httpClient = getExternalHttpClient();
 
 const { setCurrentTab } = cloningActions;
 
@@ -28,7 +31,6 @@ function MainAppBar() {
   const [openVersionDialog, setOpenVersionDialog] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
-  const httpClient = useHttpClient();
 
   const dispatch = useDispatch();
   const { addAlert } = useCloningAlerts();

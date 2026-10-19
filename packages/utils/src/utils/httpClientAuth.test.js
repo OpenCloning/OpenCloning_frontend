@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { attachAuthInterceptors, setHttpClientTokenGetter, setHttpClientUnauthorizedHandler } from './httpClientAuth';
 
+const createClient = () => axios.create({ baseURL: 'http://localhost:8000/db', allowAbsoluteUrls: false });
+
 describe('httpClientAuth', () => {
   beforeEach(() => {
     setHttpClientUnauthorizedHandler(null);
@@ -15,7 +17,7 @@ describe('httpClientAuth', () => {
   });
 
   it('leaves request headers unchanged when no token getter is set', async () => {
-    const client = attachAuthInterceptors(axios.create());
+    const client = attachAuthInterceptors(createClient());
     const requestFulfilled = client.interceptors.request.handlers[0].fulfilled;
     const config = { headers: {} };
 
@@ -26,7 +28,7 @@ describe('httpClientAuth', () => {
   });
 
   it('adds the bearer token from a sync token getter', async () => {
-    const client = attachAuthInterceptors(axios.create());
+    const client = attachAuthInterceptors(createClient());
     const requestFulfilled = client.interceptors.request.handlers[0].fulfilled;
     const config = { headers: {} };
 
@@ -39,7 +41,7 @@ describe('httpClientAuth', () => {
   });
 
   it('adds the bearer token from an async token getter', async () => {
-    const client = attachAuthInterceptors(axios.create());
+    const client = attachAuthInterceptors(createClient());
     const requestFulfilled = client.interceptors.request.handlers[0].fulfilled;
     const config = { headers: {} };
 
@@ -52,7 +54,7 @@ describe('httpClientAuth', () => {
   });
 
   it('calls the shared unauthorized handler for 401 responses', async () => {
-    const client = attachAuthInterceptors(axios.create());
+    const client = attachAuthInterceptors(createClient());
     const responseRejected = client.interceptors.response.handlers[0].rejected;
     const handler = vi.fn();
     const error = { response: { status: 401 } };
@@ -64,8 +66,14 @@ describe('httpClientAuth', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it('refuses clients that could send the token to other hosts', () => {
+    expect(() => attachAuthInterceptors(axios.create())).toThrow('allowAbsoluteUrls');
+    expect(() => attachAuthInterceptors(axios.create({ baseURL: 'http://localhost:8000' }))).toThrow('allowAbsoluteUrls');
+    expect(() => attachAuthInterceptors(axios.create({ allowAbsoluteUrls: false }))).toThrow('allowAbsoluteUrls');
+  });
+
   it('does not attach duplicate interceptors to the same client', () => {
-    const client = axios.create();
+    const client = createClient();
 
     attachAuthInterceptors(client);
     attachAuthInterceptors(client);

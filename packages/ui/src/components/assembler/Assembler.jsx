@@ -19,8 +19,7 @@ import useCombinatorialAssembly from './useCombinatorialAssembly';
 import ExistingSyntaxDialog from './ExistingSyntaxDialog';
 import error2String from '@opencloning/utils/error2String';
 import { categoryFilter, downloadAssemblerFilesAsZip, getFilesToExportFromAssembler, getDefaultAssemblyOutputName, MAX_OUTPUT_NAME_LENGTH, sanitizeOutputName } from './assembler_utils';
-import useBackendRoute from '../../hooks/useBackendRoute';
-import useHttpClient from '../../hooks/useHttpClient';
+import useBackendHttpClient from '../../hooks/useBackendHttpClient';
 import useCloningAlerts from '../../hooks/useCloningAlerts';
 import UploadPlasmidsButton from './UploadPlasmidsButton';
 import { useConfig } from '../../providers';
@@ -376,12 +375,11 @@ function categoriesFromSyntaxAndPlasmids(syntax, plasmids) {
 
 function LoadSyntaxButton({ setSyntax, addPlasmids, clearPlasmids }) {
   const [existingSyntaxDialogOpen, setExistingSyntaxDialogOpen] = React.useState(false)
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   const { staticContentPath } = useConfig();
-  const backendRoute = useBackendRoute();
   const { addAlert } = useCloningAlerts();
   const onSyntaxSelect = React.useCallback(async (syntax, plasmids) => {
-    const url = backendRoute('validate_syntax');
+    const url = 'validate_syntax';
     try {
       await httpClient.post(url, syntax);
       setSyntax(syntax)
@@ -393,7 +391,7 @@ function LoadSyntaxButton({ setSyntax, addPlasmids, clearPlasmids }) {
         severity: 'error',
       });
     }
-  }, [setSyntax, addPlasmids, clearPlasmids, httpClient, backendRoute, addAlert])
+  }, [setSyntax, addPlasmids, clearPlasmids, httpClient, addAlert])
   return <>
     <Button color="success" onClick={() => setExistingSyntaxDialogOpen(true)}>Load Syntax</Button>
     {existingSyntaxDialogOpen && <ExistingSyntaxDialog

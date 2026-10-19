@@ -1,6 +1,6 @@
-import getHttpClient from './getHttpClient';
+import { getExternalHttpClient } from './httpClients';
 
-const httpClient = getHttpClient();
+const httpClient = getExternalHttpClient();
 
 
 export async function taxonSuggest(userInput) {

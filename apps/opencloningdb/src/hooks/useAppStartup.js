@@ -1,18 +1,17 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
-import { useBackendRoute, useHttpClient } from '@opencloning/ui/hooks';
+import { useBackendHttpClient } from '@opencloning/ui/hooks';
 import { useQuery } from '@tanstack/react-query';
 
 const { updateAppInfo } = cloningActions;
 
 function useAppInfo() {
   const user = useSelector((state) => state.auth.user);
-  const backendRoute = useBackendRoute();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   const { data: response } = useQuery({
     queryKey: ['appInfo', user?.id],
-    queryFn: () => httpClient.get(backendRoute('version')),
+    queryFn: () => httpClient.get('version'),
     enabled: Boolean(user),
   });
   return response?.data;

@@ -1,16 +1,15 @@
 import React from 'react';
 import { batch, useDispatch, useStore } from 'react-redux';
 import useCloningAlerts from '../hooks/useCloningAlerts';
-import useBackendRoute from '../hooks/useBackendRoute';
 import useCloningHistoryLoader from '../hooks/useCloningHistoryLoader';
 import { getEmptyPlaceholderSource } from '@opencloning/store/cloning_utils';
 import { cloningActions } from '@opencloning/store/cloning';
 import HistoryLoadedDialog from './HistoryLoadedDialog';
-import useHttpClient from '../hooks/useHttpClient';
+import useBackendHttpClient from '../hooks/useBackendHttpClient';
 
 const { deleteSourceAndItsChildren, addSourceAndItsOutputSequence } = cloningActions;
 
-async function processSequenceFiles(files, backendRoute, httpClient) {
+async function processSequenceFiles(files, httpClient) {
   const allSources = [];
   const allSequences = [];
   const allWarnings = [];
@@ -27,7 +26,7 @@ async function processSequenceFiles(files, backendRoute, httpClient) {
         'content-type': 'multipart/form-data',
       },
     };
-    const url = backendRoute('read_from_file');
+    const url = 'read_from_file';
     try {
       const { data: { sources, sequences }, headers } = await httpClient.post(url, formData, config);
       // If there are warnings, add them to the list of warnings
@@ -57,9 +56,8 @@ async function processSequenceFiles(files, backendRoute, httpClient) {
 function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
   const { addAlert } = useCloningAlerts();
   const dispatch = useDispatch();
-  const backendRoute = useBackendRoute();
   const store = useStore();
-  const httpClient = useHttpClient();
+  const httpClient = useBackendHttpClient();
   const { loadHistoryFromFile, loadSnapgeneHistory } = useCloningHistoryLoader();
   const [fileLoaderFunctions, setFileLoaderFunctions] = React.useState(null);
 
@@ -117,7 +115,7 @@ function LoadCloningHistoryWrapper({ fileList, clearFiles, children }) {
         }
       }
       try {
-        const { sources, sequences, warnings } = await processSequenceFiles(files, backendRoute, httpClient);
+        const { sources, sequences, warnings } = await processSequenceFiles(files, httpClient);
         batch(() => {
           // If there is only one source and it is empty, delete it
           const emptyPlaceholder = getEmptyPlaceholderSource(cloningState.sources);
