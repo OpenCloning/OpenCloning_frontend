@@ -14,7 +14,7 @@ const OTHER_FILE_ID = newUniqueId();
 const TEST_FILE_CONTENT = 'test content';
 
 const commonStubHandler = (url, config) => {
-  if (url === '/api/v2/items_types') {
+  if (url === '/api/v2/teams/current/resources_categories') {
     return Promise.resolve({
       data: [
         { id: SEQUENCE_CATEGORY_ID, title: 'Sequences' },

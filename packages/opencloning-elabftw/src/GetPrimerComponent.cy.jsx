@@ -11,7 +11,7 @@ describe('<GetPrimerComponent />', () => {
 
     // Stub both endpoints in a single stub
     cy.stub(eLabFTWHttpClient, 'get').callsFake((url) => {
-      if (url === '/api/v2/items_types') {
+      if (url === '/api/v2/teams/current/resources_categories') {
         return Promise.resolve({
           data: [
             { id: PRIMER_CATEGORY_ID, title: 'Primers' },
@@ -42,7 +42,7 @@ describe('<GetPrimerComponent />', () => {
 
     // Stub both endpoints in a single stub
     cy.stub(eLabFTWHttpClient, 'get').callsFake((url, config) => {
-      if (url === '/api/v2/items_types') {
+      if (url === '/api/v2/teams/current/resources_categories') {
         return Promise.resolve({
           data: [{ id: PRIMER_CATEGORY_ID, title: 'Primers' }],
         });
@@ -89,7 +89,7 @@ describe('<GetPrimerComponent />', () => {
 
     // Stub both endpoints in a single stub
     cy.stub(eLabFTWHttpClient, 'get').callsFake((url, config) => {
-      if (url === '/api/v2/items_types') {
+      if (url === '/api/v2/teams/current/resources_categories') {
         return Promise.resolve({
           data: [{ id: PRIMER_CATEGORY_ID, title: 'Primers' }],
         });
@@ -137,7 +137,7 @@ describe('<GetPrimerComponent />', () => {
     const setErrorSpy = cy.spy().as('setErrorSpy');
 
     cy.stub(eLabFTWHttpClient, 'get').callsFake((url) => {
-      if (url === '/api/v2/items_types') {
+      if (url === '/api/v2/teams/current/resources_categories') {
         return Promise.resolve({
           data: [{ id: PRIMER_CATEGORY_ID, title: 'Primers' }],
         });
@@ -172,7 +172,7 @@ describe('<GetPrimerComponent />', () => {
 
     // Stub both endpoints in a single stub
     cy.stub(eLabFTWHttpClient, 'get').callsFake((url, config) => {
-      if (url === '/api/v2/items_types') {
+      if (url === '/api/v2/teams/current/resources_categories') {
         return Promise.resolve({
           data: [{ id: PRIMER_CATEGORY_ID, title: 'Primers' }],
         });
@@ -218,7 +218,7 @@ describe('<GetPrimerComponent />', () => {
     let firstCallCategory = true;
     let firstCallPrimer = true;
     cy.stub(eLabFTWHttpClient, 'get').callsFake((url, config) => {
-      if (url === '/api/v2/items_types') {
+      if (url === '/api/v2/teams/current/resources_categories') {
         if (firstCallCategory) {
           firstCallCategory = false;
           return Promise.reject(new Error('Network error'));
