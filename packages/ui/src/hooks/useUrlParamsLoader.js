@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
+import { useConfig } from './useConfig';
 import useDatabase from './useDatabase';
 import useLoadDatabaseFile from './useLoadDatabaseFile';
 import useCloningAlerts from './useCloningAlerts';
@@ -23,6 +24,7 @@ const { updateSource } = cloningActions;
 export default function useUrlParamsLoader() {
   const dispatch = useDispatch();
   const database = useDatabase();
+  const { mcpUrl } = useConfig();
   const { addAlert } = useCloningAlerts();
   const setHistoryFileError = (e) => addAlert({ message: e, severity: 'error' });
   const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendSourceRequest: null, setHistoryFileError });
@@ -71,6 +73,27 @@ export default function useUrlParamsLoader() {
         } catch (error) {
           addAlert({
             message: 'Error loading example',
+            severity: 'error',
+          });
+          console.error(error);
+        }
+      } else if (urlParams.source === 'mcp' && urlParams.strategy) {
+        // Only the MCP server set in the config is fetched from, never a url from the query
+        try {
+          if (!mcpUrl) {
+            throw new Error('No MCP server configured');
+          }
+          if (!/^[A-Za-z0-9_-]+$/.test(urlParams.strategy)) {
+            throw new Error('Invalid strategy id');
+          }
+          const url = `${mcpUrl.replace(/\/$/, '')}/strategies/${encodePathSegment(urlParams.strategy)}.json`;
+          const resp = await httpClient.get(url);
+          const file = new File([JSON.stringify(resp.data)], 'mcp_strategy.json');
+          const prepared = await loadHistoryFromFile(file, { onError: setHistoryFileError });
+          await prepared?.replace();
+        } catch (error) {
+          addAlert({
+            message: 'Error loading strategy from the MCP server (it may have expired or not exist)',
             severity: 'error',
           });
           console.error(error);

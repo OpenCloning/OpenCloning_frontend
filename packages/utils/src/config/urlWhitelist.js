@@ -20,4 +20,5 @@ export default [
   'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/taxonomy/taxon_suggest',
   'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/taxon',
   'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession',
+  'http://localhost:8002'
 ];

@@ -4,5 +4,6 @@
     "showAppBar": true,
     "noExternalRequests": false,
     "enableAssembler": true,
-    "enablePlannotate": true
+    "enablePlannotate": true,
+    "mcpUrl": "https://mcp.opencloning.org"
 }

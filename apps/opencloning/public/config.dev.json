@@ -4,5 +4,6 @@
     "noExternalRequests": false,
     "enableAssembler": true,
     "enablePlannotate": true,
-    "staticContentPath": "collection"
+    "staticContentPath": "collection",
+    "mcpUrl": "http://localhost:8002"
 }
