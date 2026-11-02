@@ -1,5 +1,6 @@
 import React from 'react';
 import { ConfigProvider } from '@opencloning/ui/providers/ConfigProvider';
+import { DatabaseProvider } from '@opencloning/ui/providers/DatabaseContext';
 import { localFilesHttpClient } from '@opencloning/ui/hooks';
 import UploadPlasmidsButton from './UploadPlasmidsButton';
 import mocloSyntax from '../../../../../cypress/test_files/syntax/moclo_syntax.json';
@@ -267,4 +268,78 @@ describe('<UploadPlasmidsButton />', () => {
     cy.get('@addPlasmidsSpy').should('not.have.been.called');
   });
 
+  it('does not show the database button when there is no database or it does not support bulk loading', () => {
+    cy.mount(
+      <ConfigProvider config={testConfig}>
+        <DatabaseProvider value={{ name: 'MockDB' }}>
+          <UploadPlasmidsButton addPlasmids={() => {}} syntax={mocloSyntax} />
+        </DatabaseProvider>
+      </ConfigProvider>,
+    );
+    cy.get('button').contains('Add Plasmids').should('exist');
+    cy.contains('button', 'Load Plasmids from MockDB').should('not.exist');
+  });
+
+  it('loads plasmids from the database as DatabaseSource plasmids', () => {
+    cy.readFile('cypress/test_files/syntax/pYTK002.gb').then((pYTK002) => {
+      cy.readFile('cypress/test_files/syntax/moclo_ytk_multi_part.gb').then((multiPart) => {
+        const entries = [
+          { databaseId: 10, name: 'pYTK002_db', textFileSequence: { id: 10, type: 'TextFileSequence', sequence_file_format: 'genbank', overhang_crick_3prime: 0, overhang_watson_3prime: 0, file_content: pYTK002 } },
+          { databaseId: 20, name: 'multi_part_db', textFileSequence: { id: 20, type: 'TextFileSequence', sequence_file_format: 'genbank', overhang_crick_3prime: 0, overhang_watson_3prime: 0, file_content: multiPart } },
+        ];
+        const mockDatabase = {
+          name: 'MockDB',
+          GetSequencesInBulkComponent: ({ onSequencesLoaded }) => <button type="button" onClick={() => onSequencesLoaded(entries)}>Mock load</button>,
+        };
+        const addPlasmidsSpy = cy.spy().as('addPlasmidsSpy');
+        cy.mount(
+          <ConfigProvider config={testConfig}>
+            <DatabaseProvider value={mockDatabase}>
+              <UploadPlasmidsButton addPlasmids={addPlasmidsSpy} syntax={mocloSyntax} />
+            </DatabaseProvider>
+          </ConfigProvider>,
+        );
+        cy.contains('button', 'Load Plasmids from MockDB').click();
+        cy.contains('button', 'Mock load').click();
+        // The bulk dialog closes and the valid / invalid dialog is shown
+        cy.contains('button', 'Mock load').should('not.exist');
+        cy.get('[data-testid="invalid-plasmids-box"]').contains('multi_part_db');
+        cy.get('[data-testid="valid-plasmids-box"]').contains('pYTK002_db');
+
+        cy.contains('button', 'Import valid plasmids').click();
+        cy.get('@addPlasmidsSpy').should('have.been.calledOnce');
+        cy.get('@addPlasmidsSpy').then((spy) => {
+          const plasmids = spy.getCall(0).args[0];
+          expect(plasmids).to.have.length(1);
+          const [plasmid] = plasmids;
+          expect(plasmid.type).to.equal('databaseSequence');
+          expect(plasmid.database_id).to.equal(10);
+          expect(plasmid.plasmid_name).to.equal('pYTK002_db (ConS)');
+          expect(plasmid.key).to.equal('CCCT-AACG');
+          expect(plasmid.userUploaded).to.equal(true);
+          // The sequence is kept as returned by the database
+          expect(plasmid.textFileSequence).to.deep.equal(entries[0].textFileSequence);
+        });
+      });
+    });
+  });
+
+  it('shows an error if a database sequence cannot be parsed', () => {
+    const mockDatabase = {
+      name: 'MockDB',
+      GetSequencesInBulkComponent: ({ onSequencesLoaded }) => <button type="button" onClick={() => onSequencesLoaded([{ databaseId: 1, name: 'broken', textFileSequence: { file_content: 'wrong_format' } }])}>Mock load</button>,
+    };
+    const addPlasmidsSpy = cy.spy().as('addPlasmidsSpy');
+    cy.mount(
+      <ConfigProvider config={testConfig}>
+        <DatabaseProvider value={mockDatabase}>
+          <UploadPlasmidsButton addPlasmids={addPlasmidsSpy} syntax={mocloSyntax} />
+        </DatabaseProvider>
+      </ConfigProvider>,
+    );
+    cy.contains('button', 'Load Plasmids from MockDB').click();
+    cy.contains('button', 'Mock load').click();
+    cy.get('.MuiAlert-colorError').contains('Error loading plasmid broken from database').should('exist');
+    cy.get('@addPlasmidsSpy').should('not.have.been.called');
+  });
 });

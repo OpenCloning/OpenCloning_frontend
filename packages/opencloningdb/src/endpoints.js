@@ -6,6 +6,7 @@ const endpoints = {
   sequences: '/sequences',
   sequence: (id) => `/sequences/${e(id)}`,
   sequenceTextFile: (id) => `/sequences/${e(id)}/text_file_sequence`,
+  sequenceTextFiles: '/sequences/text_file_sequences',
   sequenceChangeAnnotation: (id) => `/sequences/${e(id)}/change_annotation`,
   sequenceCloningStrategy: (id) => `/sequences/${e(id)}/cloning_strategy`,
   sequenceChildren: (id) => `/sequences/${e(id)}/children`,

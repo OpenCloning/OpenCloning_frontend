@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { ConfigProvider } from '@opencloning/ui/providers/ConfigProvider';
+import store from '@opencloning/store';
 import { AssemblerComponent } from './Assembler';
 
 
@@ -362,3 +363,67 @@ describe('<AssemblerComponent />', () => {
   });
 });
 
+describe('<AssemblerComponent /> with plasmids from a database', () => {
+  const databasePlasmids = [
+    { id: 1, key: 'CCCT-AACG', database_id: 10 },
+    { id: 2, key: 'AACG-CCCT', database_id: 20 },
+  ].map(({ id, key, database_id }) => {
+    const [left_overhang, right_overhang] = key.split('-');
+    return {
+      id,
+      type: 'databaseSequence',
+      plasmid_name: `DB Plasmid ${database_id}`,
+      database_id,
+      left_overhang,
+      right_overhang,
+      key,
+      userUploaded: true,
+      textFileSequence: { ...dummyResponse.sequences[0], id: database_id, file_content: `${dummyResponse.sequences[0].file_content}\n${database_id}` },
+    };
+  });
+
+  it('uses the database sequences and creates DatabaseSources', () => {
+    cy.intercept('POST', 'http://localhost:8000/restriction_and_ligation*', (req) => {
+      // Sequence content is the one from the database, no request is made to fetch them
+      expect(req.body.sequences.map((s) => s.file_content)).to.deep.equal(databasePlasmids.map((p) => p.textFileSequence.file_content));
+      req.reply({ statusCode: 200, body: dummyResponse2 });
+    }).as('assemblySuccess');
+
+    cy.mount(
+      <ConfigProvider config={testConfig}>
+        <AssemblerComponent
+          plasmids={databasePlasmids}
+          categories={mockCategories}
+          assemblyEnzymes={['assembly_enzyme']}
+          addAlert={cy.stub().as('addAlert')}
+          appInfo={{}}
+        />
+      </ConfigProvider>,
+    );
+    cy.get('[data-testid="plasmid-select"]').first().within(() => {
+      cy.get('input').click();
+    });
+    cy.get('li').contains('DB Plasmid 10').click();
+    cy.get('[data-testid="plasmid-select"]').eq(1).within(() => {
+      cy.get('input').click();
+    });
+    cy.get('li').contains('DB Plasmid 20').click();
+
+    cy.get('[data-testid="assembler-submit-button"]').click();
+    cy.wait('@assemblySuccess');
+    cy.get('[data-testid="assembler-product-table"]').contains('DB Plasmid 10').should('exist');
+
+    cy.get('[data-testid="assembler-product-table-view-button"]').first().click();
+    cy.then(() => {
+      const { sources, sequences } = store.getState().cloning;
+      const databaseSources = sources.filter((s) => s.type === 'DatabaseSource');
+      expect(databaseSources.map((s) => s.database_id)).to.deep.equal([10, 20]);
+      databaseSources.forEach((source) => {
+        expect(source.input).to.deep.equal([]);
+        const sequence = sequences.find((seq) => seq.id === source.id);
+        expect(sequence.file_content).to.equal(databasePlasmids.find((p) => p.database_id === source.database_id).textFileSequence.file_content);
+      });
+    });
+    cy.get('@addAlert').should('have.not.been.called');
+  });
+});

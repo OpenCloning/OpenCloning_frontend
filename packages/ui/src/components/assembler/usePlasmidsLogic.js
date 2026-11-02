@@ -10,7 +10,7 @@ import { aliasedEnzymesByName } from '@teselagen/sequence-utils';
  * @param {Array} params.parts - Array of parts
  * @param {string[]} params.assemblyEnzymes - Assembly enzyme names
  * @param {Object} params.overhangNames - Mapping of overhangs to names
- * @returns {Object} - { linkedPlasmids, setLinkedPlasmids, uploadPlasmids }
+ * @returns {Object} - { linkedPlasmids, setLinkedPlasmids, uploadPlasmids, loadPlasmidsFromDatabase }
  */
 export function usePlasmidsLogic({ parts, assemblyEnzymes, overhangNames }) {
   const [linkedPlasmids, setLinkedPlasmidsState] = React.useState([]);
@@ -82,5 +82,20 @@ export function usePlasmidsLogic({ parts, assemblyEnzymes, overhangNames }) {
     setLinkedPlasmids(plasmids);
   }, [setLinkedPlasmids]);
 
-  return { linkedPlasmids, setLinkedPlasmids, uploadPlasmids };
+  // entries: [{ databaseId, name, textFileSequence }], as returned by database.GetSequencesInBulkComponent
+  // Topology is not forced to circular, since the sequence is used as stored in the database.
+  const loadPlasmidsFromDatabase = React.useCallback(async (entries) => {
+    const plasmids = await Promise.all(entries.map(async ({ databaseId, name, textFileSequence }) => {
+      try {
+        const data = await anyToJson(textFileSequence.file_content, { fileName: 'sequence.gb' });
+        const sequenceData = data[0].parsedSequence;
+        return { ...sequenceData, appData: { fileName: name, databaseId, textFileSequence, correspondingParts: [], partInfo: [], correspondingPartsNames: [] } };
+      } catch (e) {
+        throw new Error(`Error loading plasmid ${name} from database: ${e.message}`);
+      }
+    }));
+    setLinkedPlasmids(plasmids);
+  }, [setLinkedPlasmids]);
+
+  return { linkedPlasmids, setLinkedPlasmids, uploadPlasmids, loadPlasmidsFromDatabase };
 }

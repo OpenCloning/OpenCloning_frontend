@@ -26,6 +26,22 @@ function formatLoadedFile(plasmid, id) {
   }
 }
 
+function formatDatabaseSequence(plasmid, id) {
+  return {
+    source: {
+      id,
+      type: 'DatabaseSource',
+      input: [],
+      database_id: plasmid.database_id,
+    },
+    sequence: {
+      ...plasmid.textFileSequence,
+      id,
+    },
+    plasmid: plasmid,
+  }
+}
+
 export const useAssembler = () => {
   const httpClient = useBackendHttpClient();
 
@@ -37,6 +53,8 @@ export const useAssembler = () => {
         try {
           if (plasmid.type === 'loadedFile') {
             processedOutput[pos].push(formatLoadedFile(plasmid, pos + 1))
+          } else if (plasmid.type === 'databaseSequence') {
+            processedOutput[pos].push(formatDatabaseSequence(plasmid, pos + 1))
           } else {
             const { source } = plasmid;
             const url = classNameToEndPointMap[source.type]

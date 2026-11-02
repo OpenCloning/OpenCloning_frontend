@@ -37,4 +37,7 @@ export default {
   getSequenceName: null,
   // Function to get the sequencing files from the database, see docs for what the return value should be
   getSequencingFiles: null,
+  // Component for loading several sequences at once (e.g. in the assembler), calls
+  // onSequencesLoaded with an array of { databaseId, name, textFileSequence }
+  GetSequencesInBulkComponent: null,
 };

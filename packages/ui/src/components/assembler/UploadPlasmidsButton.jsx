@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Box, ButtonGroup } from '@mui/material';
 import { useConfig } from '../../providers';
+import useDatabase from '../../hooks/useDatabase';
 import ServerStaticFileSelect from '../form/ServerStaticFileSelect';
 import { usePlasmidsLogic } from './usePlasmidsLogic';
 import PlasmidSyntaxTable from './PlasmidSyntaxTable';
@@ -9,12 +10,26 @@ import { jsonToGenbank } from '@teselagen/bio-parsers';
 function formatPlasmid(sequenceData) {
 
   const { appData } = sequenceData;
-  const { fileName, correspondingParts, longestFeature } = appData;
+  const { fileName, correspondingParts, longestFeature, databaseId, textFileSequence } = appData;
   const [left_overhang, right_overhang] = correspondingParts[0].split('-');
   
   let plasmidName = fileName;
   if (longestFeature[0]?.name) {
     plasmidName += ` (${longestFeature[0].name})`;
+  }
+
+  if (databaseId !== undefined) {
+    return {
+      type: 'databaseSequence',
+      plasmid_name: plasmidName,
+      database_id: databaseId,
+      left_overhang,
+      right_overhang,
+      key: `${left_overhang}-${right_overhang}`,
+      sequenceData,
+      textFileSequence,
+      userUploaded: true,
+    };
   }
   
   return {
@@ -63,8 +78,41 @@ export function UploadPlasmidsFromLocalServerButton({ handleFileChange }) {
   </>
 }
   
+export function UploadPlasmidsFromDatabaseButton({ onSequencesLoaded }) {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const database = useDatabase();
+
+  const handleSequencesLoaded = React.useCallback(async (sequences) => {
+    try {
+      await onSequencesLoaded(sequences)
+      setDialogOpen(false)
+    } catch (e) {
+      setError(e.message)
+    }
+  }, [onSequencesLoaded, setError])
+
+  const GetSequencesInBulkComponent = database?.GetSequencesInBulkComponent;
+  if (!GetSequencesInBulkComponent) {
+    return null;
+  }
+
+  return <>
+    <Button color="primary" onClick={() => {setError(null); setDialogOpen(true)}}>
+          Load Plasmids from {database.name}
+    </Button>
+    {dialogOpen && <Dialog open onClose={() => {setError(null); setDialogOpen(false)}}>
+      <DialogTitle>Load Plasmids from {database.name}</DialogTitle>
+      <DialogContent sx={{ width: '500px' }}>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <GetSequencesInBulkComponent onSequencesLoaded={handleSequencesLoaded} />
+      </DialogContent>
+    </Dialog>}
+  </>
+}
+
 function UploadPlasmidsButton({ addPlasmids, syntax }) {
-  const { uploadPlasmids, linkedPlasmids, setLinkedPlasmids } = usePlasmidsLogic(syntax)
+  const { uploadPlasmids, loadPlasmidsFromDatabase, linkedPlasmids, setLinkedPlasmids } = usePlasmidsLogic(syntax)
   const validPlasmids = React.useMemo(() => linkedPlasmids.filter((plasmid) => plasmid.appData.correspondingParts.length === 1), [linkedPlasmids])
   const invalidPlasmids = React.useMemo(() => linkedPlasmids.filter((plasmid) => plasmid.appData.correspondingParts.length !== 1), [linkedPlasmids])
   const fileInputRef = React.useRef(null)
@@ -85,6 +133,7 @@ function UploadPlasmidsButton({ addPlasmids, syntax }) {
     </Button>
     <input multiple type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={(event) => handleFileChange(Array.from(event.target.files))} accept=".gbk,.gb,.fasta,.fa,.dna" />
     <UploadPlasmidsFromLocalServerButton handleFileChange={handleFileChange} />
+    <UploadPlasmidsFromDatabaseButton onSequencesLoaded={loadPlasmidsFromDatabase} />
     <Dialog
       maxWidth="lg"
       fullWidth

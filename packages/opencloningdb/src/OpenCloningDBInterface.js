@@ -1,6 +1,7 @@
 import { Save as SaveIcon, Link as LinkIcon } from '@mui/icons-material';
 import GetPrimerComponent from './GetPrimerComponent';
 import GetSequenceFileAndDatabaseIdComponent from './GetSequenceFileAndDatabaseIdComponent';
+import GetSequencesInBulkComponent from './GetSequencesInBulkComponent';
 import { openCloningDBHttpClient } from './common';
 import endpoints from './endpoints';
 import LoadHistoryComponent from './LoadHistoryComponent';
@@ -138,4 +139,7 @@ export default {
   locateSequenceInDatabase,
   // Function to submit sequencing files to the database
   submitSequencingFileToDatabase,
+  // Component for loading several sequences at once (e.g. in the assembler), calls
+  // onSequencesLoaded with an array of { databaseId, name, textFileSequence }
+  GetSequencesInBulkComponent,
 };
