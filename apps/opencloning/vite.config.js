@@ -32,6 +32,10 @@ export default ({ mode }) => {
         '@opencloning/opencloning-elabftw': resolve(import.meta.dirname, '../../packages/opencloning-elabftw/src'),
       },
     },
+    server: {
+      // 'localhost' can resolve to ::1 only, which port forwarding (dev container) doesn't reach
+      host: '127.0.0.1',
+    },
     plugins: [
       react(),
       (env.VITE_COVERAGE) && istanbul({
