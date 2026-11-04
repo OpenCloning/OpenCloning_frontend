@@ -12,7 +12,7 @@ yarn install
 yarn workspace standalone-app dev
 ```
 
-The app will be available at `http://localhost:3001`
+The app will be available at `http://localhost:3000`
 
 ## What This Demonstrates
 
