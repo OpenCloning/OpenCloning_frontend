@@ -32,8 +32,8 @@ describe('Test assembler functionality', () => {
     cy.get('div[role="dialog"]').should('not.exist');
     
     // Verify that the assembler component is now visible with the loaded syntax
-    // After loading syntax, the "Add Plasmids" button should appear
-    cy.get('button').contains('Add Plasmids', { timeout: 10000 }).should('be.visible');
+    // After loading syntax, the "Load Plasmids" button should appear
+    cy.get('button').contains('Load Plasmids', { timeout: 10000 }).should('be.visible');
     // Verify the assembler component is rendered by checking for the Category select
     cy.get('label').contains('Category', { timeout: 10000 }).should('be.visible');
 

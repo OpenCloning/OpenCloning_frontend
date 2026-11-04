@@ -68,8 +68,10 @@ describe('<UploadPlasmidsButton />', () => {
       </ConfigProvider>,
     );
 
-    cy.get('button').contains('Load Plasmids from Local Server').should('not.exist');
-    cy.get('button').contains('Add Plasmids').siblings('input').selectFile([
+    cy.get('[data-testid="load-plasmids-button"]').click();
+    cy.get('[data-testid="load-plasmids-from-local-server"]').should('not.exist');
+    cy.get('body').type('{esc}');
+    cy.get('[data-testid="load-plasmids-file-input"]').selectFile([
       'cypress/test_files/syntax/pYTK002.gb',
       'cypress/test_files/syntax/moclo_ytk_multi_part.gb',
       'cypress/test_files/syntax/pYTK095.gb',
@@ -149,7 +151,7 @@ describe('<UploadPlasmidsButton />', () => {
         <UploadPlasmidsButton addPlasmids={() => {}} syntax={mocloSyntax} />
       </ConfigProvider>,
     );
-    cy.get('button').contains('Add Plasmids').siblings('input').selectFile([
+    cy.get('[data-testid="load-plasmids-file-input"]').selectFile([
       'cypress/test_files/sequencing/locus.gb'],
     { force: true });
 
@@ -171,7 +173,7 @@ describe('<UploadPlasmidsButton />', () => {
       </ConfigProvider>,
     );
     
-    cy.get('button').contains('Add Plasmids').siblings('input').selectFile([
+    cy.get('[data-testid="load-plasmids-file-input"]').selectFile([
       'cypress/test_files/syntax/pYTK002.gb',
       'cypress/test_files/syntax/moclo_ytk_multi_part.gb',
       'cypress/test_files/syntax/pYTK095.gb',
@@ -208,7 +210,8 @@ describe('<UploadPlasmidsButton />', () => {
         <UploadPlasmidsButton addPlasmids={addPlasmidsSpy} syntax={mocloSyntax} />
       </ConfigProvider>,
     );
-    cy.get('button').contains('Load Plasmids from Local Server').click();
+    cy.get('[data-testid="load-plasmids-button"]').click();
+    cy.get('[data-testid="load-plasmids-from-local-server"]').click();
 
     cy.get('button').contains('Submit').should('be.disabled');
     cy.get('#option-select').click();
@@ -249,7 +252,8 @@ describe('<UploadPlasmidsButton />', () => {
         <UploadPlasmidsButton addPlasmids={addPlasmidsSpy} syntax={mocloSyntax} />
       </ConfigProvider>,
     );
-    cy.get('button').contains('Load Plasmids from Local Server').click();
+    cy.get('[data-testid="load-plasmids-button"]').click();
+    cy.get('[data-testid="load-plasmids-from-local-server"]').click();
     cy.get('button').contains('Submit').should('be.disabled');
     cy.get('#option-select').click();
     cy.contains('Example sequence 1').click();
@@ -276,8 +280,9 @@ describe('<UploadPlasmidsButton />', () => {
         </DatabaseProvider>
       </ConfigProvider>,
     );
-    cy.get('button').contains('Add Plasmids').should('exist');
-    cy.contains('button', 'Load Plasmids from MockDB').should('not.exist');
+    cy.get('[data-testid="load-plasmids-button"]').click();
+    cy.get('[data-testid="load-plasmids-from-files"]').should('exist');
+    cy.get('[data-testid="load-plasmids-from-database"]').should('not.exist');
   });
 
   it('loads plasmids from the database as DatabaseSource plasmids', () => {
@@ -299,7 +304,8 @@ describe('<UploadPlasmidsButton />', () => {
             </DatabaseProvider>
           </ConfigProvider>,
         );
-        cy.contains('button', 'Load Plasmids from MockDB').click();
+        cy.get('[data-testid="load-plasmids-button"]').click();
+        cy.get('[data-testid="load-plasmids-from-database"]').contains('From MockDB').click();
         cy.contains('button', 'Mock load').click();
         // The bulk dialog closes and the valid / invalid dialog is shown
         cy.contains('button', 'Mock load').should('not.exist');
@@ -337,7 +343,8 @@ describe('<UploadPlasmidsButton />', () => {
         </DatabaseProvider>
       </ConfigProvider>,
     );
-    cy.contains('button', 'Load Plasmids from MockDB').click();
+    cy.get('[data-testid="load-plasmids-button"]').click();
+    cy.get('[data-testid="load-plasmids-from-database"]').contains('From MockDB').click();
     cy.contains('button', 'Mock load').click();
     cy.get('.MuiAlert-colorError').contains('Error loading plasmid broken from database').should('exist');
     cy.get('@addPlasmidsSpy').should('not.have.been.called');

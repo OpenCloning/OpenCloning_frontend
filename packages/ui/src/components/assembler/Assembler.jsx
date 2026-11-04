@@ -21,6 +21,7 @@ import error2String from '@opencloning/utils/error2String';
 import { categoryFilter, downloadAssemblerFilesAsZip, getFilesToExportFromAssembler, getDefaultAssemblyOutputName, MAX_OUTPUT_NAME_LENGTH, sanitizeOutputName } from './assembler_utils';
 import useBackendHttpClient from '../../hooks/useBackendHttpClient';
 import useCloningAlerts from '../../hooks/useCloningAlerts';
+import useDatabase from '../../hooks/useDatabase';
 import UploadPlasmidsButton from './UploadPlasmidsButton';
 import { useConfig } from '../../providers';
 import { isEqual } from 'lodash-es';
@@ -194,7 +195,7 @@ function AssemblerBox({ item, index, setCategory, setId, categories, plasmids, a
                 const { key, ...restProps } = props
                 const plasmid = plasmids.find((d) => d.id === option)
                 return (
-                  <MenuItem key={key} {...restProps} sx={{ backgroundColor: plasmid.userUploaded === true ? '#dcedc8' : undefined }}>
+                  <MenuItem key={key} {...restProps} sx={{ backgroundColor: plasmid.type === 'loadedFile' ? '#dcedc8' : undefined }}>
                     {formatItemName(plasmid)}
                   </MenuItem>
                 )}}
@@ -378,20 +379,25 @@ function LoadSyntaxButton({ setSyntax, addPlasmids, clearPlasmids }) {
   const httpClient = useBackendHttpClient();
   const { staticContentPath } = useConfig();
   const { addAlert } = useCloningAlerts();
+  const database = useDatabase();
+  // If plasmids can be loaded from the database, the default plasmids of the syntax are not loaded
+  const loadDefaultPlasmids = !database?.GetSequencesInBulkComponent;
   const onSyntaxSelect = React.useCallback(async (syntax, plasmids) => {
     const url = 'validate_syntax';
     try {
       await httpClient.post(url, syntax);
       setSyntax(syntax)
       clearPlasmids()
-      addPlasmids(plasmids)
+      if (loadDefaultPlasmids) {
+        addPlasmids(plasmids)
+      }
     } catch (error) {
       addAlert({
         message: error2String(error),
         severity: 'error',
       });
     }
-  }, [setSyntax, addPlasmids, clearPlasmids, httpClient, addAlert])
+  }, [setSyntax, addPlasmids, clearPlasmids, httpClient, addAlert, loadDefaultPlasmids])
   return <>
     <Button color="success" onClick={() => setExistingSyntaxDialogOpen(true)}>Load Syntax</Button>
     {existingSyntaxDialogOpen && <ExistingSyntaxDialog
