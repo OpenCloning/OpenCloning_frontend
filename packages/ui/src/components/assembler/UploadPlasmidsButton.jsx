@@ -47,47 +47,99 @@ function formatPlasmid(sequenceData) {
 
 }
 
-function LoadPlasmidsFromLocalServerDialog({ handleFileChange, onClose }) {
+/** Dialog wrapping a component that loads plasmids. children is a function that receives the onLoad callback. */
+function LoadPlasmidsDialog({ title, onLoad, onClose, children }) {
   const [error, setError] = React.useState(null);
 
-  const onFileSelected = React.useCallback(async (files) => {
+  const handleLoad = React.useCallback(async (items) => {
     try {
-      await handleFileChange(files)
+      await onLoad(items)
       onClose()
     } catch (e) {
       setError(e.message)
     }
-  }, [handleFileChange, onClose])
+  }, [onLoad, onClose])
 
   return <Dialog open onClose={onClose}>
-    <DialogTitle>Load Plasmids from Local Server</DialogTitle>
+    <DialogTitle>{title}</DialogTitle>
     <DialogContent sx={{ width: '500px' }}>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <ServerStaticFileSelect onFileSelected={onFileSelected} type="sequence" multiple />
+      {children(handleLoad)}
     </DialogContent>
   </Dialog>
 }
 
-function LoadPlasmidsFromDatabaseDialog({ onSequencesLoaded, onClose }) {
-  const [error, setError] = React.useState(null);
-  const database = useDatabase();
-  const { GetSequencesInBulkComponent } = database;
+/**
+ * "Load Plasmids" button with a dropdown. The "From files" option is always present (opens a file picker
+ * and calls onFilesSelected), extraOptions are appended: [{ id, label, Icon, onClick }]
+ */
+function LoadPlasmidsMenuButton({ onFilesSelected, extraOptions }) {
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const open = Boolean(anchorEl)
+  const fileInputRef = React.useRef(null)
 
-  const handleSequencesLoaded = React.useCallback(async (sequences) => {
-    try {
-      await onSequencesLoaded(sequences)
-      onClose()
-    } catch (e) {
-      setError(e.message)
-    }
-  }, [onSequencesLoaded, onClose])
+  const onFileInputChange = (event) => {
+    const files = Array.from(event.target.files)
+    event.target.value = ''
+    onFilesSelected(files)
+  }
 
-  return <Dialog open onClose={onClose}>
-    <DialogTitle>Load Plasmids from {database.name}</DialogTitle>
-    <DialogContent sx={{ width: '500px' }}>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <GetSequencesInBulkComponent onSequencesLoaded={handleSequencesLoaded} />
-    </DialogContent>
+  return <>
+    <input multiple type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={onFileInputChange} accept=".gbk,.gb,.fasta,.fa,.dna" data-testid="load-plasmids-file-input" />
+    <Button
+      color="primary"
+      onClick={(event) => setAnchorEl(event.currentTarget)}
+      endIcon={<ArrowDropDownIcon />}
+      aria-haspopup="true"
+      aria-expanded={open ? 'true' : undefined}
+      aria-controls={open ? 'load-plasmids-menu' : undefined}
+      data-testid="load-plasmids-button"
+    >
+      Load Plasmids
+    </Button>
+    <Menu id="load-plasmids-menu" anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)} onClick={() => setAnchorEl(null)}>
+      <MenuItem onClick={() => fileInputRef.current.click()} data-testid="load-plasmids-from-files">
+        <ListItemIcon><UploadFileIcon fontSize="small" /></ListItemIcon>
+        From files
+      </MenuItem>
+      {extraOptions.map(({ id, label, Icon, onClick }) => (
+        <MenuItem key={id} onClick={onClick} data-testid={`load-plasmids-from-${id}`}>
+          <ListItemIcon><Icon fontSize="small" /></ListItemIcon>
+          {label}
+        </MenuItem>
+      ))}
+    </Menu>
+  </>
+}
+
+function ImportPlasmidsDialog({ validPlasmids, invalidPlasmids, onImport, onCancel }) {
+  return <Dialog
+    maxWidth="lg"
+    fullWidth
+    open={invalidPlasmids.length > 0 || validPlasmids.length > 0}
+    onClose={onCancel}
+    PaperProps={{ style: { maxHeight: '80vh' } }}
+  >
+    <DialogActions sx={{ justifyContent: 'center', position: 'sticky', top: 0, zIndex: 99, background: '#fff', py: 2 }}>
+      <Button sx={{ p: 1.5, fontSize: '1rem' }} disabled={validPlasmids.length === 0} variant="contained" color="success" onClick={onImport}>Import valid plasmids</Button>
+      <Button sx={{ p: 1.5, fontSize: '1rem' }} variant="contained" color="error" onClick={onCancel}>Cancel</Button>
+    </DialogActions>
+    {invalidPlasmids.length > 0 && (
+      <Box data-testid="invalid-plasmids-box">
+        <DialogTitle>Invalid Plasmids</DialogTitle>
+        <DialogContent>
+          <PlasmidSyntaxTable plasmids={invalidPlasmids} />
+        </DialogContent>
+      </Box>
+    )}
+    {validPlasmids.length > 0 && (
+      <Box data-testid="valid-plasmids-box">
+        <DialogTitle>Valid Plasmids</DialogTitle>
+        <DialogContent>
+          <PlasmidSyntaxTable plasmids={validPlasmids} />
+        </DialogContent>
+      </Box>
+    )}
   </Dialog>
 }
 
@@ -95,95 +147,40 @@ function UploadPlasmidsButton({ addPlasmids, syntax }) {
   const { uploadPlasmids, loadPlasmidsFromDatabase, linkedPlasmids, setLinkedPlasmids } = usePlasmidsLogic(syntax)
   const validPlasmids = React.useMemo(() => linkedPlasmids.filter((plasmid) => plasmid.appData.correspondingParts.length === 1), [linkedPlasmids])
   const invalidPlasmids = React.useMemo(() => linkedPlasmids.filter((plasmid) => plasmid.appData.correspondingParts.length !== 1), [linkedPlasmids])
-  const fileInputRef = React.useRef(null)
-  const [menuAnchorEl, setMenuAnchorEl] = React.useState(null)
-  // null | 'localServer' | 'database'
+  // null | 'local-server' | 'database'
   const [openDialog, setOpenDialog] = React.useState(null)
   const closeDialog = React.useCallback(() => setOpenDialog(null), [])
   const { staticContentPath } = useConfig();
   const database = useDatabase();
-  const databaseSupportsBulk = Boolean(database?.GetSequencesInBulkComponent);
-
-  const handleFileChange = async (files) => {
-    fileInputRef.current.value = ''
-    await uploadPlasmids(Array.from(files))
-  }
 
   const handleImportValidPlasmids = React.useCallback(() => {
     addPlasmids(validPlasmids.map(formatPlasmid))
     setLinkedPlasmids([])
   }, [addPlasmids, validPlasmids, setLinkedPlasmids])
 
-  const onMenuItemClick = (action) => {
-    setMenuAnchorEl(null)
-    action()
-  }
+  const extraMenuOptions = [
+    staticContentPath && { id: 'local-server', label: 'From local server', Icon: DnsIcon, onClick: () => setOpenDialog('local-server') },
+    database?.GetSequencesInBulkComponent && { id: 'database', label: `From ${database.name}`, Icon: StorageIcon, onClick: () => setOpenDialog('database') },
+  ].filter(Boolean)
 
   return (<>
-    <Button
-      color="primary"
-      onClick={(event) => setMenuAnchorEl(event.currentTarget)}
-      endIcon={<ArrowDropDownIcon />}
-      aria-haspopup="true"
-      aria-expanded={menuAnchorEl ? 'true' : undefined}
-      aria-controls={menuAnchorEl ? 'load-plasmids-menu' : undefined}
-      data-testid="load-plasmids-button"
-    >
-      Load Plasmids
-    </Button>
-    <Menu id="load-plasmids-menu" anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={() => setMenuAnchorEl(null)}>
-      <MenuItem onClick={() => onMenuItemClick(() => fileInputRef.current.click())} data-testid="load-plasmids-from-files">
-        <ListItemIcon><UploadFileIcon fontSize="small" /></ListItemIcon>
-        From files
-      </MenuItem>
-      {staticContentPath && (
-        <MenuItem onClick={() => onMenuItemClick(() => setOpenDialog('localServer'))} data-testid="load-plasmids-from-local-server">
-          <ListItemIcon><DnsIcon fontSize="small" /></ListItemIcon>
-          From local server
-        </MenuItem>
-      )}
-      {databaseSupportsBulk && (
-        <MenuItem onClick={() => onMenuItemClick(() => setOpenDialog('database'))} data-testid="load-plasmids-from-database">
-          <ListItemIcon><StorageIcon fontSize="small" /></ListItemIcon>
-          From {database.name}
-        </MenuItem>
-      )}
-    </Menu>
-    <input multiple type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={(event) => handleFileChange(Array.from(event.target.files))} accept=".gbk,.gb,.fasta,.fa,.dna" data-testid="load-plasmids-file-input" />
-    {openDialog === 'localServer' && <LoadPlasmidsFromLocalServerDialog handleFileChange={handleFileChange} onClose={closeDialog} />}
-    {openDialog === 'database' && <LoadPlasmidsFromDatabaseDialog onSequencesLoaded={loadPlasmidsFromDatabase} onClose={closeDialog} />}
-    <Dialog
-      maxWidth="lg"
-      fullWidth
-      open={invalidPlasmids.length > 0 || validPlasmids.length > 0}
-      onClose={() => setLinkedPlasmids([])}
-      PaperProps={{
-        style: {
-          maxHeight: '80vh',
-        },
-      }}
-    >
-      <DialogActions sx={{ justifyContent: 'center', position: 'sticky', top: 0, zIndex: 99, background: '#fff', py: 2 }}>
-        <Button sx={{ p: 1.5, fontSize: '1rem' }} disabled={validPlasmids.length === 0} variant="contained" color="success" onClick={handleImportValidPlasmids}>Import valid plasmids</Button>
-        <Button sx={{ p: 1.5, fontSize: '1rem' }} variant="contained" color="error" onClick={() => setLinkedPlasmids([])}>Cancel</Button>
-      </DialogActions>
-      {invalidPlasmids.length > 0 && (
-        <Box data-testid="invalid-plasmids-box">
-          <DialogTitle>Invalid Plasmids</DialogTitle>
-          <DialogContent>
-            <PlasmidSyntaxTable plasmids={invalidPlasmids} />
-          </DialogContent>
-        </Box>
-      )}
-      {validPlasmids.length > 0 && (
-        <Box data-testid="valid-plasmids-box">
-          <DialogTitle>Valid Plasmids</DialogTitle>
-          <DialogContent>
-            <PlasmidSyntaxTable plasmids={validPlasmids} />
-          </DialogContent>
-        </Box>
-      )}
-    </Dialog>
+    <LoadPlasmidsMenuButton onFilesSelected={uploadPlasmids} extraOptions={extraMenuOptions} />
+    {openDialog === 'local-server' && (
+      <LoadPlasmidsDialog title="Load Plasmids from Local Server" onLoad={uploadPlasmids} onClose={closeDialog}>
+        {(onLoad) => <ServerStaticFileSelect onFileSelected={onLoad} type="sequence" multiple />}
+      </LoadPlasmidsDialog>
+    )}
+    {openDialog === 'database' && (
+      <LoadPlasmidsDialog title={`Load Plasmids from ${database.name}`} onLoad={loadPlasmidsFromDatabase} onClose={closeDialog}>
+        {(onLoad) => <database.GetSequencesInBulkComponent onSequencesLoaded={onLoad} />}
+      </LoadPlasmidsDialog>
+    )}
+    <ImportPlasmidsDialog
+      validPlasmids={validPlasmids}
+      invalidPlasmids={invalidPlasmids}
+      onImport={handleImportValidPlasmids}
+      onCancel={() => setLinkedPlasmids([])}
+    />
   </>)
 }
 
