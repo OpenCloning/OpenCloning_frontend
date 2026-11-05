@@ -1,73 +1,34 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Tooltip } from '@mui/material';
-import {
-  CloningStrategyBulkUploadPreviewTable,
-  rowsToCloningStrategySyncResults,
-  submitCloningStrategies,
-  validateCloningStrategyFiles,
-} from '@opencloning/opencloningdb';
-import BulkUploadModal from './BulkUploadModal';
-import useBulkUploadFlow from './useBulkUploadFlow';
+import { SubmitCloningStrategiesInBulkComponent } from '@opencloning/opencloningdb';
+import useAppAlerts from '../../hooks/useAppAlerts';
 
 export default function BulkUploadCloningStrategiesButton() {
-  const {
-    addErrorAlert,
-    addAlert,
-    bulkTags,
-    closeModal,
-    handleUploadClick,
-    hiddenFileInput,
-    isSubmitting,
-    isValidating,
-    isViewer,
-    openModal,
-    setBulkTags,
-    submitRows,
-    validationRows,
-    validateSubmission,
-  } = useBulkUploadFlow({
-    supportsTags: true,
-    validateMutationFn: validateCloningStrategyFiles,
-    submitMutationFn: submitCloningStrategies,
-    getSuccessMessage: (createdSequences, variables) => {
-      const strategyCount = variables.syncResults.length;
-      return `Imported ${strategyCount} cloning strateg${strategyCount === 1 ? 'y' : 'ies'} successfully${createdSequences.length > 0 ? ` (${createdSequences.length} sequences created)` : ''}`;
-    },
-    onSubmitSuccess: (_data, _variables, queryClient) => {
-      queryClient.invalidateQueries({ queryKey: ['sequences'] });
-      queryClient.invalidateQueries({ queryKey: ['primers'] });
-    },
-  });
+  const hiddenFileInput = React.useRef(null);
+  const { addAlert } = useAppAlerts();
+  const isViewer = useSelector((state) => state.auth.workspace?.role) === 'viewer';
+  // Files being uploaded (null if the dialog is closed)
+  const [files, setFiles] = React.useState(null);
 
   if (isViewer) {
     return null;
   }
 
-  const handleFileUpload = async (event) => {
+  const handleFileUpload = (event) => {
     const uploadedFiles = Array.from(event.target.files ?? []);
-    if (uploadedFiles.length < 1) {
-      return;
-    }
-
-    try {
-      await validateSubmission(uploadedFiles);
-    } finally {
-      event.target.value = null;
+    event.target.value = null;
+    if (uploadedFiles.length > 0) {
+      setFiles(uploadedFiles);
     }
   };
 
-  const handleSubmit = (submittedRows) => {
-    const syncResults = rowsToCloningStrategySyncResults(submittedRows);
-
-    if (syncResults.length < 1) {
-      addAlert({
-        message: 'No importable cloning strategies selected',
-        severity: 'warning',
-      });
-      return;
-    }
-
-    submitRows({ syncResults, tags: bulkTags });
+  const onSuccess = (sequenceRefs, syncResults) => {
+    const strategyCount = syncResults.length;
+    addAlert({
+      message: `Imported ${strategyCount} cloning strateg${strategyCount === 1 ? 'y' : 'ies'} successfully${sequenceRefs.length > 0 ? ` (${sequenceRefs.length} sequences created)` : ''}`,
+      severity: 'success',
+    });
   };
 
   return (
@@ -80,7 +41,7 @@ export default function BulkUploadCloningStrategiesButton() {
           </span>
         )}
       >
-        <Button onClick={handleUploadClick} data-testid="bulk-upload-cloning-strategies-button">
+        <Button onClick={() => hiddenFileInput.current?.click()} data-testid="bulk-upload-cloning-strategies-button">
           Upload sequences with history
         </Button>
       </Tooltip>
@@ -94,23 +55,15 @@ export default function BulkUploadCloningStrategiesButton() {
         onChange={handleFileUpload}
       />
 
-      <BulkUploadModal
-        open={openModal}
-        onClose={closeModal}
-        dataTestId="bulk-upload-cloning-strategies-modal"
-        title="Bulk Upload Cloning Strategies Preview"
-      >
-        <CloningStrategyBulkUploadPreviewTable
-          rows={validationRows}
-          handleSubmit={handleSubmit}
-          handleCancel={closeModal}
-          isSubmitting={isSubmitting}
-          isValidating={isValidating}
-          bulkTags={bulkTags}
-          onBulkTagsChange={setBulkTags}
-          onTagCreateError={addErrorAlert}
+      {files && (
+        <SubmitCloningStrategiesInBulkComponent
+          files={files}
+          onClose={() => setFiles(null)}
+          onSuccess={onSuccess}
+          title="Bulk Upload Cloning Strategies Preview"
+          dataTestId="bulk-upload-cloning-strategies-modal"
         />
-      </BulkUploadModal>
+      )}
     </>
   );
 }

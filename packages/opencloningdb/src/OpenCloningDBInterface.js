@@ -144,6 +144,6 @@ export default {
   // onSequencesLoaded with an array of { databaseId, name, textFileSequence }
   GetSequencesInBulkComponent,
   // Dialog for submitting several cloning strategies at once (e.g. the assembler products), receives
-  // { files: [{ name, content }], onClose, onSuccess }, where content is the JSON of the cloning strategy
+  // { files, onClose, onSuccess }, where files is an array of File (cloning strategy JSON)
   SubmitCloningStrategiesInBulkComponent,
 };

@@ -18,7 +18,7 @@ import EditTextDialog from '../form/EditTextDialog';
 import useCombinatorialAssembly from './useCombinatorialAssembly';
 import ExistingSyntaxDialog from './ExistingSyntaxDialog';
 import error2String from '@opencloning/utils/error2String';
-import { categoryFilter, downloadAssemblerFilesAsZip, getFilesToExportFromAssembler, getDefaultAssemblyOutputName, MAX_OUTPUT_NAME_LENGTH, sanitizeOutputName } from './assembler_utils';
+import { categoryFilter, downloadAssemblerFilesAsZip, getFilesToExportFromAssembler, getCloningStrategyFilesFromAssembler, getDefaultAssemblyOutputName, MAX_OUTPUT_NAME_LENGTH, sanitizeOutputName } from './assembler_utils';
 import useBackendHttpClient from '../../hooks/useBackendHttpClient';
 import useCloningAlerts from '../../hooks/useCloningAlerts';
 import useDatabase from '../../hooks/useDatabase';
@@ -30,6 +30,9 @@ import { graphToMSA, partsToGraph } from './graph_utils';
 
 
 const { setState: setCloningState, setCurrentTab: setCurrentTabAction } = cloningActions;
+
+// Shown on the download and upload buttons when they are disabled because of the output names
+const INVALID_OUTPUT_NAMES_MESSAGE = `Output names must be unique, non-empty, and at most ${MAX_OUTPUT_NAME_LENGTH} characters`;
 
 function formatItemName(item) {
   // Fallback in case the item is not found (while updating list)
@@ -216,11 +219,16 @@ export function AssemblerComponent({ plasmids, categories, assemblyEnzymes, addA
   const [assemblyOutputNames, setAssemblyOutputNames] = React.useState([])
   const [errorMessage, setErrorMessage] = React.useState('')
   const [loadingMessage, setLoadingMessage] = React.useState('')
+  // Cloning strategy files being uploaded to the database (null if the dialog is closed)
+  const [filesToUpload, setFilesToUpload] = React.useState(null)
+  const database = useDatabase()
+  const SubmitCloningStrategiesInBulkComponent = database?.SubmitCloningStrategiesInBulkComponent
 
   const clearAssemblySelection = React.useCallback(() => {
     setRequestedAssemblies([])
     setAssemblyOutputNames([])
     setErrorMessage('')
+    setFilesToUpload(null)
   }, [])
 
   const { assembly, setCategory, setId, expandedAssemblies, assemblyComplete, canBeSubmitted, currentCategories } = useCombinatorialAssembly({ onValueChange: clearAssemblySelection, categories, plasmids })
@@ -283,6 +291,20 @@ export function AssemblerComponent({ plasmids, categories, assemblyEnzymes, addA
     }
   }, [requestedAssemblies, expandedAssemblies, plasmids, currentCategories, categories, appInfo, addAlert, assemblyOutputNames])
 
+  const onUploadToDatabase = React.useCallback(() => {
+    try {
+      setFilesToUpload(getCloningStrategyFilesFromAssembler({ requestedAssemblies, appInfo, outputNames: assemblyOutputNames })
+        .map(({ name, content }) => new File([content], name, { type: 'application/json' })))
+    } catch (error) {
+      addAlert({ message: `Error preparing assemblies for upload: ${error.message}`, severity: 'error' })
+    }
+  }, [requestedAssemblies, appInfo, assemblyOutputNames, addAlert])
+
+  const onUploadSuccess = React.useCallback(() => {
+    const count = filesToUpload?.length ?? 0
+    addAlert({ message: `Uploaded ${count} assembl${count === 1 ? 'y' : 'ies'} to ${database.name}`, severity: 'success' })
+  }, [filesToUpload, addAlert, database])
+
   const options = React.useMemo(() => assemblyComplete ? assembly : [...assembly, { category: '', plasmidIds: [] }], [assembly, assemblyComplete])
 
   return (
@@ -312,7 +334,16 @@ export function AssemblerComponent({ plasmids, categories, assemblyEnzymes, addA
           sx={{ p: 2, fontSize: '1.2rem' }}
           onClick={onDownloadAssemblies}
           disabled={!canDownload}
-          title={!canDownload ? 'Output names must be unique, non-empty, and at most 255 characters' : ''}>Download Assemblies
+          title={!canDownload ? INVALID_OUTPUT_NAMES_MESSAGE : ''}>Download Assemblies
+        </Button>}
+        {requestedAssemblies.length > 0 && SubmitCloningStrategiesInBulkComponent && <Button
+          color="primary"
+          variant="contained"
+          data-testid="assembler-upload-to-db-button"
+          sx={{ p: 2, fontSize: '1.2rem' }}
+          onClick={onUploadToDatabase}
+          disabled={!canDownload}
+          title={!canDownload ? INVALID_OUTPUT_NAMES_MESSAGE : `Upload the assemblies and their history to ${database.name}`}>Upload to DB
         </Button>}
       </Box>
       {errorMessage && <Alert severity="error" sx={{ my: 2, maxWidth: 300, margin: 'auto', fontSize: '1.2rem' }}>{errorMessage}</Alert>}
@@ -322,6 +353,13 @@ export function AssemblerComponent({ plasmids, categories, assemblyEnzymes, addA
           assemblyOutputNames, onOutputNameChange,
         }} />
       }
+      {filesToUpload && SubmitCloningStrategiesInBulkComponent && (
+        <SubmitCloningStrategiesInBulkComponent
+          files={filesToUpload}
+          onClose={() => setFilesToUpload(null)}
+          onSuccess={onUploadSuccess}
+        />
+      )}
 
     </Box >
   )

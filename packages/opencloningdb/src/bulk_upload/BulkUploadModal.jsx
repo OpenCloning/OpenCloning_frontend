@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Modal, Typography } from '@mui/material';
 
+/** Modal used by the bulk upload previews. Pass onClose undefined to prevent closing it (e.g. while submitting). */
 export default function BulkUploadModal({
   open,
   onClose,
@@ -8,9 +9,13 @@ export default function BulkUploadModal({
   dataTestId,
   children,
 }) {
+  const titleId = React.useId();
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} aria-labelledby={titleId}>
       <Box
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         data-testid={dataTestId}
         sx={{
           bgcolor: 'background.paper',
@@ -25,7 +30,7 @@ export default function BulkUploadModal({
           flexDirection: 'column',
         }}
       >
-        <Typography variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
+        <Typography id={titleId} variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
           {title}
         </Typography>
         {children}
