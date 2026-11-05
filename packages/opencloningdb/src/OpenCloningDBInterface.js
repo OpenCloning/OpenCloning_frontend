@@ -6,6 +6,7 @@ import { openCloningDBHttpClient } from './common';
 import endpoints from './endpoints';
 import LoadHistoryComponent from './LoadHistoryComponent';
 import SubmitToDatabaseComponent from './SubmitToDatabaseComponent';
+import SubmitCloningStrategiesInBulkComponent from './SubmitCloningStrategiesInBulkComponent';
 import PrimersNotInDatabaseComponent from './PrimersNotInDatabaseComponent';
 
 function isSubmissionDataValid(submissionData) {
@@ -142,4 +143,7 @@ export default {
   // Component for loading several sequences at once (e.g. in the assembler), calls
   // onSequencesLoaded with an array of { databaseId, name, textFileSequence }
   GetSequencesInBulkComponent,
+  // Dialog for submitting several cloning strategies at once (e.g. the assembler products), receives
+  // { files: [{ name, content }], onClose, onSuccess }, where content is the JSON of the cloning strategy
+  SubmitCloningStrategiesInBulkComponent,
 };
