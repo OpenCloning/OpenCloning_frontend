@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim
+FROM node:22-trixie-slim
 
 ARG TZ=Europe/London
 ENV TZ="$TZ"
@@ -10,7 +10,9 @@ ARG YARN_VERSION=4.9.1
 RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates curl git less procps sudo nano \
   iptables ipset iproute2 dnsutils aggregate jq \
-  shellcheck \
+  shellcheck xvfb \
+  libgtk2.0-0t64 libgtk-3-0t64 libgbm-dev libnotify-dev libnss3 libxss1 \
+  libasound2t64 libxtst6 xauth \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Non-root user (Claude Code refuses --dangerously-skip-permissions as root).
