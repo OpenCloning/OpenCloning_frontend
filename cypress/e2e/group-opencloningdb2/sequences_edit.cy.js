@@ -371,8 +371,8 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.wrap(request.body[0]).should('have.property', 'file_name', 'linearised_pFA6a-kanMX6_wrong_database_id.json');
         cy.wrap(request.body[1]).should('have.property', 'file_name', 'manually_typed.json');
       });
-      cy.dbAlertExists('Internal server error');
-      cy.closeDbAlerts();
+      // Submission errors are shown in the dialog
+      cy.get('.MuiAlert-colorError').contains('Internal server error').should('exist');
       cy.intercept(
         {
           method: 'POST',
@@ -410,9 +410,8 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.get('[data-testid="CancelIcon"]').should('exist');
         cy.contains('test parsing error').should('exist');
       });
+      cy.get('.MuiAlert-colorWarning').contains('Conflicts detected while importing').should('exist');
     });
-    cy.dbAlertExists('Conflicts detected while importing');
-    cy.closeDbAlerts();
   });
   it('can change annotation', () => {
     cy.viewport(1920, 1080);
