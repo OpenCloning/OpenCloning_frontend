@@ -7,4 +7,5 @@ export { default as SubmitCloningStrategiesInBulkComponent } from './SubmitCloni
 export { default as BulkUploadPreview } from './bulk_upload/BulkUploadPreview.jsx';
 export { default as CloningStrategyBulkUploadPreviewTable } from './bulk_upload/CloningStrategyBulkUploadPreviewTable.jsx';
 export { CommonTableRow } from './bulk_upload/common.jsx';
-export { cloningStrategyRowIssues, cloningStrategyRowStatus, getCloningStrategyRowsInfo } from './bulk_upload/bulk_upload_utils.js';
+export { cloningStrategyRowIssues, cloningStrategyRowStatus, getCloningStrategyRowsInfo, rowsToCloningStrategySyncResults } from './bulk_upload/bulk_upload_utils.js';
+export { validateCloningStrategyFiles, submitCloningStrategies } from './bulk_upload/cloning_strategy_bulk_api.js';

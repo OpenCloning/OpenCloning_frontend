@@ -64,3 +64,13 @@ export function getCloningStrategyRowsInfo(rows) {
     totalRowsCount: rows.length,
   };
 }
+
+/** The rows that can be submitted (not already synced, with a cloning strategy), in the format of the submit endpoint. */
+export function rowsToCloningStrategySyncResults(rows) {
+  return rows
+    .filter((row) => !row.already_synced && row.cloning_strategy)
+    .map(({ file_name: fileName, cloning_strategy: cloningStrategy }) => ({
+      ['file_name']: fileName,
+      ['cloning_strategy']: cloningStrategy,
+    }));
+}

@@ -1,6 +1,11 @@
 import React from 'react';
 import { Button, Tooltip } from '@mui/material';
-import { openCloningDBHttpClient, endpoints, CloningStrategyBulkUploadPreviewTable } from '@opencloning/opencloningdb';
+import {
+  CloningStrategyBulkUploadPreviewTable,
+  rowsToCloningStrategySyncResults,
+  submitCloningStrategies,
+  validateCloningStrategyFiles,
+} from '@opencloning/opencloningdb';
 import BulkUploadModal from './BulkUploadModal';
 import useBulkUploadFlow from './useBulkUploadFlow';
 
@@ -22,26 +27,8 @@ export default function BulkUploadCloningStrategiesButton() {
     validateSubmission,
   } = useBulkUploadFlow({
     supportsTags: true,
-    validateMutationFn: async (files) => {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-      const { data } = await openCloningDBHttpClient.post(endpoints.sequencesCloningStrategyBulkValidate, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return data;
-    },
-    submitMutationFn: async ({ syncResults, tags }) => {
-      const { data } = await openCloningDBHttpClient.post(endpoints.sequencesCloningStrategyBulk, syncResults, {
-        params: {
-          ...(tags?.length ? { tags } : {}),
-        },
-      });
-      return data;
-    },
+    validateMutationFn: validateCloningStrategyFiles,
+    submitMutationFn: submitCloningStrategies,
     getSuccessMessage: (createdSequences, variables) => {
       const strategyCount = variables.syncResults.length;
       return `Imported ${strategyCount} cloning strateg${strategyCount === 1 ? 'y' : 'ies'} successfully${createdSequences.length > 0 ? ` (${createdSequences.length} sequences created)` : ''}`;
@@ -70,12 +57,7 @@ export default function BulkUploadCloningStrategiesButton() {
   };
 
   const handleSubmit = (submittedRows) => {
-    const syncResults = submittedRows
-      .filter((row) => !row.already_synced && row.cloning_strategy)
-      .map(({ file_name: fileName, cloning_strategy: cloningStrategy }) => ({
-        ['file_name']: fileName,
-        ['cloning_strategy']: cloningStrategy,
-      }));
+    const syncResults = rowsToCloningStrategySyncResults(submittedRows);
 
     if (syncResults.length < 1) {
       addAlert({

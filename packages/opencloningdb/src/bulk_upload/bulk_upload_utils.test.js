@@ -1,4 +1,4 @@
-import { cloningStrategyRowIssues, cloningStrategyRowStatus, getCloningStrategyRowsInfo } from './bulk_upload_utils';
+import { cloningStrategyRowIssues, cloningStrategyRowStatus, getCloningStrategyRowsInfo, rowsToCloningStrategySyncResults } from './bulk_upload_utils';
 
 const clearRow = { file_name: 'clear.json', cloning_strategy: {} };
 const errorRow = { file_name: 'error.json', parsing_errors: ['Cloning strategy is not valid JSON'] };
@@ -66,5 +66,20 @@ describe('getCloningStrategyRowsInfo', () => {
     expect(info.infoRowsCount).toBe(1);
     expect(info.clearRowsCount).toBe(1);
     expect(info.totalRowsCount).toBe(5);
+  });
+});
+
+describe('rowsToCloningStrategySyncResults', () => {
+  it('keeps the rows with a strategy that are not synced, with only file_name and cloning_strategy', () => {
+    const rows = [clearRow, syncedRow, parsingWarningRow, errorRow, sequenceMismatchRow];
+    expect(rowsToCloningStrategySyncResults(rows)).toEqual([
+      { file_name: 'clear.json', cloning_strategy: {} },
+      { file_name: 'warning.json', cloning_strategy: {} },
+      { file_name: 'sequence.json', cloning_strategy: {} },
+    ]);
+  });
+
+  it('returns an empty array if nothing can be submitted', () => {
+    expect(rowsToCloningStrategySyncResults([syncedRow, errorRow])).toEqual([]);
   });
 });
