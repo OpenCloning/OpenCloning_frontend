@@ -12,6 +12,7 @@ export default function BulkUploadPreview({
   isValidating,
   bulkTags,
   onBulkTagsChange,
+  onTagCreateError,
   importMode,
 }) {
   if (isValidating) {
@@ -31,6 +32,7 @@ export default function BulkUploadPreview({
       isSubmitting={isSubmitting}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
+      onTagCreateError={onTagCreateError}
       importMode={importMode}
     >
       {renderTable(rowsInfo.orderedRows)}

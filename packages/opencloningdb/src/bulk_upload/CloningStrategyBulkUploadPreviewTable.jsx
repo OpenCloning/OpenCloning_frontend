@@ -4,7 +4,7 @@ import {
   cloningStrategyRowIssues,
   cloningStrategyRowStatus,
   getCloningStrategyRowsInfo,
-} from '../../utils/bulk_upload';
+} from './bulk_upload_utils';
 import { CommonTableRow } from './common';
 import BulkUploadPreview from './BulkUploadPreview';
 
@@ -84,6 +84,7 @@ export default function CloningStrategyBulkUploadPreviewTable({
   isValidating,
   bulkTags,
   onBulkTagsChange,
+  onTagCreateError,
 }) {
   return (
     <BulkUploadPreview
@@ -96,6 +97,7 @@ export default function CloningStrategyBulkUploadPreviewTable({
       isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
+      onTagCreateError={onTagCreateError}
     />
   );
 }
