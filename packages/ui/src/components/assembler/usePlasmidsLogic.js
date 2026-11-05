@@ -88,6 +88,9 @@ export function usePlasmidsLogic({ parts, assemblyEnzymes, overhangNames }) {
     const plasmids = await Promise.all(entries.map(async ({ databaseId, name, textFileSequence }) => {
       try {
         const data = await anyToJson(textFileSequence.file_content, { fileName: 'sequence.gb' });
+        if (!data[0]?.success || !data[0].parsedSequence) {
+          throw new Error(data[0]?.messages?.join(', ') || 'could not parse sequence');
+        }
         const sequenceData = data[0].parsedSequence;
         return { ...sequenceData, appData: { fileName: name, databaseId, textFileSequence, correspondingParts: [], partInfo: [], correspondingPartsNames: [] } };
       } catch (e) {
