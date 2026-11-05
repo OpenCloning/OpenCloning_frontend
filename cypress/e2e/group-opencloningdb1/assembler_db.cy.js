@@ -79,6 +79,11 @@ describe('Assembler with OpenCloningDB', () => {
     cy.get('[role="dialog"] button').contains('Import valid plasmids').click();
     cy.get('[role="dialog"]').should('not.exist');
 
+    // Loading the same plasmids again does not add duplicates
+    loadPlasmidsByTag('golden-braid');
+    cy.get('[role="dialog"] button').contains('Import valid plasmids').click();
+    cy.get('[role="dialog"]').should('not.exist');
+
     // Only the valid ones are available
     cy.get('[data-testid="category-select"]').last().click();
     cy.get('li[role="option"]').contains("Prom + 5'UTR").click();
@@ -108,6 +113,11 @@ describe('Assembler with OpenCloningDB', () => {
   });
 
   describe('Upload to DB', () => {
+    // The test expects none of the products to be in the database already.
+    // The outer beforeEach logs in first, so this resets the data before the test, not the session.
+    beforeEach(() => {
+      cy.resetDB();
+    });
     afterEach(() => {
       cy.resetDB();
     });

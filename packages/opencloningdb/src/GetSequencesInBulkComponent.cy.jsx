@@ -94,4 +94,23 @@ describe('<GetSequencesInBulkComponent />', () => {
     cy.contains('No sequences found with the selected tags.').should('exist');
     cy.get('@onSequencesLoadedSpy').should('not.have.been.called');
   });
+
+  it('shows a message when the picked sequences have no content', () => {
+    const onSequencesLoadedSpy = cy.spy().as('onSequencesLoadedSpy');
+    cy.interceptOpenCloningDBStub('get_sequences_search_by_name', { alias: 'searchByName' });
+    cy.interceptOpenCloningDBStub('get_sequences_search_by_name_uid_query', { alias: 'searchByUid' });
+    cy.intercept('GET', `**${endpoints.sequenceTextFiles}*`, { statusCode: 200, body: [] }).as('getSequences');
+
+    cy.mount(<GetSequencesInBulkComponent onSequencesLoaded={onSequencesLoadedSpy} />);
+
+    cy.contains('button', 'Pick sequences').click();
+    cy.get('input').type(SEQUENCE_NAME);
+    cy.wait('@searchByName');
+    clickMultiSelectOption('Sequences', RegExp(`^${SEQUENCE_NAME}$`), 'div');
+    cy.contains('button', 'Load sequences').click();
+    cy.wait('@getSequences');
+    cy.contains('The selected sequences have no content (template sequences cannot be loaded).').should('exist');
+    cy.contains('No sequences found with the selected tags.').should('not.exist');
+    cy.get('@onSequencesLoadedSpy').should('not.have.been.called');
+  });
 });

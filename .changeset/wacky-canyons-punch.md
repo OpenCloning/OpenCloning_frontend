@@ -1,7 +1,6 @@
 ---
 "@opencloning/opencloningdb": minor
 "@opencloning/ui": minor
-"standalone-app": patch
 "syntax-builder": patch
 "opencloningdb": patch
 ---
@@ -19,3 +18,4 @@ Assembler: load plasmids from the database and upload the assemblies to it.
 - `opencloningdb`:
   - The "Upload sequences with history" button uses `SubmitCloningStrategiesInBulkComponent`. Its validation, submission and conflict messages are now shown in the dialog instead of as alerts.
   - The tag selects no longer drop excluded tags from the shared tags cache.
+- `syntax-builder`: the dev server runs on port 3000 and listens on `127.0.0.1`, like the other apps.

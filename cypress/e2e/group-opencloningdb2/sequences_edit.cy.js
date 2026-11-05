@@ -384,7 +384,8 @@ describe('Actions that can be perfomed by an edit user on the Sequences page', (
         cy.wrap(request.body).should('have.length', 1);
         cy.wrap(request.body[0]).should('have.property', 'file_name', 'manually_typed.json');
       });
-      cy.dbAlertExists('Imported 1 cloning strategy successfully');
+      // manually_typed.json has a single sequence, which is new
+      cy.dbAlertExists('Imported 1 cloning strategy successfully (1 sequence created)');
       cy.closeDbAlerts();
     });
     cy.get('tbody tr button').contains('manually_typed').should('exist');

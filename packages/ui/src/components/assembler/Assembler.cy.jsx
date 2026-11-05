@@ -459,13 +459,15 @@ describe('<AssemblerComponent /> with plasmids from a database', () => {
     }
 
     // Mock of the database dialog, stores the props it receives
-    function mockDatabase() {
+    // submittedCount: number of strategies the mock reports as submitted on success
+    function mockDatabase(submittedCount = 1) {
       const receivedProps = [];
       function SubmitCloningStrategiesInBulkComponent(props) {
         receivedProps.push(props);
+        const syncResults = Array.from({ length: submittedCount }, (_, i) => ({ file_name: `${i}.json` }));
         return (
           <div data-testid="mock-submit-dialog">
-            <button type="button" onClick={() => { props.onSuccess([{ id: 100 }]); props.onClose(); }}>mock success</button>
+            <button type="button" onClick={() => { props.onSuccess([{ id: 100 }], syncResults); props.onClose(); }}>mock success</button>
             <button type="button" onClick={props.onClose}>mock close</button>
           </div>
         );
@@ -524,6 +526,14 @@ describe('<AssemblerComponent /> with plasmids from a database', () => {
       cy.contains('button', 'mock success').click();
       cy.get('[data-testid="mock-submit-dialog"]').should('not.exist');
       cy.get('@addAlert').should('have.been.calledOnceWith', { message: 'Uploaded 1 assembly to MockDB', severity: 'success' });
+    });
+
+    it('reports the number of submitted assemblies, not the number of files', () => {
+      const { database } = mockDatabase(2);
+      mountAndAssemble(database);
+      cy.get('[data-testid="assembler-upload-to-db-button"]').click();
+      cy.contains('button', 'mock success').click();
+      cy.get('@addAlert').should('have.been.calledOnceWith', { message: 'Uploaded 2 assemblies to MockDB', severity: 'success' });
     });
 
     it('closes the dialog without alerts', () => {

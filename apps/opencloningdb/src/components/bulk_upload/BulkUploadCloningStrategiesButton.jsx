@@ -25,8 +25,14 @@ export default function BulkUploadCloningStrategiesButton() {
 
   const onSuccess = (sequenceRefs, syncResults) => {
     const strategyCount = syncResults.length;
+    // The server returns all the sequences of the strategies, the ones that were in the database already
+    // are those of the sources with a database_id
+    const existingIds = new Set(syncResults.flatMap(({ cloning_strategy: cloningStrategy }) => cloningStrategy.sources
+      .map((source) => source.database_id)
+      .filter((id) => id !== null && id !== undefined)));
+    const createdCount = new Set(sequenceRefs.map((ref) => ref.id).filter((id) => !existingIds.has(id))).size;
     addAlert({
-      message: `Imported ${strategyCount} cloning strateg${strategyCount === 1 ? 'y' : 'ies'} successfully${sequenceRefs.length > 0 ? ` (${sequenceRefs.length} sequences created)` : ''}`,
+      message: `Imported ${strategyCount} cloning strateg${strategyCount === 1 ? 'y' : 'ies'} successfully${createdCount > 0 ? ` (${createdCount} sequence${createdCount === 1 ? '' : 's'} created)` : ''}`,
       severity: 'success',
     });
   };

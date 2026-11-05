@@ -300,10 +300,11 @@ export function AssemblerComponent({ plasmids, categories, assemblyEnzymes, addA
     }
   }, [requestedAssemblies, appInfo, assemblyOutputNames, addAlert])
 
-  const onUploadSuccess = React.useCallback(() => {
-    const count = filesToUpload?.length ?? 0
+  // syncResults are the submitted strategies (some may be skipped, e.g. already in the database)
+  const onUploadSuccess = React.useCallback((_sequenceRefs, syncResults) => {
+    const count = syncResults.length
     addAlert({ message: `Uploaded ${count} assembl${count === 1 ? 'y' : 'ies'} to ${database.name}`, severity: 'success' })
-  }, [filesToUpload, addAlert, database])
+  }, [addAlert, database])
 
   const options = React.useMemo(() => assemblyComplete ? assembly : [...assembly, { category: '', plasmidIds: [] }], [assembly, assemblyComplete])
 
@@ -492,7 +493,10 @@ function Assembler() {
   const addPlasmids = React.useCallback((newPlasmids) => {
     setPlasmids((prevPlasmids) => {
       const maxId = Math.max(...prevPlasmids.map((plasmid) => plasmid.id), 0)
-      return [...prevPlasmids, ...newPlasmids.map((plasmid, index) => ({ ...plasmid, id: maxId + index + 1 }))]
+      // Plasmids from the database that are already loaded are skipped
+      const loadedDatabaseIds = new Set(prevPlasmids.map((plasmid) => plasmid.database_id).filter((id) => id !== undefined))
+      const plasmidsToAdd = newPlasmids.filter((plasmid) => plasmid.database_id === undefined || !loadedDatabaseIds.has(plasmid.database_id))
+      return [...prevPlasmids, ...plasmidsToAdd.map((plasmid, index) => ({ ...plasmid, id: maxId + index + 1 }))]
     })
   }, [])
 

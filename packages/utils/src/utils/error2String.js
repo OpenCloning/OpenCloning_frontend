@@ -1,6 +1,7 @@
 export default function error2String(error) {
   if (error.code === 'ERR_NETWORK') { return 'Cannot connect to backend server'; }
-  if (!error.code) {
+  // No response from the server (e.g. timeout), or not a request error
+  if (!error.code || !error.response) {
     return error.message;
   }
   const { detail } = error.response.data;

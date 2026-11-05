@@ -63,7 +63,7 @@ function GetSequencesInBulkComponent({ onSequencesLoaded }) {
           : <SequenceSelect label="Sequences" value={selectedSequences} onChange={setSelectedSequences} />}
       </FormControl>
       {error && <Alert severity="error">{error.response?.data?.detail || error.message || 'Could not load sequences from OpenCloningDB'}</Alert>}
-      {emptyResult && <Alert severity="info">No sequences found with the selected tags.</Alert>}
+      {emptyResult && <Alert severity="info">{mode === 'tags' ? 'No sequences found with the selected tags.' : 'The selected sequences have no content (template sequences cannot be loaded).'}</Alert>}
       {isPending
         ? <CircularProgress sx={{ alignSelf: 'center' }} />
         : <Button variant="contained" disabled={selection.length === 0} onClick={onLoad}>Load sequences</Button>}
