@@ -1,11 +1,12 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { openCloningDBHttpClient, endpoints, TagMultiSelect } from '@opencloning/opencloningdb';
 import { Dialog, DialogTitle, DialogContent, FormControl, Alert, Button } from '@mui/material';
-import TagMultiSelect from './TagMultiSelect';
+import useAppAlerts from '../hooks/useAppAlerts';
 import error2String from '@opencloning/utils/error2String';
 
 function TagEntitiesDialog({ selectedEntities, entityType, label, open, onClose, onSuccess, excludeTagIds = [] }) {
+  const { addErrorAlert } = useAppAlerts();
   const [tags, setTags] = React.useState([]);
   const queryClient = useQueryClient();
   
@@ -78,6 +79,7 @@ function TagEntitiesDialog({ selectedEntities, entityType, label, open, onClose,
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ mt: 1 }}>
             <TagMultiSelect
+              onCreateError={addErrorAlert}
               value={tags}
               excludeTagIds={excludeTagIds}
               onChange={(value) => {

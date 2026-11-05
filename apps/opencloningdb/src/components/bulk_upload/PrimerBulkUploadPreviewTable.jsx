@@ -1,8 +1,7 @@
 import React from 'react';
 import { Box, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { getPrimerRowsInfo, primerRowStatus, rowIssues } from '../../utils/bulk_upload';
-import { CommonTableRow } from './common';
-import BulkUploadPreview from './BulkUploadPreview';
+import { BulkUploadPreview, CommonTableRow } from '@opencloning/opencloningdb';
 
 
 
@@ -67,6 +66,7 @@ export default function PrimerBulkUploadPreviewTable({
   isValidating,
   bulkTags,
   onBulkTagsChange,
+  onTagCreateError,
 }) {
   return (
     <BulkUploadPreview
@@ -79,6 +79,7 @@ export default function PrimerBulkUploadPreviewTable({
       isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
+      onTagCreateError={onTagCreateError}
     />
   );
 }

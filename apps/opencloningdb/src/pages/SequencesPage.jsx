@@ -13,10 +13,10 @@ import {
   FormControlLabel,
   ButtonGroup,
 } from '@mui/material';
-import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { openCloningDBHttpClient, endpoints, TagMultiSelect } from '@opencloning/opencloningdb';
 import { parseSequenceParams, applySequenceParamsToSearchParams } from '../utils/query_utils';
 import SearchBarTextField from '../components/SearchBarTextField';
-import TagMultiSelect from '../components/TagMultiSelect';
+import useAppAlerts from '../hooks/useAppAlerts';
 import SequenceTypeMultiSelect from '../components/SequenceTypeMultiSelect';
 import { UrlParamsForm } from '../components/urlParamsForm';
 import TagEntitiesButton from '../components/TagEntitiesButton';
@@ -33,6 +33,7 @@ import useRowSelection from '../hooks/useRowSelection';
 const MIN_WIDTH = 200;
 
 function SequenceQueryFields({ pendingParams, setPendingParams }) {
+  const { addErrorAlert } = useAppAlerts();
   return (
     <>
       <SearchBarTextField
@@ -55,6 +56,7 @@ function SequenceQueryFields({ pendingParams, setPendingParams }) {
         sx={{ minWidth: MIN_WIDTH }}
       />
       <TagMultiSelect
+        onCreateError={addErrorAlert}
         value={pendingParams.tags ?? []}
         onChange={(value) => setPendingParams((p) => ({ ...p, tags: value }))}
         sx={{ minWidth: MIN_WIDTH }}

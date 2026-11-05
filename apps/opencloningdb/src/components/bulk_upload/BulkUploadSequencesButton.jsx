@@ -7,6 +7,7 @@ import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadSequencesButton() {
   const {
+    addErrorAlert,
     bulkTags,
     closeModal,
     handleUploadClick,
@@ -120,6 +121,7 @@ export default function BulkUploadSequencesButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

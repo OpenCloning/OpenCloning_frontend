@@ -11,6 +11,7 @@ import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadLinesButton() {
   const {
+    addErrorAlert,
     addAlert,
     closeModal,
     handleUploadClick,
@@ -122,6 +123,7 @@ export default function BulkUploadLinesButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

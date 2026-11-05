@@ -14,7 +14,7 @@ export default function useBulkUploadFlow({
 }) {
   const hiddenFileInput = React.useRef(null);
   const queryClient = useQueryClient();
-  const { addAlert } = useAppAlerts();
+  const { addAlert, addErrorAlert } = useAppAlerts();
   const workspaceRole = useSelector((state) => state.auth.workspace?.role);
   const [openModal, setOpenModal] = React.useState(false);
   const [validationRows, setValidationRows] = React.useState([]);
@@ -94,6 +94,7 @@ export default function useBulkUploadFlow({
 
   return {
     addAlert,
+    addErrorAlert,
     bulkTags: supportsTags ? bulkTags : [],
     closeModal,
     handleUploadClick,

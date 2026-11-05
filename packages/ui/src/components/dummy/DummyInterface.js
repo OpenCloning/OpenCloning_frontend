@@ -40,4 +40,7 @@ export default {
   // Component for loading several sequences at once (e.g. in the assembler), calls
   // onSequencesLoaded with an array of { databaseId, name, textFileSequence }
   GetSequencesInBulkComponent: null,
+  // Dialog for submitting several cloning strategies at once (e.g. the assembler products), receives
+  // { files: [{ name, content }], onClose, onSuccess }, where content is the JSON of the cloning strategy
+  SubmitCloningStrategiesInBulkComponent: null,
 };

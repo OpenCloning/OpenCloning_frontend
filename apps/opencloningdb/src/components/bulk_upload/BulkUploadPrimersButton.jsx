@@ -11,6 +11,7 @@ import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadPrimersButton() {
   const {
+    addErrorAlert,
     addAlert,
     bulkTags,
     closeModal,
@@ -118,6 +119,7 @@ export default function BulkUploadPrimersButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

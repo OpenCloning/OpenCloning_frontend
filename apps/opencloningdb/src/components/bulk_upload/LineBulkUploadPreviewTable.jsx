@@ -6,8 +6,7 @@ import {
   lineBulkRowIssues,
   lineBulkRowStatus,
 } from '../../utils/bulk_upload';
-import { CommonTableRow } from './common';
-import BulkUploadPreview from './BulkUploadPreview';
+import { BulkUploadPreview, CommonTableRow } from '@opencloning/opencloningdb';
 
 function LineBulkUploadPreviewTableRow({ row }) {
   const issues = lineBulkRowIssues(row);
@@ -61,6 +60,7 @@ export default function LineBulkUploadPreviewTable({
   isValidating,
   bulkTags,
   onBulkTagsChange,
+  onTagCreateError,
 }) {
   return (
     <BulkUploadPreview
@@ -73,6 +73,7 @@ export default function LineBulkUploadPreviewTable({
       isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
+      onTagCreateError={onTagCreateError}
       importMode="allClearRequired"
     />
   );

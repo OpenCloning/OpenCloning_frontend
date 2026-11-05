@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Alert, Button, CircularProgress, FormControl, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import SequenceSelect from './SequenceSelect';
-import TagSelect from './TagSelect';
+import TagMultiSelect from './TagMultiSelect';
 import { formatSequenceName, openCloningDBHttpClient } from './common';
 import endpoints from './endpoints';
 
@@ -47,8 +47,8 @@ function GetSequencesInBulkComponent({ onSequencesLoaded }) {
   const selection = mode === 'tags' ? selectedTags : selectedSequences;
   const onLoad = () => {
     setEmptyResult(false);
-    const ids = selection.map((item) => item.id);
-    mutate(mode === 'tags' ? { tags: ids } : { ids });
+    // selectedTags are ids, selectedSequences are sequence objects
+    mutate(mode === 'tags' ? { tags: selectedTags } : { ids: selectedSequences.map((item) => item.id) });
   };
 
   return (
@@ -59,7 +59,7 @@ function GetSequencesInBulkComponent({ onSequencesLoaded }) {
       </ToggleButtonGroup>
       <FormControl fullWidth>
         {mode === 'tags'
-          ? <TagSelect label="Tags" value={selectedTags} onChange={setSelectedTags} />
+          ? <TagMultiSelect label="Tags" value={selectedTags} onChange={setSelectedTags} allowCreate={false} />
           : <SequenceSelect label="Sequences" value={selectedSequences} onChange={setSelectedSequences} />}
       </FormControl>
       {error && <Alert severity="error">{error.response?.data?.detail || error.message || 'Could not load sequences from OpenCloningDB'}</Alert>}

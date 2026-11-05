@@ -16,6 +16,7 @@ const VALID_TYPES_HINT = VALID_TEMPLATE_SEQUENCE_TYPE_KEYS.join(', ');
 
 export default function BulkUploadTemplateSequencesButton() {
   const {
+    addErrorAlert,
     addAlert,
     bulkTags,
     closeModal,
@@ -127,6 +128,7 @@ export default function BulkUploadTemplateSequencesButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>
