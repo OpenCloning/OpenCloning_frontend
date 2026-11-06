@@ -106,6 +106,7 @@ jobs:
         run: yarn build
         env:
           VITE_UMAMI_WEBSITE_ID: ${{ secrets.VITE_UMAMI_WEBSITE_ID }}
+          VITE_MCP_SERVER_URL: https://mcp.opencloning.org
 
       - name: Publish to Netlify
         run: |

@@ -154,6 +154,10 @@ To update which files are excluded from coverage, edit the `.nycrc.json` file.
 
 You can configure website analytics using umami by setting the env var `VITE_UMAMI_WEBSITE_ID` to the website id. When building the site, the analytics script will be included in the build. See `apps/opencloning/index.html` and `apps/opencloning/vite.config.js` to see how this is done (using ejs templating).
 
+### MCP server
+
+The URL of the OpenCloning MCP server (used to load strategies via `?source=mcp&strategy=...`) is set at build time with the env var `VITE_MCP_SERVER_URL`, for example in a `.env` file for the dev server, or as a docker build argument (`--build-arg VITE_MCP_SERVER_URL=...`). The same URL is added to the whitelist of external requests. If unset, loading from an MCP server is disabled.
+
 ### Recording video with cypress
 
 ```

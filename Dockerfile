@@ -14,6 +14,11 @@ RUN yarn install --immutable
 # Add build argument for base URL with a default value
 ARG BASE_URL="/"
 
+# URL of the OpenCloning MCP server (empty to disable loading strategies from it).
+# Baked into the build, and also used to whitelist requests.
+ARG VITE_MCP_SERVER_URL=""
+ENV VITE_MCP_SERVER_URL=$VITE_MCP_SERVER_URL
+
 RUN yarn build --base "$BASE_URL"
 
 # Stage 2: Create a lightweight production image
@@ -32,5 +37,4 @@ ENV SHOW_APP_BAR="true"
 ENV NO_EXTERNAL_REQUESTS="false"
 ENV ENABLE_ASSEMBLER="false"
 ENV ENABLE_PLANNOTATE="false"
-ENV MCP_URL=""
 CMD ["sh", "docker_entrypoint.sh"]

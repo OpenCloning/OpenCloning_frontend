@@ -36,7 +36,6 @@ export function ConfigProvider({ config, children }) {
  *   - requiresBackendAuth: boolean
  *   - noExternalRequests: boolean
  *   - database: string | null
- *   - mcpUrl: string | null (URL of the OpenCloning MCP server, the only one strategies can be loaded from)
  * 
  * @throws {Error} If used outside of ConfigProvider
  */

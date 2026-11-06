@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { cloningActions } from '@opencloning/store/cloning';
-import { useConfig } from './useConfig';
 import useDatabase from './useDatabase';
 import useLoadDatabaseFile from './useLoadDatabaseFile';
 import useCloningAlerts from './useCloningAlerts';
@@ -17,6 +16,9 @@ const httpClient = getExternalHttpClient();
 
 const { updateSource } = cloningActions;
 
+// OpenCloning MCP server, set at build time
+const mcpUrl = import.meta.env.VITE_MCP_SERVER_URL;
+
 /**
  * Hook to load sequences from URL parameters
  * Handles various source types: database, example, template, genome_coordinates, locus_tag
@@ -24,7 +26,6 @@ const { updateSource } = cloningActions;
 export default function useUrlParamsLoader() {
   const dispatch = useDispatch();
   const database = useDatabase();
-  const { mcpUrl } = useConfig();
   const { addAlert } = useCloningAlerts();
   const setHistoryFileError = (e) => addAlert({ message: e, severity: 'error' });
   const { loadDatabaseFile } = useLoadDatabaseFile({ source: { id: 1 }, sendSourceRequest: null, setHistoryFileError });
@@ -78,7 +79,7 @@ export default function useUrlParamsLoader() {
           console.error(error);
         }
       } else if (urlParams.source === 'mcp' && urlParams.strategy) {
-        // Only the MCP server set in the config is fetched from, never a url from the query
+        // Only the MCP server set at build time (VITE_MCP_SERVER_URL) is fetched from, never a url from the query
         try {
           if (!mcpUrl) {
             throw new Error('No MCP server configured');

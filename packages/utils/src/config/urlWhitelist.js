@@ -20,5 +20,6 @@ export default [
   'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/taxonomy/taxon_suggest',
   'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/taxon',
   'https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession',
-  'https://mcp.opencloning.org',
+  // OpenCloning MCP server, set at build time
+  ...(import.meta.env.VITE_MCP_SERVER_URL ? [import.meta.env.VITE_MCP_SERVER_URL] : []),
 ];
