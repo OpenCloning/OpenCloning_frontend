@@ -1,9 +1,13 @@
 import React from 'react';
 import { Typography, TableContainer, Paper, Button, CircularProgress, Box, TableRow, TableCell, FormControl } from '@mui/material';
-import { Cancel as CancelIcon, CheckCircle as CheckCircleIcon, Info as InfoIcon, Warning as WarningIcon } from '@mui/icons-material';
 import TagMultiSelect from '../TagMultiSelect';
+import { Cancel as CancelIcon, CheckCircle as CheckCircleIcon, Info as InfoIcon, Warning as WarningIcon } from '@mui/icons-material';
 
 
+/**
+ * Wraps a bulk upload preview table with the summary and the import / cancel buttons.
+ * The tag field is shown if onBulkTagsChange is passed, onTagCreateError receives the error if creating a tag fails.
+ */
 export function BulkUploadPreviewTableWrapper({
   rowsInfo,
   handleSubmit,
@@ -12,6 +16,7 @@ export function BulkUploadPreviewTableWrapper({
   children,
   bulkTags = [],
   onBulkTagsChange,
+  onTagCreateError,
   importMode = 'clearAndWarnings',
 }) {
   const { clearRows, clearAndWarningRows, warningRowsCount, errorRowsCount, infoRowsCount = 0, orderedRows } = rowsInfo;
@@ -35,6 +40,7 @@ export function BulkUploadPreviewTableWrapper({
             label="Tags to apply (optional)"
             value={bulkTags}
             onChange={onBulkTagsChange}
+            onCreateError={onTagCreateError}
             data-testid="bulk-upload-tags"
           />
         </FormControl>

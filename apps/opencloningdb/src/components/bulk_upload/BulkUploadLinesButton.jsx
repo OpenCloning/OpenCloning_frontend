@@ -1,16 +1,16 @@
 import React from 'react';
-import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { openCloningDBHttpClient, endpoints, BulkUploadModal } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import { error2String } from '@opencloning/utils';
 import LineBulkUploadPreviewTable from './LineBulkUploadPreviewTable';
 import { prepareLineRowsForValidation } from '../../utils/bulk_upload';
-import BulkUploadModal from './BulkUploadModal';
 import BulkUploadMenuButton from './BulkUploadMenuButton';
 import { BULK_SUBMISSION_TEMPLATES } from './bulkSubmissionTemplates';
 import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadLinesButton() {
   const {
+    addErrorAlert,
     addAlert,
     closeModal,
     handleUploadClick,
@@ -122,6 +122,7 @@ export default function BulkUploadLinesButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

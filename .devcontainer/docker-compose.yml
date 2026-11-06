@@ -9,6 +9,9 @@ services:
         TZ: Europe/London
         CLAUDE_CODE_VERSION: stable
     command: sleep infinity
+    # Needed on Linux hosts; Docker Desktop already defines host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -16,8 +19,6 @@ services:
       CLAUDE_CONFIG_DIR: /home/dev/.claude
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
       DISABLE_AUTOUPDATER: "1"
-      # Skip the Cypress binary download on yarn install (vitest still works)
-      CYPRESS_INSTALL_BINARY: "0"
     volumes:
       - ..:/workspace:cached
       - ../.git:/workspace/.git:ro
@@ -27,6 +28,14 @@ services:
       - claude-config:/home/dev/.claude
     tmpfs:
       - /workspace/secrets
+
+  # Makes localhost:8000 inside the app container reach the backend running on the host.
+  # Shares app's network namespace, so it is subject to the same firewall.
+  backend-forward:
+    image: alpine/socat
+    network_mode: "service:app"
+    restart: unless-stopped
+    command: TCP-LISTEN:8000,fork,reuseaddr TCP:host.docker.internal:8000
 
 volumes:
   node_modules:

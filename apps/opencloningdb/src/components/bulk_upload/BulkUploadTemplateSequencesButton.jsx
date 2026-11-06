@@ -1,5 +1,5 @@
 import React from 'react';
-import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { openCloningDBHttpClient, endpoints, BulkUploadModal } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import TemplateSequenceBulkUploadPreviewTable from './TemplateSequenceBulkUploadPreviewTable';
 import {
@@ -7,7 +7,6 @@ import {
   VALID_TEMPLATE_SEQUENCE_TYPE_KEYS,
 } from '../../utils/bulk_upload';
 import { error2String } from '@opencloning/utils';
-import BulkUploadModal from './BulkUploadModal';
 import BulkUploadMenuButton from './BulkUploadMenuButton';
 import { BULK_SUBMISSION_TEMPLATES } from './bulkSubmissionTemplates';
 import useBulkUploadFlow from './useBulkUploadFlow';
@@ -16,6 +15,7 @@ const VALID_TYPES_HINT = VALID_TEMPLATE_SEQUENCE_TYPE_KEYS.join(', ');
 
 export default function BulkUploadTemplateSequencesButton() {
   const {
+    addErrorAlert,
     addAlert,
     bulkTags,
     closeModal,
@@ -127,6 +127,7 @@ export default function BulkUploadTemplateSequencesButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

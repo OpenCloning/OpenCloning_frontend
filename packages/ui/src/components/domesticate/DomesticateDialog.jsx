@@ -1,3 +1,4 @@
+/* istanbul ignore file -- depends on an external service (GoldenBraid) that is currently down */
 /* eslint-disable camelcase -- request/response fields match OpenAPI (snake_case) */
 import React from 'react';
 import {

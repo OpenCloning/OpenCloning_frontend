@@ -72,7 +72,8 @@ describe('test that configuration works', () => {
     cy.get('[data-testid="local-syntax-dialog"] input').click();
     cy.get('div[role="presentation"]').contains('syntax1').click();
     cy.get('button').contains('Submit').click();
-    cy.get('button').contains('Load Plasmids from Local Server').should('exist');
+    cy.get('button').contains('Load Plasmids').click();
+    cy.get('[data-testid="load-plasmids-from-local-server"]').should('exist');
   });
   it('when staticContentPath is not set, sequences and syntaxes cannot be loaded from local server', () => {
     // Intercept config.json request and modify staticContentPath to 'collection'
@@ -87,8 +88,9 @@ describe('test that configuration works', () => {
     cy.get('button').contains('Load Syntax').click();
     cy.get('button').contains('Load syntax from local server').should('not.exist');
     cy.get('li').contains('MoClo YTK').click();
-    cy.get('button').contains('Add Plasmids').should('exist');
-    cy.get('button').contains('Load Plasmids from Local Server').should('not.exist');
+    cy.get('button').contains('Load Plasmids').click();
+    cy.get('[data-testid="load-plasmids-from-files"]').should('exist');
+    cy.get('[data-testid="load-plasmids-from-local-server"]').should('not.exist');
   });
 });
 

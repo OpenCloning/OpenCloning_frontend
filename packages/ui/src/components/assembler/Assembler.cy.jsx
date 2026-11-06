@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { ConfigProvider } from '@opencloning/ui/providers/ConfigProvider';
+import { DatabaseProvider } from '@opencloning/ui/providers/DatabaseContext';
+import store from '@opencloning/store';
 import { AssemblerComponent } from './Assembler';
 
 
@@ -362,3 +364,185 @@ describe('<AssemblerComponent />', () => {
   });
 });
 
+describe('<AssemblerComponent /> with plasmids from a database', () => {
+  const databasePlasmids = [
+    { id: 1, key: 'CCCT-AACG', database_id: 10 },
+    { id: 2, key: 'AACG-CCCT', database_id: 20 },
+  ].map(({ id, key, database_id }) => {
+    const [left_overhang, right_overhang] = key.split('-');
+    return {
+      id,
+      type: 'databaseSequence',
+      plasmid_name: `DB Plasmid ${database_id}`,
+      database_id,
+      left_overhang,
+      right_overhang,
+      key,
+      userUploaded: true,
+      textFileSequence: { ...dummyResponse.sequences[0], id: database_id, file_content: `${dummyResponse.sequences[0].file_content}\n${database_id}` },
+    };
+  });
+
+  it('uses the database sequences and creates DatabaseSources', () => {
+    cy.intercept('POST', 'http://localhost:8000/restriction_and_ligation*', (req) => {
+      // Sequence content is the one from the database, no request is made to fetch them
+      expect(req.body.sequences.map((s) => s.file_content)).to.deep.equal(databasePlasmids.map((p) => p.textFileSequence.file_content));
+      req.reply({ statusCode: 200, body: dummyResponse2 });
+    }).as('assemblySuccess');
+
+    cy.mount(
+      <ConfigProvider config={testConfig}>
+        <AssemblerComponent
+          plasmids={databasePlasmids}
+          categories={mockCategories}
+          assemblyEnzymes={['assembly_enzyme']}
+          addAlert={cy.stub().as('addAlert')}
+          appInfo={{}}
+        />
+      </ConfigProvider>,
+    );
+    cy.get('[data-testid="plasmid-select"]').first().within(() => {
+      cy.get('input').click();
+    });
+    // Plasmids from the database are not highlighted (only those uploaded from files)
+    cy.get('li').contains('DB Plasmid 10').should('not.have.css', 'background-color', 'rgb(220, 237, 200)');
+    cy.get('li').contains('DB Plasmid 10').click();
+    cy.get('[data-testid="plasmid-select"]').eq(1).within(() => {
+      cy.get('input').click();
+    });
+    cy.get('li').contains('DB Plasmid 20').click();
+
+    cy.get('[data-testid="assembler-submit-button"]').click();
+    cy.wait('@assemblySuccess');
+    cy.get('[data-testid="assembler-product-table"]').contains('DB Plasmid 10').should('exist');
+
+    cy.get('[data-testid="assembler-product-table-view-button"]').first().click();
+    cy.then(() => {
+      const { sources, sequences } = store.getState().cloning;
+      const databaseSources = sources.filter((s) => s.type === 'DatabaseSource');
+      expect(databaseSources.map((s) => s.database_id)).to.deep.equal([10, 20]);
+      databaseSources.forEach((source) => {
+        expect(source.input).to.deep.equal([]);
+        const sequence = sequences.find((seq) => seq.id === source.id);
+        expect(sequence.file_content).to.equal(databasePlasmids.find((p) => p.database_id === source.database_id).textFileSequence.file_content);
+      });
+    });
+    cy.get('@addAlert').should('have.not.been.called');
+  });
+
+  describe('Upload to DB', () => {
+    function mountAndAssemble(database) {
+      cy.intercept('POST', 'http://localhost:8000/restriction_and_ligation*', { statusCode: 200, body: dummyResponse2 }).as('assemblySuccess');
+      const component = (
+        <ConfigProvider config={testConfig}>
+          <AssemblerComponent
+            plasmids={databasePlasmids}
+            categories={mockCategories}
+            assemblyEnzymes={['assembly_enzyme']}
+            addAlert={cy.stub().as('addAlert')}
+            appInfo={{ backendVersion: '1', schemaVersion: '2', frontendVersion: '3' }}
+          />
+        </ConfigProvider>
+      );
+      cy.mount(database ? <DatabaseProvider value={database}>{component}</DatabaseProvider> : component);
+      cy.get('[data-testid="plasmid-select"]').first().within(() => {
+        cy.get('input').click();
+      });
+      cy.get('li').contains('DB Plasmid 10').click();
+      cy.get('[data-testid="plasmid-select"]').eq(1).within(() => {
+        cy.get('input').click();
+      });
+      cy.get('li').contains('DB Plasmid 20').click();
+      cy.get('[data-testid="assembler-submit-button"]').click();
+      cy.wait('@assemblySuccess');
+      cy.get('[data-testid="assembler-download-assemblies-button"]').should('exist');
+    }
+
+    // Mock of the database dialog, stores the props it receives
+    // submittedCount: number of strategies the mock reports as submitted on success
+    function mockDatabase(submittedCount = 1) {
+      const receivedProps = [];
+      function SubmitCloningStrategiesInBulkComponent(props) {
+        receivedProps.push(props);
+        const syncResults = Array.from({ length: submittedCount }, (_, i) => ({ file_name: `${i}.json` }));
+        return (
+          <div data-testid="mock-submit-dialog">
+            <button type="button" onClick={() => { props.onSuccess([{ id: 100 }], syncResults); props.onClose(); }}>mock success</button>
+            <button type="button" onClick={props.onClose}>mock close</button>
+          </div>
+        );
+      }
+      return { database: { name: 'MockDB', SubmitCloningStrategiesInBulkComponent }, receivedProps };
+    }
+
+    it('is not shown without a database', () => {
+      mountAndAssemble(null);
+      cy.get('[data-testid="assembler-upload-to-db-button"]').should('not.exist');
+    });
+
+    it('is not shown if the database does not support bulk submission', () => {
+      mountAndAssemble({ name: 'MockDB' });
+      cy.get('[data-testid="assembler-upload-to-db-button"]').should('not.exist');
+    });
+
+    it('is disabled when an output name is empty', () => {
+      const { database } = mockDatabase();
+      mountAndAssemble(database);
+      cy.get('[data-testid="assembler-upload-to-db-button"]').should('not.be.disabled');
+      cy.get('[data-testid="assembler-product-table-edit-button"]').first().click();
+      cy.get('[role="dialog"]').find('input').clear();
+      cy.get('[role="dialog"]').contains('Save').click();
+      cy.get('[data-testid="assembler-upload-to-db-button"]').should('be.disabled');
+    });
+
+    it('passes the cloning strategies of the assemblies to the database dialog', () => {
+      const { database, receivedProps } = mockDatabase();
+      mountAndAssemble(database);
+      cy.get('[data-testid="assembler-product-table-edit-button"]').first().click();
+      cy.get('[role="dialog"]').find('input').clear();
+      cy.get('[role="dialog"]').find('input').type('my product');
+      cy.get('[role="dialog"]').contains('Save').click();
+
+      cy.get('[data-testid="mock-submit-dialog"]').should('not.exist');
+      cy.get('[data-testid="assembler-upload-to-db-button"]').click();
+      cy.get('[data-testid="mock-submit-dialog"]').should('exist');
+      cy.then(() => {
+        const { files } = receivedProps[receivedProps.length - 1];
+        expect(files).to.have.length(1);
+        expect(files[0]).to.be.instanceOf(File);
+        expect(files[0].name).to.equal('my_product.json');
+        return files[0].text();
+      }).then((content) => {
+        const cloningStrategy = JSON.parse(content);
+        expect(cloningStrategy.backend_version).to.equal('1');
+        const databaseSources = cloningStrategy.sources.filter((s) => s.type === 'DatabaseSource');
+        expect(databaseSources.map((s) => s.database_id)).to.deep.equal([10, 20]);
+        const finalSource = cloningStrategy.sources.find((s) => s.type === 'RestrictionAndLigationSource');
+        expect(finalSource.output_name).to.equal('my_product');
+        const finalSequence = cloningStrategy.sequences.find((s) => s.id === finalSource.id);
+        expect(finalSequence.file_content.split('\n')[0]).to.contain('my_product');
+      });
+
+      cy.contains('button', 'mock success').click();
+      cy.get('[data-testid="mock-submit-dialog"]').should('not.exist');
+      cy.get('@addAlert').should('have.been.calledOnceWith', { message: 'Uploaded 1 assembly to MockDB', severity: 'success' });
+    });
+
+    it('reports the number of submitted assemblies, not the number of files', () => {
+      const { database } = mockDatabase(2);
+      mountAndAssemble(database);
+      cy.get('[data-testid="assembler-upload-to-db-button"]').click();
+      cy.contains('button', 'mock success').click();
+      cy.get('@addAlert').should('have.been.calledOnceWith', { message: 'Uploaded 2 assemblies to MockDB', severity: 'success' });
+    });
+
+    it('closes the dialog without alerts', () => {
+      const { database } = mockDatabase();
+      mountAndAssemble(database);
+      cy.get('[data-testid="assembler-upload-to-db-button"]').click();
+      cy.contains('button', 'mock close').click();
+      cy.get('[data-testid="mock-submit-dialog"]').should('not.exist');
+      cy.get('@addAlert').should('not.have.been.called');
+    });
+  });
+});

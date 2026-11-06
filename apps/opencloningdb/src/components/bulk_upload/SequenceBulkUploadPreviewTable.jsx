@@ -1,8 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { getSequenceRowsInfo, sequenceRowIssues, sequenceRowStatus } from '../../utils/bulk_upload';
-import { CommonTableRow } from './common';
-import BulkUploadPreview from './BulkUploadPreview';
+import { BulkUploadPreview, CommonTableRow } from '@opencloning/opencloningdb';
 
 function SequenceBulkUploadPreviewTableRow({ row }) {
   const issues = sequenceRowIssues(row);
@@ -55,6 +54,7 @@ export default function SequenceBulkUploadPreviewTable({
   isValidating,
   bulkTags,
   onBulkTagsChange,
+  onTagCreateError,
 }) {
   return (
     <BulkUploadPreview
@@ -67,6 +67,7 @@ export default function SequenceBulkUploadPreviewTable({
       isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
+      onTagCreateError={onTagCreateError}
     />
   );
 }

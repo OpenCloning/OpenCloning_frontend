@@ -203,26 +203,39 @@ export function getFilesToExportFromAssembler({requestedAssemblies, expandedAsse
     });
   }
 
-  for (let i = 0; i < requestedAssemblies.length; i++) {
+  getCloningStrategyFilesFromAssembler({ requestedAssemblies, appInfo, outputNames }).forEach(({ name, content, finalSequence }) => {
+    files2Export.push({ name, content });
+    files2Export.push({
+      name: name.replace(/\.json$/, '.gbk'),
+      content: finalSequence.file_content,
+    });
+  });
+  return files2Export;
+}
+
+/**
+ * One cloning strategy JSON file per assembly, with the output name set on the final sequence.
+ * Returns [{ name: '<name>.json', content: '<json string>', finalSequence }]. The input is not modified.
+ */
+export function getCloningStrategyFilesFromAssembler({ requestedAssemblies, appInfo, outputNames }) {
+  if (outputNames.length !== requestedAssemblies.length) {
+    throw new Error('outputNames must be the same length as requestedAssemblies');
+  }
+  return requestedAssemblies.map((assembly, i) => {
     const name = sanitizeOutputName(outputNames[i]);
-    const requestedAssembly = JSON.parse(JSON.stringify(requestedAssemblies[i]));
-    const jsonContent = formatStateForJsonExport({...requestedAssembly, appInfo});
+    const requestedAssembly = JSON.parse(JSON.stringify(assembly));
     const finalSequenceId = getGraftSequenceId(requestedAssembly)
     const finalSequence = requestedAssembly.sequences.find(s => s.id === finalSequenceId)
     finalSequence.file_content = editGenbankSequenceNameFromTextContent(finalSequence.file_content, name);
     const finalSource = requestedAssembly.sources.find(s => s.id === finalSequenceId)
     finalSource.output_name = name;
-    files2Export.push({
+    const jsonContent = formatStateForJsonExport({...requestedAssembly, appInfo});
+    return {
       name: `${name}.json`,
       content: JSON.stringify(jsonContent, null, 2),
-    });
-
-    files2Export.push({
-      name: `${name}.gbk`,
-      content: finalSequence.file_content,
-    });
-  }
-  return files2Export;
+      finalSequence,
+    };
+  });
 }
 
 export async function downloadAssemblerFilesAsZip(files) {

@@ -1,9 +1,8 @@
 import React from 'react';
-import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { openCloningDBHttpClient, endpoints, BulkUploadModal } from '@opencloning/opencloningdb';
 import { delimitedFileToJson } from '@opencloning/utils/fileParsers';
 import PrimerBulkUploadPreviewTable from './PrimerBulkUploadPreviewTable';
 import { normalizePrimerSubmission } from '../../utils/bulk_upload';
-import BulkUploadModal from './BulkUploadModal';
 import BulkUploadMenuButton from './BulkUploadMenuButton';
 import { BULK_SUBMISSION_TEMPLATES } from './bulkSubmissionTemplates';
 import useBulkUploadFlow from './useBulkUploadFlow';
@@ -11,6 +10,7 @@ import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadPrimersButton() {
   const {
+    addErrorAlert,
     addAlert,
     bulkTags,
     closeModal,
@@ -118,6 +118,7 @@ export default function BulkUploadPrimersButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

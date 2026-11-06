@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button, Tooltip } from '@mui/material';
-import { openCloningDBHttpClient, endpoints } from '@opencloning/opencloningdb';
+import { openCloningDBHttpClient, endpoints, BulkUploadModal } from '@opencloning/opencloningdb';
 import SequenceBulkUploadPreviewTable from './SequenceBulkUploadPreviewTable';
-import BulkUploadModal from './BulkUploadModal';
 import useBulkUploadFlow from './useBulkUploadFlow';
 
 export default function BulkUploadSequencesButton() {
   const {
+    addErrorAlert,
     bulkTags,
     closeModal,
     handleUploadClick,
@@ -120,6 +120,7 @@ export default function BulkUploadSequencesButton() {
           isValidating={isValidating}
           bulkTags={bulkTags}
           onBulkTagsChange={setBulkTags}
+          onTagCreateError={addErrorAlert}
         />
       </BulkUploadModal>
     </>

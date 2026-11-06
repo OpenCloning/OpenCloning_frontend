@@ -1,6 +1,6 @@
 import { aliasedEnzymesByName, getDigestFragmentsForRestrictionEnzymes, getReverseComplementSequenceString, getComplementSequenceString, getReverseComplementSequenceAndAnnotations } from "@teselagen/sequence-utils";
 import fs from 'fs';
-import { assignSequenceToSyntaxPart, simplifyDigestFragment, reverseComplementSimplifiedDigestFragment, tripletsToTranslation, partDataToDisplayData, arrayCombinations, getFilesToExportFromAssembler, getDefaultAssemblyOutputName } from "./assembler_utils";
+import { assignSequenceToSyntaxPart, simplifyDigestFragment, reverseComplementSimplifiedDigestFragment, tripletsToTranslation, partDataToDisplayData, arrayCombinations, getFilesToExportFromAssembler, getCloningStrategyFilesFromAssembler, getDefaultAssemblyOutputName, sanitizeOutputName } from "./assembler_utils";
 import { partsToEdgesGraph } from "./graph_utils";
 
 
@@ -377,5 +377,44 @@ describe('getFilesToExportFromAssembler', () => {
     expect(files[3].name).toBe('my_assembly_1.gbk');
     expect(files[4].name).toBe('my_assembly_2.json');
     expect(files[5].name).toBe('my_assembly_2.gbk');
+  });
+});
+
+describe('getCloningStrategyFilesFromAssembler', () => {
+  const appInfo = dummyData.appInfo;
+  it('returns one cloning strategy per assembly, with the output name set on the final sequence', () => {
+    const outputNames = ['my assembly/1', 'my_assembly_2'];
+    const files = getCloningStrategyFilesFromAssembler({ requestedAssemblies: dummyData.requestedAssemblies, appInfo, outputNames });
+    expect(files).toHaveLength(2);
+    const sanitizedNames = outputNames.map(sanitizeOutputName);
+    files.forEach((file, i) => {
+      expect(file.name).toBe(`${sanitizedNames[i]}.json`);
+      const cloningStrategy = JSON.parse(file.content);
+      const originalSequences = dummyData.requestedAssemblies[i].sequences;
+      expect(cloningStrategy.sequences).toHaveLength(originalSequences.length);
+      expect(cloningStrategy.primers).toEqual(dummyData.requestedAssemblies[i].primers);
+      const finalSource = cloningStrategy.sources[cloningStrategy.sources.length - 1];
+      expect(finalSource.output_name).toBe(sanitizedNames[i]);
+      const finalSequence = cloningStrategy.sequences.find((s) => s.id === finalSource.id);
+      expect(finalSequence.file_content.split('\n')[0]).toContain(sanitizedNames[i]);
+      expect(file.finalSequence).toEqual(finalSequence);
+    });
+  });
+
+  it('keeps the database ids of the sources and does not modify the input', () => {
+    const withDatabaseSource = JSON.parse(JSON.stringify(dummyData.requestedAssemblies[0]));
+    const firstSource = withDatabaseSource.sources[0];
+    withDatabaseSource.sources[0] = { id: firstSource.id, type: 'DatabaseSource', input: [], database_id: 10 };
+    const requestedAssemblies = [withDatabaseSource];
+    const inputCopy = JSON.parse(JSON.stringify(requestedAssemblies));
+
+    const [file] = getCloningStrategyFilesFromAssembler({ requestedAssemblies, appInfo, outputNames: ['product'] });
+    const cloningStrategy = JSON.parse(file.content);
+    expect(cloningStrategy.sources[0]).toEqual({ id: firstSource.id, type: 'DatabaseSource', input: [], database_id: 10 });
+    expect(requestedAssemblies).toEqual(inputCopy);
+  });
+
+  it('throws if the number of names does not match the number of assemblies', () => {
+    expect(() => getCloningStrategyFilesFromAssembler({ requestedAssemblies: dummyData.requestedAssemblies, appInfo, outputNames: ['a'] })).toThrow();
   });
 });

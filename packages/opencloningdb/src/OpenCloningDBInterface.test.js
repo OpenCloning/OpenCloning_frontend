@@ -10,6 +10,8 @@ vi.mock('./GetSequenceFileAndDatabaseIdComponent', () => ({ default: () => null 
 vi.mock('./LoadHistoryComponent', () => ({ default: () => null }));
 vi.mock('./SubmitToDatabaseComponent', () => ({ default: () => null }));
 vi.mock('./PrimersNotInDatabaseComponent', () => ({ default: () => null }));
+vi.mock('./GetSequencesInBulkComponent', () => ({ default: () => null }));
+vi.mock('./SubmitCloningStrategiesInBulkComponent', () => ({ default: () => null }));
 
 import OpenCloningDBInterface from './OpenCloningDBInterface';
 

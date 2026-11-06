@@ -18,7 +18,9 @@
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
         "redhat.vscode-yaml",
-        "timonwong.shellcheck"
+        "shelex.vscode-cy-helper",
+        "timonwong.shellcheck",
+        "vitest.explorer"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"
@@ -34,6 +36,6 @@
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh && /usr/local/bin/check-isolation.sh",
   "postAttachCommand": "/usr/local/bin/check-isolation.sh",
   // Runs before the firewall exists. The node_modules volume takes dev ownership from the image directory
-  "postCreateCommand": "yarn install --immutable",
+  "postCreateCommand": "yarn install --immutable && yarn cypress install",
   "waitFor": "postStartCommand"
 }

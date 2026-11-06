@@ -1,10 +1,12 @@
 import { Save as SaveIcon, Link as LinkIcon } from '@mui/icons-material';
 import GetPrimerComponent from './GetPrimerComponent';
 import GetSequenceFileAndDatabaseIdComponent from './GetSequenceFileAndDatabaseIdComponent';
+import GetSequencesInBulkComponent from './GetSequencesInBulkComponent';
 import { openCloningDBHttpClient } from './common';
 import endpoints from './endpoints';
 import LoadHistoryComponent from './LoadHistoryComponent';
 import SubmitToDatabaseComponent from './SubmitToDatabaseComponent';
+import SubmitCloningStrategiesInBulkComponent from './SubmitCloningStrategiesInBulkComponent';
 import PrimersNotInDatabaseComponent from './PrimersNotInDatabaseComponent';
 
 function isSubmissionDataValid(submissionData) {
@@ -138,4 +140,10 @@ export default {
   locateSequenceInDatabase,
   // Function to submit sequencing files to the database
   submitSequencingFileToDatabase,
+  // Component for loading several sequences at once (e.g. in the assembler), calls
+  // onSequencesLoaded with an array of { databaseId, name, textFileSequence }
+  GetSequencesInBulkComponent,
+  // Dialog for submitting several cloning strategies at once (e.g. the assembler products), receives
+  // { files, onClose, onSuccess }, where files is an array of File (cloning strategy JSON)
+  SubmitCloningStrategiesInBulkComponent,
 };

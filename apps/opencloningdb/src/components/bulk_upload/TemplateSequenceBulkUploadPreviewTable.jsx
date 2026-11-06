@@ -6,8 +6,7 @@ import {
   templateSequenceRowIssues,
   templateSequenceRowStatus,
 } from '../../utils/bulk_upload';
-import { CommonTableRow } from './common';
-import BulkUploadPreview from './BulkUploadPreview';
+import { BulkUploadPreview, CommonTableRow } from '@opencloning/opencloningdb';
 
 function TemplateSequenceBulkUploadPreviewTableRow({ row }) {
   const issues = templateSequenceRowIssues(row);
@@ -59,6 +58,7 @@ export default function TemplateSequenceBulkUploadPreviewTable({
   isValidating,
   bulkTags,
   onBulkTagsChange,
+  onTagCreateError,
 }) {
   return (
     <BulkUploadPreview
@@ -71,6 +71,7 @@ export default function TemplateSequenceBulkUploadPreviewTable({
       isValidating={isValidating}
       bulkTags={bulkTags}
       onBulkTagsChange={onBulkTagsChange}
+      onTagCreateError={onTagCreateError}
       importMode="allClearRequired"
     />
   );
