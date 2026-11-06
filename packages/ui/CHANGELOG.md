@@ -1,5 +1,15 @@
 # @opencloning/ui
 
+## 2.1.1
+
+### Patch Changes
+
+- [#790](https://github.com/OpenCloning/OpenCloning_frontend/pull/790) [`0b2a21d`](https://github.com/OpenCloning/OpenCloning_frontend/commit/0b2a21dde79f5539579bee39f0de49b01cd6c10c) Thanks [@manulera](https://github.com/manulera)! - Support for fetchin sequences created by the OC mcp server
+
+- Updated dependencies [[`0b2a21d`](https://github.com/OpenCloning/OpenCloning_frontend/commit/0b2a21dde79f5539579bee39f0de49b01cd6c10c)]:
+  - @opencloning/utils@2.1.1
+  - @opencloning/store@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
