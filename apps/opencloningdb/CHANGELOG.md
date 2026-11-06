@@ -1,5 +1,30 @@
 # opencloningdb
 
+## 0.4.5
+
+### Patch Changes
+
+- [#786](https://github.com/OpenCloning/OpenCloning_frontend/pull/786) [`c8c46d4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/c8c46d4dc36cb8741d1bd89816c7ca82b89996b3) Thanks [@manulera](https://github.com/manulera)! - Assembler: load plasmids from the database and upload the assemblies to it.
+
+  - `@opencloning/ui`:
+    - The Assembler's plasmid buttons are grouped into a "Load Plasmids" menu (from files, from the local server, from the database).
+    - When the database interface provides `GetSequencesInBulkComponent`, plasmids can be loaded by tag or picked, and are used as `DatabaseSource`s. In that case the default plasmids of a syntax are not loaded.
+    - When it provides `SubmitCloningStrategiesInBulkComponent`, a new "Upload to DB" button uploads the assemblies with their history, as in the bulk upload of sequences with history.
+    - Both are new optional entries of the database interface (see `DummyInterface`).
+  - `@opencloning/opencloningdb`:
+    - Implements `GetSequencesInBulkComponent` and `SubmitCloningStrategiesInBulkComponent`.
+    - Exports `TagMultiSelect` (with `allowCreate` and `onCreateError`), `BulkUploadModal`, `BulkUploadPreview` and `CommonTableRow`, moved from the `opencloningdb` app.
+  - `opencloningdb`:
+    - The "Upload sequences with history" button uses `SubmitCloningStrategiesInBulkComponent`. Its validation, submission and conflict messages are now shown in the dialog instead of as alerts.
+    - The tag selects no longer drop excluded tags from the shared tags cache.
+  - `syntax-builder`: the dev server runs on port 3000 and listens on `127.0.0.1`, like the other apps.
+
+- Updated dependencies [[`c8c46d4`](https://github.com/OpenCloning/OpenCloning_frontend/commit/c8c46d4dc36cb8741d1bd89816c7ca82b89996b3)]:
+  - @opencloning/opencloningdb@1.9.0
+  - @opencloning/ui@2.1.0
+  - @opencloning/store@2.1.0
+  - @opencloning/utils@2.1.0
+
 ## 0.4.4
 
 ### Patch Changes
