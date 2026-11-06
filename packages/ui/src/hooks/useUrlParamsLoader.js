@@ -16,6 +16,9 @@ const httpClient = getExternalHttpClient();
 
 const { updateSource } = cloningActions;
 
+// OpenCloning MCP server, set at build time
+const mcpUrl = import.meta.env.VITE_MCP_SERVER_URL;
+
 /**
  * Hook to load sequences from URL parameters
  * Handles various source types: database, example, template, genome_coordinates, locus_tag
@@ -71,6 +74,27 @@ export default function useUrlParamsLoader() {
         } catch (error) {
           addAlert({
             message: 'Error loading example',
+            severity: 'error',
+          });
+          console.error(error);
+        }
+      } else if (urlParams.source === 'mcp' && urlParams.strategy) {
+        // Only the MCP server set at build time (VITE_MCP_SERVER_URL) is fetched from, never a url from the query
+        try {
+          if (!mcpUrl) {
+            throw new Error('No MCP server configured');
+          }
+          if (!/^[A-Za-z0-9_-]+$/.test(urlParams.strategy)) {
+            throw new Error('Invalid strategy id');
+          }
+          const url = `${mcpUrl.replace(/\/$/, '')}/strategies/${encodePathSegment(urlParams.strategy)}.json`;
+          const resp = await httpClient.get(url);
+          const file = new File([JSON.stringify(resp.data)], 'mcp_strategy.json');
+          const prepared = await loadHistoryFromFile(file, { onError: setHistoryFileError });
+          await prepared?.replace();
+        } catch (error) {
+          addAlert({
+            message: 'Error loading strategy from the MCP server (it may have expired or not exist)',
             severity: 'error',
           });
           console.error(error);
